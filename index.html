@@ -4842,10 +4842,6 @@ function updateAntropometria() {
 }
 
 // Inicializa a escuta passiva nas antigas funções manuais para não quebrar a lógica de IMC do Idoso/Gestante
-function imcCrianca(){ updateAntropometria(); }
-
-
-// ── IG CÁLCULO GESTANTE E IMC GEST/IDOSO ──────────────────────
 function dataISOEmUTC(valor){
   const partes=String(valor||'').split('-').map(Number);
   if(partes.length!==3||partes.some(Number.isNaN))return null;
@@ -5611,37 +5607,6 @@ async function carregarLaudoLivre(prefix){
 }
 function montarLeitoresLivres(){
   EXAMES_LIVRES_MODULOS.forEach(cfg=>{const alvo=document.getElementById(cfg.alvo);if(!alvo||document.getElementById(`lab-livre-card-${cfg.p}`))return;const card=document.createElement('div');card.className='card';card.id=`lab-livre-card-${cfg.p}`;card.innerHTML=`<div class="ct"><span class="dot db"></span>Análise livre de laudo laboratorial</div><div class="alert alert-i">Anexe um PDF/TXT ou cole qualquer laudo. O sistema utiliza os valores de referência escritos no próprio exame e cruza achados reconhecidos com os protocolos cadastrados.</div><div class="f"><label>Arquivo do laudo</label><input type="file" id="lab-livre-file-${cfg.p}" accept=".pdf,.txt,text/plain,application/pdf" onchange="carregarLaudoLivre('${cfg.p}')"></div><div class="f"><label>Texto do laudo</label><textarea class="free-lab-input" id="lab-livre-texto-${cfg.p}" placeholder="Cole aqui resultados, unidades e valores de referência..."></textarea></div><div class="brow"><button class="btn btn-p" type="button" onclick="renderLaudoLivre('${cfg.p}')">Interpretar laudo completo</button><button class="btn btn-s" type="button" onclick="document.getElementById('lab-livre-texto-${cfg.p}').value='';document.getElementById('lab-livre-out-${cfg.p}').innerHTML='';delete EXAMES_LIVRES['${cfg.p}']">Limpar</button></div><div id="lab-livre-out-${cfg.p}" style="margin-top:12px"></div>`;alvo.appendChild(card);});
-}
-function resumoExamesLivres(prefix){return EXAMES_LIVRES[prefix]?.resumo||'';}
-// Compatibilidade de auditoria: CONDUTAS DOS EXAMES LIVRES agora sao consolidadas no plano tecnico abaixo.
-function planoExamesLivresSoap(prefix){
-  const dados=EXAMES_LIVRES[prefix];if(!dados?.registros?.length)return'';
-  const alterados=dados.registros.filter(r=>r.status==='alto'||r.status==='baixo'),semref=dados.registros.filter(r=>r.status==='semref');
-  const linhas=[`EXAMES LABORATORIAIS INTERPRETADOS: ${dados.registros.length} resultados; ${alterados.length} alterados; ${semref.length} sem referência reconhecida.`];
-  if(dados.cardsProtocolo?.length){
-    const ordem={urgente:0,atencao:1,rotina:2};
-    linhas.push('','CONDUTAS PROTOCOLADAS:');
-    dados.cardsProtocolo.sort((a,b)=>ordem[a.nivel]-ordem[b.nivel]).forEach(c=>{
-      linhas.push(`${c.nivel==='urgente'?'PRIORIDADE IMEDIATA':c.nivel==='atencao'?'REQUER AVALIACAO':'ACOMPANHAMENTO'} — ${c.titulo}`);
-      linhas.push(`Achado: ${c.achado}`);
-      c.acoes.forEach(x=>linhas.push(`- ${x}`));
-      linhas.push(`Fonte: ${c.fonte}`,'');
-    });
-  }
-  const contemplados=new Set((dados.cardsProtocolo||[]).flatMap(c=>c.titulo.match(/anemia|tsh|diabetes|glic|pré-eclâmpsia|metabólica/gi)||[]).map(labLivreNorm));
-  const demais=alterados.filter(r=>{
-    const n=labLivreNorm(r.exame);
-    if([...contemplados].some(x=>(x==='anemia'&&/hemoglobina/.test(n))||(x==='tsh'&&/tsh|t4/.test(n))||(/diabetes|glic/.test(x)&&/glic/.test(n))||(x==='pre-eclampsia'&&/plaqueta|creatinina|tgo|tgp|ast|alt/.test(n))||(x==='metabolica'&&/sodio|potassio|hco3|ph/.test(n))))return false;
-    return true;
-  });
-  if(demais.length){
-    linhas.push('DEMAIS ALTERACOES LABORATORIAIS:');
-    const porGrupo={};demais.forEach(r=>(porGrupo[grupoExameLivre(r.exame)]??=[]).push(`${r.exame.replace(/[.\s]+$/,'')}: ${r.resultado} ${r.unidade} (${r.status==='alto'?'acima':'abaixo'} da referência)`));
-    Object.entries(porGrupo).forEach(([g,itens])=>linhas.push(`- ${g}: ${itens.join('; ')}.`));
-    linhas.push('- Correlacionar as demais alterações com quadro clínico, medicamentos e condições da coleta; confirmar resultados críticos e definir investigação com avaliação médica.','');
-  }
-  if(semref.length)linhas.push(`RESULTADOS A CONFERIR: ${semref.map(r=>r.exame.replace(/[.\s]+$/,'')).join('; ')}. Confirmar referência conforme método, idade, sexo e condição gestacional.`);
-  return linhas.join('\n').trim();
 }
 function resumoExamesSoapEstruturado(prefix){
   const padrao=EXAMES_PADRAO[prefix],livre=EXAMES_LIVRES[prefix],objetivo=[],avaliacao=[],plano=[],unicos=lista=>[...new Set(lista.filter(Boolean))];
@@ -6587,9 +6552,6 @@ function renderAlertasVermelhosSoap(prefix){
   out.innerHTML=alertas.length?`<h4>Alertas vermelhos antes do SOAP</h4><ul>${alertas.map(x=>`<li>${escTR(x)}</li>`).join('')}</ul>`:'';
   return alertas;
 }
-function bloqueiosSoap(prefix){
-  return [];
-}
 function renderInconsistenciasSoap(prefix){
   const ids=SOAP_IDS_MODULO[prefix],s=document.getElementById(ids?.s);if(!s)return[];
   const card=s.closest('.card')||s.closest('.tp'),ref=card?.querySelector(`#soap-pendencias-${prefix}`)||card?.querySelector('.soap-grid');if(!card||!ref)return[];
@@ -6608,10 +6570,6 @@ function aplicarModoSoap(prefix){
   if(modo==='curto'){const limites={s:4,o:4,a:3,p:5};Object.entries(ids).forEach(([k,id])=>{const e=document.getElementById(id);if(e)e.value=resumirSecaoSoap(e.value,limites[k]||4)})}
   if(modo==='sae')gerarSAE(prefix,true,textoSoapAtual(false));
 }
-function gerarSoapCurto(){definirModoSoap('curto');quickGerarSoap()}
-function gerarSoapCompleto(){definirModoSoap('completo');quickGerarSoap()}
-function gerarSoapComSae(){definirModoSoap('sae');quickGerarSoap()}
-function gerarPendenciasPorModulo(prefix){return gerarPendenciasSoap(prefix)}
 function linhasSoapValidas(texto){
   return String(texto||'').split('\n').map(x=>x.trim()).filter(Boolean);
 }
@@ -6726,26 +6684,6 @@ function humanizarPlanoSoap(prefix,plano){
 function linhasNaoVazias(texto){return String(texto||'').split('\n').map(x=>x.trim()).filter(Boolean)}
 function dividirLinhasPorRegex(linhas,rx){const sim=[],nao=[];linhas.forEach(l=>(rx.test(l)?sim:nao).push(l));return{sim,nao}}
 function blocoCategoriaSoap(titulo,linhas){linhas=Array.isArray(linhas)?linhasNaoVazias(linhas.join('\n')):linhasNaoVazias(linhas);return linhas.length?`${titulo}:\n${linhas.join('\n')}`:''}
-function categorizarSubjetivoSoap(prefix,subj){
-  const linhas=linhasNaoVazias(subj),ante=/anteced|comorb|medica|alerg|tabag|alcool|álcool|droga|h[áa]bito|familiar|obst[eé]trico|g\d|p\d|a\d/i,territ=/rede|apoio|micro[aá]rea|territ[oó]rio|vulnerab|viol[eê]ncia|respons[aá]vel|cuidador/i,alerta=/sangramento|perda de l[ií]quido|dor|febre|falta de ar|dispneia|cefaleia|escotoma|edema|ide[aç][aã]o|queda|teste reagente/i;
-  let r=dividirLinhasPorRegex(linhas,ante),ant=r.sim; r=dividirLinhasPorRegex(r.nao,territ);const terr=r.sim; r=dividirLinhasPorRegex(r.nao,alerta);const sinais=r.sim,hist=r.nao;
-  return [blocoCategoriaSoap('Anamnese / história atual',hist),blocoCategoriaSoap('Queixas e sinais de alerta',sinais),blocoCategoriaSoap('Antecedentes, medicações, alergias e hábitos',ant),blocoCategoriaSoap('Rede de apoio, território e vulnerabilidade',terr)].filter(Boolean).join('\n\n');
-}
-function categorizarObjetivoSoap(prefix,obj){
-  const linhas=linhasNaoVazias(obj),vit=/\bpa\b|press[aã]o|fc\b|fr\b|spo2|satura|temperatura|peso|imc|altura|comprimento|per[ií]metro|au\b|bcf|glicemia/i,exames=/exame|laboratorial|teste r[aá]pido|laudo|vdrl|hiv|hepatite|urina|hemograma|glicose|creatinina|tsh|vacina|pni/i,escala=/ivcf|ersm|dnpm|m-chat|gds|meem|escala|estratifica/i;
-  let r=dividirLinhasPorRegex(linhas,vit),v=r.sim; r=dividirLinhasPorRegex(r.nao,exames);const ex=r.sim; r=dividirLinhasPorRegex(r.nao,escala);const inst=r.sim,fis=r.nao;
-  return [blocoCategoriaSoap('Sinais vitais e antropometria',v),blocoCategoriaSoap('Exame físico geral/específico',fis),blocoCategoriaSoap('Exames, testes rápidos, laudos e vacinas',ex),blocoCategoriaSoap('Escalas ou instrumentos aplicados',inst)].filter(Boolean).join('\n\n');
-}
-function categorizarAvaliacaoSoap(prefix,ava){
-  const linhas=linhasNaoVazias(ava),risco=/risco|estratifica|ivcf|ersm|classifica|pontua[cç][aã]o|crit[eé]rio/i,alterado=/alterad|les[aã]o|n[oó]dulo|corrimento|dor|sangramento|atraso|fr[aá]gil|fragilidade|queda|reagente|alto|m[eé]dio|alerta/i,pend=/pend[eê]ncia|inconsist|revisar|n[aã]o registrado|n[aã]o avaliado|insuficiente/i;
-  let r=dividirLinhasPorRegex(linhas,risco),ris=r.sim; r=dividirLinhasPorRegex(r.nao,alterado);const alt=r.sim; r=dividirLinhasPorRegex(r.nao,pend);const pe=r.sim,sint=r.nao;
-  return [blocoCategoriaSoap('Síntese clínica',sint),blocoCategoriaSoap('Estratificação de risco e critérios',ris),blocoCategoriaSoap('Achados alterados / pontos de atenção',alt),blocoCategoriaSoap('Pendências clínicas para revisão',pe)].filter(Boolean).join('\n\n');
-}
-function categorizarPlanoSoap(prefix,plano){
-  const linhas=linhasNaoVazias(plano),exames=/exame|laborat|teste|laudo|coleta|vacina|pni|dtpa|hepatite|influenza|covid|vsr/i,enc=/encaminh|refer[eê]ncia|caps|cta|ami|odont|maternidade|visita|acs|busca ativa/i,ret=/retorno|sinais de alerta|orienta|pactuad|parceria|preven[cç][aã]o|monitorar|acompanha/i,med=/medica[cç][aã]o|tratamento|dose|mg|ui|aplicador|aciclovir|metronidazol|ceftriaxona|azitromicina|penicilina|miconazol|clindamicina|ata/i,fonte=/^base protocolar:/i;
-  let r=dividirLinhasPorRegex(linhas,fonte),fo=r.sim; r=dividirLinhasPorRegex(r.nao,med);const me=r.sim; r=dividirLinhasPorRegex(r.nao,exames);const ex=r.sim; r=dividirLinhasPorRegex(r.nao,enc);const en=r.sim; r=dividirLinhasPorRegex(r.nao,ret);const re=r.sim,cond=r.nao;
-  return [blocoCategoriaSoap('Condutas realizadas / planejadas',cond),blocoCategoriaSoap('Exames, testes e vacinas',ex),blocoCategoriaSoap('Tratamentos ou medicações conforme protocolo',me),blocoCategoriaSoap('Encaminhamentos e cuidado compartilhado',en),blocoCategoriaSoap('Orientações, retorno e sinais de alerta',re),fo.join('\n')].filter(Boolean).join('\n\n');
-}
 function resumoSinanIntegrado(prefix){
   const texto=normalizarTextoProtocolo([textoCamposPagina(prefix),soapTextoModulo(prefix)].join(' ')),agravos=[];
   const add=x=>{if(!agravos.includes(x))agravos.push(x)};
@@ -7118,27 +7056,6 @@ function discardChanges(){ loadProto();renderProtoEditor(); document.getElementB
 function markUnsaved(){ document.getElementById('save-bar').classList.add('show'); }
 function showToast(msg){ let t=document.getElementById('toast'); if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:9px 18px;border-radius:8px;font-size:13px;z-index:500;transition:opacity .3s';document.body.appendChild(t);} t.textContent=msg; t.style.opacity='1'; setTimeout(()=>t.style.opacity='0',2200); }
 function edTab(b,id){ document.querySelectorAll('.ed-tab').forEach(t=>t.classList.remove('on')); document.querySelectorAll('.ed-sec').forEach(s=>s.classList.remove('on')); b.classList.add('on'); document.getElementById(id).classList.add('on'); }
-function exportProto(){ document.getElementById('export-area').value=JSON.stringify(PROTO,null,2); }
-function importProto(){ try{PROTO=JSON.parse(document.getElementById('import-area').value);saveProto();}catch(e){alert('Erro');} }
-function resetProto(){ localStorage.removeItem('esf_proto'); location.reload(); }
-document.addEventListener('DOMContentLoaded',()=>{loadProto();renderProtoEditor();});
-
-// EVENTOS GERAIS (Checkboxes e Radios customizados)
-document.addEventListener('change',function(e){
-  if(e.target.type==='checkbox') e.target.closest('.cki')?.classList.toggle('ck',e.target.checked);
-  if(e.target.type==='radio'){
-    document.querySelectorAll(`input[name="${e.target.name}"]`).forEach(r=>r.closest('.rp')?.classList.remove('sg','sr','sa'));
-    e.target.closest('.rp')?.classList.add('sg');
-  }
-  if(e.target.classList.contains('gds')){
-    const n=document.querySelectorAll('.gds:checked').length;
-    document.getElementById('gds-score').textContent=`Rastreio breve de humor: ${n} / 5`+(n>0?' (aprofundar avaliação)':'')+' — não substitui a GDS-15';
-  }
-});
-
-// ── PROTOCOLO TOLEDO: M-CHAT-R, ESTRATIFICAÇÃO DE RISCO, DNPM ──────────
-
-// M-CHAT-R perguntas (NÃO = risco, exceto itens 2,5,12 onde SIM = risco)
 const MCHAT_PERGUNTAS = [
   {n:1,  txt:'Se você apontar para algo no outro lado da sala, seu filho(a) olha para o local apontado?', risco:'nao'},
   {n:2,  txt:'Alguma vez você se perguntou se seu filho(a) pode ser surdo(a)?', risco:'sim'},
@@ -8583,7 +8500,6 @@ function aplicarSugestaoSAE(p,chave){const s=SAE_SUGESTOES[chave];if(!s)return;c
 function coletarTextoSAE(p,textoExtra=''){const pg=document.getElementById('pg-'+(moduloPorPrefixo(p)?.page||'')),campos=pg?Array.from(pg.querySelectorAll('input:not([type=file]),select,textarea')).map(e=>`${e.id} ${e.value||''}`).join(' '):'',chips=pg?Array.from(pg.querySelectorAll('.clinical-chip.selected,.complaint-chip.selected,.alert-chip.selected')).map(x=>x.textContent).join(' '):'',guia=typeof coletarGuiaClinico==='function'?coletarGuiaClinico(p):{};return[textoExtra,campos,chips,guia.anamnese,guia.exame,guia.alertas,guia.condutas].join(' ')}
 function renderizarPreviewSAE(p,regras){const out=document.getElementById(`${p}-sae-preview`);if(!out)return;out.className='sae-preview on';out.innerHTML=`<div class="sae-preview-head"><span class="clinical-seal suggestion">Sugestão</span> <span class="clinical-seal validate">Validar pelo enfermeiro</span> SAE sugerida a partir dos dados registrados</div><div class="sae-preview-grid">${regras.map(r=>`<div class="sae-preview-item"><strong>${r.diagnostico}</strong><b>Problema:</b> ${r.problema}<br><b>NOC compatível:</b> ${r.resultado}<br><b>NIC compatível:</b> ${r.intervencoes}</div>`).join('')}</div><div class="sae-source">Sugestões para apoio ao Processo de Enfermagem, com títulos baseados na <a href="${SAE_NANDA_FONTE_URL}" target="_blank" rel="noopener">NANDA-I 2018–2020</a>. O diagnóstico de enfermagem, os resultados e as intervenções devem ser avaliados, ajustados e validados pelo enfermeiro responsável.</div>`}
 function gerarSAE(p,silencioso=false,textoExtra=''){const texto=coletarTextoSAE(p,textoExtra);let regras=SAE_REGRAS.filter(x=>x.rx.test(texto)).slice(0,5);if(!regras.length)regras.push({problema:'Necessidade de promoção e manutenção da saúde',diagnostico:'Disposição para melhora da gestão da saúde',objetivo:'Fortalecer autocuidado, prevenção e continuidade do acompanhamento.',resultado:'Conhecimento e autogestão da saúde melhorados.',intervencoes:'Realizar educação em saúde, identificar necessidades, pactuar cuidados e retorno.',orientacoes:'Manter acompanhamento, vacinação e cuidados pactuados.',cuidados:['Comparecer ao retorno agendado','Manter vacinação atualizada']});regras=sanitizarRegrasSAEProtocoladas(p,regras);preencherCamposSAE(p,regras,true);renderizarPreviewSAE(p,regras);if(!silencioso)showToast(`${regras.length} sugestão(ões) SAE gerada(s). Revise e valide clinicamente.`);return regras}
-function sugerirSAEAutomatico(p,texto=''){const alvo=document.getElementById(`${p}-pc-diagnostico`);if(alvo&&!alvo.value.trim())gerarSAE(p,true,texto)}
 function limparSAE(p){['problema','diagnostico','objetivo','resultado','intervencoes','orientacoes','prescricao','prazo','responsavel','evolucao'].forEach(k=>{const e=document.getElementById(`${p}-pc-${k}`);if(e)e.value=''});document.querySelectorAll(`#${p}-plano-cuidados .quick-care.selected`).forEach(x=>x.classList.remove('selected'));const out=document.getElementById(`${p}-sae-preview`);if(out){out.className='sae-preview';out.innerHTML=''}showToast('SAE limpa.')}
 function alternarCuidadoPronto(p,btn){btn.classList.toggle('selected');const e=document.getElementById(`${p}-pc-prescricao`);if(e)e.value=Array.from(document.querySelectorAll(`#${p}-plano-cuidados .quick-care.selected`)).map(x=>x.textContent.trim()).join('\n')}
 function montarPlanosCuidados(){PLANO_MODULOS.forEach(([p,alvo])=>{const area=document.getElementById(alvo);if(!area||document.getElementById(`${p}-plano-cuidados`))return;const cuidados=MODULOS_EM_DESENVOLVIMENTO.has(p)?CUIDADOS_PRONTOS.filter(x=>!/(procurar.*urg[eê]ncia|medica[cç][aã]o|encaminh)/i.test(x)):CUIDADOS_PRONTOS;const c=document.createElement('div');c.className='card';c.id=`${p}-plano-cuidados`;c.innerHTML=`<div class="sae-head"><div class="ct" style="margin:0"><span class="dot dg"></span>SAE — Plano de Cuidados de Enfermagem</div><small>O sistema sugere hipóteses NANDA-I e resultados/intervenções compatíveis com NOC/NIC. O enfermeiro deve revisar e validar clinicamente.</small></div><div class="brow"><button class="btn btn-p" type="button" onclick="gerarSAE('${p}')">GERAR SAE</button><button class="btn btn-s" type="button" onclick="limparSAE('${p}')">Limpar SAE</button><button class="btn btn-s" onclick="aplicarSugestaoSAE('${p}','queda')">Risco de queda</button><button class="btn btn-s" onclick="aplicarSugestaoSAE('${p}','adesao')">Adesão inadequada</button><button class="btn btn-s" onclick="aplicarSugestaoSAE('${p}','dor')">Dor</button><button class="btn btn-s" onclick="aplicarSugestaoSAE('${p}','ferida')">Ferida</button><button class="btn btn-s" onclick="aplicarSugestaoSAE('${p}','ansiedade')">Ansiedade</button></div><div id="${p}-sae-preview" class="sae-preview"></div><div class="plano-cuidados-grid"><div class="f"><label>Problema identificado</label><textarea id="${p}-pc-problema"></textarea></div><div class="f"><label>Hipótese diagnóstica de enfermagem — NANDA-I</label><textarea id="${p}-pc-diagnostico"></textarea></div><div class="f"><label>Objetivo do cuidado</label><textarea id="${p}-pc-objetivo"></textarea></div><div class="f"><label>Resultado esperado — NOC compatível</label><textarea id="${p}-pc-resultado"></textarea></div><div class="f"><label>Intervenções de enfermagem — NIC compatível</label><textarea id="${p}-pc-intervencoes"></textarea></div><div class="f"><label>Orientações ao paciente/família</label><textarea id="${p}-pc-orientacoes"></textarea></div><div class="f span2"><label>Prescrição de cuidados de enfermagem</label><div class="quick-care-list">${cuidados.map(x=>`<button type="button" class="quick-care" onclick="alternarCuidadoPronto('${p}',this)">${x}</button>`).join('')}</div><textarea id="${p}-pc-prescricao" placeholder="Cuidados selecionados e cuidados personalizados..."></textarea></div><div class="f"><label>Prazo para reavaliação</label><input type="date" id="${p}-pc-prazo"></div><div class="f"><label>Responsável pelo acompanhamento</label><input id="${p}-pc-responsavel"></div><div class="f span2"><label>Conduta pactuada com paciente/família</label><textarea id="${p}-pc-pactuada">Paciente/família compreende as orientações, concorda com o plano de cuidado e foi orientado sobre sinais de alerta e retorno.</textarea></div><div class="f span2"><label>Evolução no retorno</label><textarea id="${p}-pc-evolucao"></textarea></div></div>`;area.appendChild(c)})}
@@ -8678,10 +8594,6 @@ function lerFormAISoap(){
   return normalizarConfigAISoap(cfg);
 }
 function endpointSupabaseAISoap(cfg){return /\.supabase\.co\/functions\/v1\//i.test(String(cfg?.endpoint||''))}
-function chavePareceOpenAI(chave){return /^sk-[a-z0-9_-]+/i.test(String(chave||''))}
-function headersAISoap(cfg){
-  return {'Content-Type':'application/json'};
-}
 function explicarFalhaAISoap(e,cfg){
   const msg=String(e?.message||e||'').trim();
   if(/failed to fetch|networkerror|load failed|abort/i.test(msg)&&endpointSupabaseAISoap(cfg)){
@@ -8779,9 +8691,6 @@ function dadosConsultaAISoap(prefix,cfg){
   const ids=SOAP_IDS_MODULO[prefix]||{},soapAtual={descricao:extrairDescricaoSoapAtual(document.getElementById(ids.s)?.value||''),s:document.getElementById(ids.s)?.value||'',o:document.getElementById(ids.o)?.value||'',a:document.getElementById(ids.a)?.value||'',p:document.getElementById(ids.p)?.value||''};
   return{tipoConsulta:tipoConsultaAISoap(prefix),soapAtual,camposPreenchidos:textoCamposPagina(prefix),pendenciasDetectadas:gerarPendenciasSoap(prefix),contexto:user,instrucaoSistema:system,promptModulo:promptModuloAISoap(prefix),modoSoap:modoSoapAtual()};
 }
-function payloadAISoap(cfg,prefix){
-  return{tipoConsulta:tipoConsultaAISoap(prefix),dadosConsulta:dadosConsultaAISoap(prefix,cfg)};
-}
 function textoRespostaAISoap(json){
   if(typeof json==='string')return json;
   if(json?.data?.soap)return JSON.stringify(json.data);
@@ -8828,15 +8737,6 @@ function parseAISoap(content){
     return{soap:txt,descricao:partes.descricao||extrairDescricaoSoapAtual(txt),s:partes.s,o:partes.o,a:partes.a,p:partes.p,pendencias:[]};
   }
   throw new Error('IA SOAP respondeu, mas sem campo soap.');
-}
-async function chamarAISoap(cfg,prefix){
-  const headers=headersAISoap(cfg);
-  let body=payloadAISoap(cfg,prefix);
-  let r=await fetchComTimeout(cfg.endpoint,{method:'POST',headers,body:JSON.stringify(body)},45000);
-  const texto=await r.text();
-  if(!r.ok)throw new Error(`API respondeu ${r.status}: ${texto.slice(0,240)}`);
-  let json;try{json=JSON.parse(texto)}catch(e){json=texto}
-  return parseAISoap(textoRespostaAISoap(json));
 }
 function normalizarListaPendenciasIA(pendencias){
   if(!Array.isArray(pendencias))pendencias=String(pendencias||'').split(/\n|;/);
@@ -8905,21 +8805,6 @@ function aplicarTextoCompletoAISoap(prefix,novoSOAP,pendencias){
     p.value=`P:${partes.p?`\n${partes.p.trim()}`:''}`;
   }
   renderPendenciasIASoap(prefix,pendencias||[]);renderAlertasVermelhosSoap(prefix);renderPendenciasSoap(prefix);renderInconsistenciasSoap(prefix);atualizarIndicadorPreenchimento();
-  return true;
-}
-function substituirSOAPAtual(novoSOAP){return aplicarTextoCompletoAISoap(prefixoPaginaAtual(),novoSOAP,[])}
-function aplicarRespostaAISoap(prefix,obj){
-  if(obj?.soap&&typeof obj.soap==='string')return aplicarTextoCompletoAISoap(prefix,obj.soap,obj.pendencias);
-  const ids=SOAP_IDS_MODULO[prefix];if(!ids)return false;
-  const s=document.getElementById(ids.s),o=document.getElementById(ids.o),a=document.getElementById(ids.a),p=document.getElementById(ids.p);if(!s||!o||!a||!p)return false;
-  const atual=textoSoapAtual(false),desc=limparTextoSoap(obj.descricao||obj.descricao_consulta||extrairDescricaoSoapAtual(atual));
-  const corpoS=limparTextoSoap(obj.s||obj.subjetivo||''),corpoO=limparTextoSoap(obj.o||obj.objetivo||''),corpoA=limparTextoSoap(obj.a||obj.avaliacao||obj.avaliação||''),corpoP=limparTextoSoap(obj.p||obj.plano||obj.conduta||'');
-  const base=modoSoapAtual()==='curto'?'':SOAP_BASE_PROTOCOLAR[prefix],planoFinal=(base&&!/base protocolar:/i.test(corpoP))?[corpoP,`Base protocolar: ${base}`].filter(Boolean).join('\n'):corpoP;
-  s.value=`DESCRIÇÃO DA CONSULTA\n${formatarLinhasSemiNarrativasSoap(desc||'Consulta de enfermagem realizada na APS/ESF.')}\n\nS:${corpoS?`\n${formatarLinhasSemiNarrativasSoap(corpoS)}`:''}`;
-  o.value=`O:${corpoO?`\n${formatarLinhasSemiNarrativasSoap(corpoO)}`:''}`;
-  a.value=`A:${corpoA?`\n${formatarLinhasSemiNarrativasSoap(corpoA)}`:''}`;
-  p.value=`P:${planoFinal?`\n${formatarLinhasSemiNarrativasSoap(planoFinal)}`:''}`;
-  aplicarModoSoap(prefix);renderAlertasVermelhosSoap(prefix);renderPendenciasSoap(prefix);renderPendenciasIASoap(prefix,obj.pendencias);renderInconsistenciasSoap(prefix);atualizarIndicadorPreenchimento();
   return true;
 }
 async function gerarSoapPorIA(){
@@ -9064,9 +8949,6 @@ function podeCopiarSoapAtual(){
 function quickCopiarEvolucao(){if(!podeCopiarSoapAtual())return;return copiarTextoSeguro(textoSoapAtual(false),'Somente o SOAP foi copiado.')}
 function quickCopiarSoapPendencias(){if(!podeCopiarSoapAtual())return;return copiarTextoSeguro(textoSoapAtual(true),'SOAP e pendências foram copiados.')}
 function quickCopiarSoapSae(){if(!podeCopiarSoapAtual())return;return copiarTextoSeguro(textoSoapComSae(),'SOAP e SAE foram copiados.')}
-function copiarSomenteSoap(){return quickCopiarEvolucao()}
-function copiarSoapComPendencias(){return quickCopiarSoapPendencias()}
-function copiarSoapComSae(){return quickCopiarSoapSae()}
 function quickSalvar(){const b=botaoAcaoPagina(/salvar atendimento/i);b?b.click():showToast('Este módulo ainda não possui salvamento conectado.')}
 function quickLimpar(){const pg=document.querySelector('.pg.on');if(!pg||!confirm('Limpar os campos clínicos desta consulta? Os dados básicos do paciente serão mantidos.'))return;pg.querySelectorAll('input,select,textarea').forEach(e=>{if(/-(nome|cpf|cns|nasc|telefone|cep|logradouro|numero|bairro|municipio|uf)$/.test(e.id)||['button','submit','file','hidden'].includes(e.type))return;if(e.type==='checkbox'||e.type==='radio')e.checked=false;else e.value=''});atualizarIndicadorPreenchimento();showToast('Campos clínicos limpos.')}
 function atualizarBarraAcoesRapidas(){
@@ -10240,10 +10122,6 @@ function abrirProntuarioAdmin(pacienteEnc, soapEnc) {
   document.getElementById('admin-soap-title').innerText = 'Prontuário de ' + paciente;
   document.getElementById('admin-soap-text').value = soap;
   modal.style.display = 'flex';
-}
-
-async function adminCriarTrial() {
-  showToast('Crie contas pelo painel protegido do Supabase.');
 }
 
 const PERMISSAO_LABELS={ver_historico:'Histórico',usar_modo_teste:'Modo TESTE',usar_ia_soap:'IA SOAP',gerar_documentos:'Documentos/PDF',editar_protocolos:'Protocolos',reportar_erro:'Reportar',ver_reportes:'Gerenciar relatos',ver_admin:'Admin'};
