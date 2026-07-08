@@ -22,7 +22,7 @@ Documento vivo. Atualizado a cada grupo de correção. Serve de ponto de retomad
 | Fase | Descrição | Status |
 |---|---|---|
 | Infra | Branch + baseline + harness + PROGRESSO.md | FEITO |
-| 1 | Bugs P0/P1 (18 itens da seção 3) | PENDENTE |
+| 1 | Bugs P0/P1 (18 itens da seção 3) | FEITO (16/18; bug 12→Fase 3, bug 15→Fase 4) |
 | 2 | Performance: externalizar 7 blobs + runtime | PENDENTE |
 | 3 | Faxina de código morto (seção 4) | PENDENTE |
 | 4 | Estrutura para escala (seção 5) | PENDENTE |
@@ -32,24 +32,27 @@ Documento vivo. Atualizado a cada grupo de correção. Serve de ponto de retomad
 ## Detalhe por item
 (preenchido conforme execução — FEITO/PARCIAL/PENDENTE + commit + evidência)
 
-### Fase 1 — Bugs
-- [ ] Bug 1 — contaminação de prontuário (mapas anatômicos globais)
-- [ ] Bug 2 — VD ausente em CAMPOS_PACIENTE
-- [ ] Bug 3 — prepararSinanSifilis inacessível entre IIFEs
-- [ ] Bug 4 — regressão profilaxia pré-eclâmpsia
-- [ ] Bug 5 — timezone idadeSM + varredura de classe
-- [ ] Bug 6 — split posicional S/O/A/P em salvarEdicao
-- [ ] Bug 7 — app travado offline (gate de auth)
-- [ ] Bug 8 — impressão com margem fantasma
-- [ ] Bug 9 — IA-SOAP: payload de teste != real + fetch sem timeout
-- [ ] Bug 10 — render duplicado home vs barra
-- [ ] Bug 11 — lerPA sobrescrita cross-módulo
-- [ ] Bug 12 — foto Ficha Rosa estoura localStorage
-- [ ] Bug 13 — imagem NCBI hotlink sem fallback
-- [ ] Bug 14 — baixarAtendimentosNuvem 2x
-- [ ] Bug 15 — IDs SOAP divergentes
-- [ ] Bug 16 — callAIExames ignora parâmetro
-- [ ] Bug 17 — reforcarCamposClinicos substitui em vez de mesclar
-- [ ] Bug 18 — vazamento de trialInterval no logout
+### Fase 1 — Bugs (commits fix(fase1))
+- [x] Bug 1 — contaminação de prontuário: resetMapasAnatomicos() no go('preventivo')
+- [x] Bug 2 — VD adicionado em CAMPOS_PACIENTE
+- [x] Bug 3 — window.prepararSinanSifilis exposto para a IIFE de auditoria
+- [x] Bug 4 — profilaxia pré-eclâmpsia reincorporada em gerarSoapPN (só pna)
+- [x] Bug 5 — idadeSM usa T00:00:00; varredura confirmou ser o único da classe
+- [x] Bug 6 — salvarEdicao só redistribui S/O/A/P se contagem bate; senão avisa
+- [x] Bug 7 — MODO OFFLINE com sessão em cache (verificado via CDP)
+- [x] Bug 8 — @media print zera padding-left + esconde barras fixas
+- [x] Bug 9 — fetchComTimeout na IA viva + payload de teste alinhado ao real
+- [x] Bug 10 — pós-navegação centralizada em go(); abrirModulo só resolve botão
+- [x] Bug 11 — lerPA única (regex \D+) na posição inicial (harness pegou regressão)
+- [ ] Bug 12 — foto Ficha Rosa: código órfão, será removido na FASE 3
+- [x] Bug 13 — imagem anatômica local (img/) com fallback NCBI
+- [x] Bug 14 — baixarAtendimentosNuvem 1x (removida a de carregarPermissoesUsuario)
+- [ ] Bug 15 — IDs SOAP divergentes: será padronizado na FASE 4 (estrutural)
+- [x] Bug 16 — callAIExames usa pref nos ids
+- [x] Bug 17 — reforcarCamposClinicos documentado (substituição intencional)
+- [x] Bug 18 — trialInterval limpo no logout
+
+### Assets criados
+- img/anatomia-vulva-vagina.jpg (258KB, do NCI) — bug 13
 
 (Fases 2-5 detalhadas quando iniciadas.)
