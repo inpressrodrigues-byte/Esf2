@@ -5236,10 +5236,9 @@ function avaliarVacinacaoPna(){
   if(!itens.length)itens.push('Preencher o histórico vacinal para gerar as orientações conforme protocolo.');
   out.innerHTML=`<div class="alert alert-i"><div><strong>Conduta vacinal sugerida</strong><ul style="margin:6px 0 0 18px">${itens.map(x=>`<li>${x}</li>`).join('')}</ul><div style="margin-top:6px;font-size:11px;color:var(--tx3)">Fontes: Protocolo de Pré-Natal de Toledo, 4ª edição, e Calendário Nacional de Vacinação/PNI vigente.</div></div></div>`;
 }
-function lerPA(valor){
-  const m=String(valor||'').match(/(\d{2,3})\s*[xX/]\s*(\d{2,3})/);
-  return m?[Number(m[1]),Number(m[2])]:[0,0];
-}
+// lerPA canônica (única no app): extrai [sistólica, diastólica] com qualquer separador não-dígito.
+// Definida cedo (mesmo bloco de avaliarProtocolosPna) para estar disponível no boot.
+function lerPA(v){const m=String(v||'').match(/(\d{2,3})\D+(\d{2,3})/);return m?[Number(m[1]),Number(m[2])]:[0,0]}
 function adicionarCriterioRisco(lista,nivel,motivo){
   if(motivo&&!lista.some(x=>x.nivel===nivel&&x.motivo===motivo))lista.push({nivel,motivo});
 }
@@ -8693,6 +8692,9 @@ document.addEventListener('blur',e=>{if(e.target.matches?.('.paciente-cpf')&&nor
 document.addEventListener('DOMContentLoaded',()=>{montarIVCF20();montarPlanosCuidados();filtrosGestao();const mes=new Date().toISOString().slice(0,7);['ind-mes','rel-mes'].forEach(id=>{const e=document.getElementById(id);if(e&&!e.value)e.value=mes});['pna','pnc','pu','prev','id','sm','ger','acol','hip','fer','puerp','ist'].forEach(p=>[`${p}-nome`,`${p}-cpf`].forEach(id=>{const e=document.getElementById(id);if(e){e.required=true;e.closest('.f')?.classList.add('required-mark')}}));const i=document.createElement('div');i.id='autosave-indicator';i.textContent='Salvamento automático ativo';i.style.cssText='position:fixed;right:12px;bottom:10px;z-index:240;background:var(--sf);border:1px solid var(--bd);padding:5px 9px;border-radius:5px;font-size:10px;color:var(--tx2);opacity:.45';document.body.appendChild(i);document.getElementById('id-nasc')?.addEventListener('change',sincronizarIdadeIVCF)});
 
 const QUICK_PAGE_PREFIX={'pg-pn-abertura':'pna','pg-pn-consulta':'pnc','pg-puericultura':'pu','pg-preventivo':'prev','pg-idoso':'id','pg-saude-mental':'sm','pg-consulta-geral':'ger','pg-hiperdia':'hip','pg-feridas':'fer','pg-puerperio':'puerp','pg-ist':'ist','pg-visita-domiciliar':'vd'};
+// ATENÇÃO: as listas de hip/fer/puerp/vd abaixo são SUBSTITUÍDAS em runtime por
+// reforcarCamposClinicos() (IIFE de auditoria, ~final do arquivo), que instala versões
+// mais completas. O que roda para esses 4 módulos é a versão de lá, não esta.
 const CAMPOS_ESSENCIAIS={
  pna:[['idade gestacional',['pna-ig']],['pressão arterial',['pna-pa']],['BCF',['pna-bcf']],['altura uterina',['pna-au']],['queixa',['pna-queixas']],['avaliação',['pna-a-soap']],['conduta',['pna-soap-p']]],
  pnc:[['idade gestacional',['pnc-ig']],['pressão arterial',['pnc-pa']],['BCF',['pnc-bcf']],['altura uterina',['pnc-au']],['queixa',['pnc-queixas']],['avaliação',['pnc-a']],['conduta',['pnc-p']]],
@@ -9117,17 +9119,16 @@ async function testarConfigAISoap(){
   if(!cfg.endpoint){if(st)st.textContent='Informe o endpoint da API antes de testar.';return}
   if(st)st.textContent='Testando a API...';
   try{
+    // Espelha o envelope REAL enviado por gerarSoapPorIA ({tipoAcao,tipoConsulta,dadosConsulta}
+    // centrado em soapLocal). Um teste com formato divergente do fluxo real dava falso "ok".
     const payloadTeste={
       tipoAcao:'gerar_soap',
       tipoConsulta:'preventivo',
-      modoTeste:true,
-      perfilUsuario:'admin',
       dadosConsulta:{
         descricaoConsulta:'Teste de conexão IA SOAP',
-        paciente:{nome:'Paciente Teste',idade:27},
-        subjetivo:{motivo:'rastreamento citopatológico',queixasGinecologicas:'não registradas'},
-        objetivo:{inspecaoColo:'normal',sinaisIST:'não identificados'},
-        plano:{baseProtocolar:['Rastreamento citopatológico vigente']}
+        soapLocal:'S: paciente comparece para rastreamento citopatológico.\nO: colo sem alterações à inspeção.\nA: preventivo de rotina.\nP: manter rastreamento conforme protocolo municipal.',
+        origem:'teste_conexao',
+        objetivoIA:'Teste de conexão: apenas confirmar resposta da IA SOAP, sem inventar dados.'
       }
     };
     const r=await fetchComTimeout(cfg.endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payloadTeste)},30000);
@@ -9565,7 +9566,17 @@ function salvarEdicao() {
   const idx = lista.findIndex(x => x.id === id);
   if (idx === -1) { showToast('Atendimento não encontrado'); return; }
   const soapEditado=document.getElementById('edit-soap').value.trim(),cfg=MODULOS_ATENDIMENTO[document.getElementById('edit-tipo').value],dados={...(lista[idx].dados||{})};
-  if(cfg&&Object.keys(dados).length){soapEditado.split(/\n\n+/).slice(0,cfg.soap.length).forEach((v,i)=>dados[cfg.soap[i]]=v);}
+  if(cfg&&Object.keys(dados).length){
+    const partes=soapEditado.split(/\n\n+/);
+    if(partes.length===cfg.soap.length){
+      // Estrutura íntegra (um bloco por campo S/O/A/P): redistribui posicionalmente.
+      partes.forEach((v,i)=>dados[cfg.soap[i]]=v);
+    } else {
+      // Nº de blocos != nº de campos: NÃO redistribui às cegas (evitaria trocar conteúdo
+      // entre S/O/A/P silenciosamente). Mantém o texto completo em .soap e avisa.
+      showToast('SOAP salvo como texto. Os campos S/O/A/P não foram re-divididos (estrutura alterada); ao reabrir a consulta eles mostrarão a versão anterior.');
+    }
+  }
   lista[idx] = {
     ...lista[idx],
     nome: document.getElementById('edit-nome').value.trim(),
@@ -11789,7 +11800,7 @@ function renderCondutaProtocoladaModulo(p,contexto=''){
   if(out)out.innerHTML=`<div class="protocol-decision-head"><span class="clinical-seal ${d.protocolada?'protocol':'validate'}">${d.protocolada?'Conduta protocolar':'Requer validação'}</span> ${d.protocolada?'Conduta localizada em protocolo cadastrado':'Sem conduta específica localizada'}</div><div class="protocol-decision-grid"><div class="protocol-decision-item"><strong>Conduta</strong>${escTR(d.conduta||'Não definida.')}</div><div class="protocol-decision-item"><strong>Medicação</strong>${escTR(d.medicacao||'Não prevista neste protocolo.')}</div><div class="protocol-decision-item"><strong>Dosagem / tempo</strong>${escTR(d.dosagem||'Não prevista neste protocolo.')}</div></div><div class="protocol-decision-notes"><strong>Observações do protocolo</strong>${escTR(d.observacoes||'Revisar e validar clinicamente.')}</div><div class="protocol-decision-source">Conforme protocolo: <a href="${d.url}" target="_blank" rel="noopener">${escTR(d.fonte)}</a>. Apoio à decisão: revisar e validar clinicamente antes de registrar a conduta.</div>`;
   return d;
 }
-function lerPA(v){const m=String(v||'').match(/(\d{2,3})\D+(\d{2,3})/);return m?[Number(m[1]),Number(m[2])]:[0,0]}
+// lerPA agora é definida uma única vez, cedo (junto de avaliarProtocolosPna).
 function avaliarPrioridadeModulo(p){
   if(p==='ger'){
     const d=avaliarDemandaEspontanea(),painel=document.getElementById('ger-prioridade-painel');
@@ -12733,7 +12744,7 @@ async function gerarPacoteDiabetesGestacionalPN(){
       mostrarMensagemIA?.('Gerando SOAP com IA...');
       const tipoConsulta=tipoConsultaAISoap?.(prefix)||'consulta';
       const dadosConsulta=montarDadosConsultaParaIA(tipoConsulta);
-      const resposta=await fetch(cfg.endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tipoAcao:'gerar_soap',tipoConsulta,dadosConsulta})});
+      const resposta=await fetchComTimeout(cfg.endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tipoAcao:'gerar_soap',tipoConsulta,dadosConsulta})},45000);
       let data;try{data=await resposta.json()}catch(e){throw new Error('A IA SOAP não retornou JSON válido.')}
       console.log('Resposta IA SOAP:',data);
       if(!resposta.ok)throw new Error(data?.erro||data?.error||`Erro HTTP ${resposta.status}.`);
@@ -12965,6 +12976,8 @@ async function gerarPacoteDiabetesGestacionalPN(){
     ].forEach(([p,c])=>adicionarCampo(p,c));
     const essenciais=essenciaisMap();
     if(essenciais){
+      // Substitui intencionalmente hip/fer/puerp/vd de CAMPOS_ESSENCIAIS por listas mais
+      // completas (redesenho da auditoria clínica). É a versão que vale em runtime.
       Object.assign(essenciais,{
         hip:[['PA atual e repetida',['hip-pa-atual','hip-pa','hip-pa-repetida']],['diagnóstico/condição',['hip-diagnostico','hip-tipo-diagnostico']],['glicemia/HbA1c quando DM',['hip-glicemia','hip-hba1c']],['adesão e acesso',['hip-adesao','hip-acesso-medicacao']],['sinais de alerta',['hip-dor-toracica','hip-falta-ar','hip-sint-deficit-neuro']],['conduta',['hip-conduta','hip-p']],['retorno',['hip-retorno']]],
         fer:[['localização e lateralidade',['fer-local','fer-lateralidade']],['dimensões',['fer-comprimento','fer-largura','fer-profundidade']],['leito/tecido',['fer-tecido']],['exsudato/odor',['fer-exsudato','fer-odor']],['dor',['fer-dor','fer-dor-escala']],['cobertura/conduta',['fer-cobertura','fer-produto','fer-conduta']],['retorno/evolução',['fer-retorno','fer-evolucao']]],
