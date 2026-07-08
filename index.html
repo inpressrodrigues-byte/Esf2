@@ -11792,7 +11792,6 @@ async function gerarPacoteDiabetesGestacionalPN(){
   function clean(v){return String(v??'').replace(/\s+/g,' ').trim()}
   function cleanLong(v){return String(v??'').replace(/\r/g,'').split('\n').map(x=>clean(x)).filter(Boolean).join('\n')}
   function norm(v){try{return normalizarTextoProtocolo(String(v||''))}catch(e){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()}}
-  function isFilled(v){v=clean(v);return !!v&&!/^(?:-|—|nao informado|não informado|undefined|null|dado ficticio preenchido|dado fictício preenchido)$/i.test(v)}
   function safeValue(v){
     v=clean(v);
     if(!v)return '';
@@ -11804,7 +11803,6 @@ async function gerarPacoteDiabetesGestacionalPN(){
     return '';
   }
   function add(arr,txt){txt=cleanLong(txt);if(txt&&!arr.includes(txt))arr.push(txt)}
-  function sentence(txt){txt=clean(txt);if(!txt)return '';return /[.!?]$/.test(txt)?txt:txt+'.'}
   function line(label,value,suffix=''){value=safeValue(value);return value?`${label}: ${value}${suffix}`:''}
   function todayISO(){return new Date().toISOString().slice(0,10)}
   function formatDate(v){try{return formatarDataBR(v)}catch(e){return v}}
@@ -11812,7 +11810,6 @@ async function gerarPacoteDiabetesGestacionalPN(){
   function paParts(v){const m=String(v||'').match(/(\d{2,3})\D+(\d{2,3})/);return m?{sis:Number(m[1]),dia:Number(m[2])}:null}
   function paElevada(v){const p=paParts(v);return p&&(p.sis>=140||p.dia>=90)}
   function paMuitoAlta(v){const p=paParts(v);return p&&(p.sis>=160||p.dia>=110)}
-  function reagent(v){return /reagente|positivo|detectado/i.test(String(v||''))&&!/não reagente|nao reagente|negativo|não detectado|nao detectado/i.test(String(v||''))}
   function selectedLabels(selector){return Array.from(document.querySelectorAll(selector+':checked')).map(e=>clean(e.closest('label')?.textContent||e.value)).filter(Boolean)}
   function prefixPageEl(prefix){
     const id={pna:'pg-pn-abertura',pnc:'pg-pn-consulta',pu:'pg-puericultura',prev:'pg-preventivo',id:'pg-idoso',sm:'pg-saude-mental',ist:'pg-ist'}[prefix];
