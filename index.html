@@ -12489,6 +12489,8 @@ async function gerarPacoteDiabetesGestacionalPN(){
       showToast('SINAN de sífilis adquirido preparado em rascunho. Revise os dados complementares antes de imprimir.');
     }catch(e){console.warn('Falha ao preparar SINAN sífilis:',e)}
   }
+  // Exposto no escopo global para a IIFE de auditoria (validarPN) conseguir chamar.
+  window.prepararSinanSifilis = prepararSinanSifilis;
 
   function gerarSoapPN(prefix){
     const nome=valAny([`${prefix}-nome`]);
@@ -12562,6 +12564,14 @@ async function gerarPacoteDiabetesGestacionalPN(){
     const p=[];
     add(p,`${prefix==='pna'?'Realizada abertura de pré-natal':'Realizada consulta de pré-natal'} e mantido acompanhamento pela APS.`);
     if(rLabel&&!/habitual/i.test(rLabel))add(p,'Indicado cuidado compartilhado conforme estratificação de risco e fluxo municipal.');
+    // Conduta de risco/profilaxia de pré-eclâmpsia (AAS + cálcio) — restaura o comportamento
+    // da versão original gerarSoapAutomatoPna, perdido na reescrita genérica.
+    if(prefix==='pna'&&risco){
+      const peAlto=['has','peprev','nefro','dm','geme'].some(k=>document.querySelector(`#pna-comorbidades-list input[data-comorb="${k}"]`)?.checked);
+      const condutaRisco=/habitual/i.test(risco.label||'')?'':peAlto?risco.conduta:String(risco.conduta||'').replace(/Prevenção de pré-eclâmpsia:[\s\S]*/i,'');
+      add(p,condutaRisco);
+      if(peAlto)add(p,'Avaliar prevenção de pré-eclâmpsia conforme critérios clínicos, protocolo municipal e prescrição médica, quando indicada.');
+    }
     add(p,pnaPlanoExamesSoap?.(parseNumber(valAny([`${prefix}-ig`])))||'Solicitar ou conferir exames de rotina conforme protocolo municipal.');
     if(pnSifilisReagente(prefix)){
       add(p,'Diante de sífilis reagente, ativar fluxo protocolar de sífilis na gestação, realizar aconselhamento pós-teste, registrar tratamento/seguimento, avaliar/tratar parceria sexual e verificar notificação/SINAN conforme fluxo municipal.');
