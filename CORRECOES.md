@@ -1,15 +1,16 @@
 # CORRECOES — Execução da Auditoria (branch `correcoes-auditoria`)
 
-Estado: **Fases 1 e 2 concluídas e verificadas; Fase 3 parcial. Fases 4 e 5 pendentes.**
-Nenhum push, nenhum deploy, `main` intocado. Cada grupo tem commit próprio.
+Estado: **Fases 1 e 2 concluídas; Fase 3 concluída (só CSS mortas deferidas); Fase 5 parcial. Fase 4 pendente.**
+21 commits, cada grupo verificado. Nenhum push, nenhum deploy, `main` intocado.
 
 ## Métricas antes/depois
 | Métrica | Baseline | Atual |
 |---|---|---|
-| index.html | 4,65 MB / 13.184 linhas | **1,36 MB / 13.087 linhas** |
-| Blobs base64 no HTML | ~3,34 MB inline | externalizados (defer) / mortos removidos |
+| index.html | 4,65 MB / 13.184 linhas | **1,28 MB / 12.751 linhas** (−73%) |
+| Blobs base64 no HTML | ~3,34 MB inline | externalizados (defer) / ~883KB mortos removidos |
 | Arquivos novos | — | vendor/pdf-lib.min.js (513KB), assets/modelos.js (2MB), img/anatomia-vulva-vagina.jpg (258KB) |
-| Sintaxe (node --check) | 11 blocos, 0 falhas | 7 blocos, 0 falhas |
+| Código morto removido | — | ~500 linhas (calibrador, VD 1.0, cadeia SINAN, 26 fns, cadastro, helpers) |
+| Sintaxe (node --check) | 11 blocos, 0 falhas | 6 blocos, 0 falhas |
 | Console runtime (headless) | limpo | limpo |
 
 ## Como foi verificado
@@ -47,13 +48,30 @@ Não consigo exercitar a **geração de PDF** (laudo TR, ERSM, IVCF-20, SINAN, F
 - Debounce 350ms em ba-busca e terr-busca.
 - Pendência menor: memoizar as 3 chamadas de dadosGestao por render em indicadores/território (ganho menor, deixado para não arriscar).
 
-## Fase 3 — Faxina (PARCIAL)
-FEITO: `_FICHA_PDF_B64` (685KB morto) + calibrador manual da Ficha Rosa (163 linhas: 19 fns + FICHA_ROSA_MODELO_DATA_URL 154KB + listener global) removidos.
-PENDENTE (com armadilhas de nome documentadas em PROGRESSO.md): VD 1.0, cadeia SINAN antiga (+blob 44KB), IA-SOAP paralela morta, mortas dos blocos A/B/E, cadastro público morto, CSS morto.
+## Fase 3 — Faxina (CONCLUÍDA, exceto CSS)
+FEITO (~500 linhas + 883KB de blobs mortos):
+- `_FICHA_PDF_B64` (685KB) e cadeia SINAN antiga com blob `SINAN_MODELO_OFICIAL` (44KB) + `FICHA_ROSA_MODELO_DATA_URL` (154KB).
+- Calibrador manual da Ficha Rosa (163 linhas, resolve bug 12).
+- VD 1.0 (10 fns redeclaradas, preservando 8 vivas intercaladas + VD 2.0).
+- Cadeia SINAN antiga (gerarFichaSinan/sinanObterModelo/sinanAbrirFichaOficial) — preservadas as vivas Especifica/Especifico.
+- 26 fns mortas (IA-SOAP paralela, refactor SOAP abandonado, aliases, imcCrianca, adminCriarTrial...).
+- Cadastro público morto (auth-register-view + 3 fns), preservando authLogin.
+- 3 helpers mortos da IIFE (isFilled/sentence/reagent).
+Cada remoção: confirmada sem chamadores externos + sintaxe/console verificados.
+DEFERIDO (baixo valor): ~20 classes CSS mortas (badge-*, modal-*, bg-blue/purple, clinical-tabs, ai-soap-pill, admin-chip, lab-high/low/critical, etc. — confirmadas mortas via node; regras agrupadas tornam a remoção fiddly; harmless).
 
-## Fases 4 e 5 — PENDENTES
-- Fase 4 (estrutural, a mais arriscada): registro canônico de módulos, IDs SOAP padronizados (bug 15), pipeline SOAP único, mapas anatômicos genéricos, coords ERSM únicas, escape/idade únicos, dedup checkPnaQueixas/Pnc. Preservar texto clínico.
-- Fase 5 (UX): obrigatoriedade nome/CPF, inputmode/tel, label for, recuperação de senha, erros PT-BR, contraste --tx3, emojis->dots, poda de atendimentos, botão sincronizar.
+## Fase 5 — UX (PARCIAL)
+FEITO: contraste --tx3 (WCAG AA); erros de login em PT-BR; inputmode=numeric em CPF/CNS/CEP + type=tel em telefones (gerador + estáticos); 296 labels ligados aos campos (for=).
+PENDENTE:
+- Obrigatoriedade nome/CPF ao salvar — **DECISÃO SUA (regra de negócio)**: bloquear ou avisar? CPF é sempre exigido (ex.: acolhimento sem identificação)? Não implementei para não impor regra.
+- Emojis -> SVG/dots — **DESIGN SEU**: 100+ emojis (ícones de nav 🤰🩺👶🌸🧓🧠, indicadores 🟢🟡🔴, ⚠️🚨✅). Não fiz às cegas (risco de ficar grotesco); precisa escolher ícones/estilo. Contraria a regra "nunca emojis".
+- Recuperação de senha (resetPasswordForEmail), botão "sincronizar agora", poda/arquivamento de esf_atendimentos_*.
 
-## Recomendação
-Testar em dispositivo real, antes de qualquer merge/deploy: gerar 1 PDF de cada tipo, login/sync, e os fluxos dos bugs P0 (especialmente atender 2 pacientes seguidos no Preventivo e conferir que os achados anatômicos não vazam; e o SOAP de gestante de alto risco trazer a profilaxia AAS+cálcio). Fases 4-5 pedem contexto fresco — ver PROGRESSO.md para retomada precisa.
+## Fase 4 — Estrutura (PENDENTE — a mais arriscada; contexto fresco)
+Registro canônico de módulos, padronizar IDs SOAP (bug 15), unificar pipeline SOAP (preventivo/SM), mapas anatômicos genéricos, coords ERSM únicas, escape/idade únicos, dedup checkPnaQueixas/Pnc. Refactor de geração de SOAP clínico — preservar texto (diff antes/depois). Ver seção 5 do AUDITORIA.md e passos (a)-(j) do PROMPT-CORRECAO.md.
+
+## Recomendação de teste (dispositivo real, antes de merge/deploy)
+1. Gerar 1 PDF de CADA tipo: laudo TR, ERSM, IVCF-20, SINAN específico, Ficha Rosa, pacote diabetes (confirma que a externalização defer não quebrou geração).
+2. Login real + sync nuvem + IA-SOAP com endpoint real.
+3. Bugs P0: atender 2 pacientes seguidos no Preventivo e conferir que achados de mama/colo/vagina NÃO vazam para o 2º; SOAP de gestante de alto risco deve trazer profilaxia AAS+cálcio; idade em Saúde Mental correta na virada de mês.
+Fase 4 e o restante da Fase 5 pedem sua decisão (regras/design) + contexto fresco — ver PROGRESSO.md para retomada precisa.

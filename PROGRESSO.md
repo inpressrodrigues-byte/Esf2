@@ -24,9 +24,9 @@ Documento vivo. Atualizado a cada grupo de correção. Serve de ponto de retomad
 | Infra | Branch + baseline + harness + PROGRESSO.md | FEITO |
 | 1 | Bugs P0/P1 (18 itens da seção 3) | FEITO (16/18; bug 12→Fase 3, bug 15→Fase 4) |
 | 2 | Performance: externalizar blobs + runtime | FEITO (4.65MB→2.19MB; runtime perf feito) |
-| 3 | Faxina de código morto (seção 4) | PARCIAL (blobs mortos + calibrador; falta VD1.0/SINAN/etc.) |
+| 3 | Faxina de código morto | FEITO (só CSS mortas deferidas, ~500 linhas + 883KB removidos) |
 | 4 | Estrutura para escala (seção 5) | PENDENTE (mais arriscada — fazer com contexto fresco) |
-| 5 | UX (seção 8) | PENDENTE |
+| 5 | UX (seção 8) | PARCIAL (contraste, erros PT-BR, inputmode, label for) |
 | Final | CORRECOES.md (relatório item-a-item) | FEITO (parcial — reflete o estado atual) |
 
 ### Estado do index.html: 4.65 MB (baseline) -> 1.36 MB (atual). Meta <1.6MB ATINGIDA.
