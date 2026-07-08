@@ -4694,21 +4694,18 @@ function go(id,btn){
   if(id==='indicadores')setTimeout(renderIndicadores,50);
   if(id==='territorio')setTimeout(renderTerritorio,50);
   if(id==='relatorios')setTimeout(renderRelatorio,50);
+  if(id==='historico'&&typeof renderHistorico==='function')setTimeout(renderHistorico,50);
+  if(id==='pacientes'&&typeof renderPacientes==='function')setTimeout(()=>{renderPacientes();baixarPacientesNuvem();},50);
   if(id==='preventivo'&&typeof resetMapasAnatomicos==='function')resetMapasAnatomicos();
   if(window.innerWidth<=760)alternarMenuLateral(true);
   setTimeout(atualizarBarraAcoesRapidas,30);
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function abrirModulo(id){
+  // Toda a lógica pós-navegação (render de histórico/pacientes/gestão) vive em go(),
+  // para rodar uma única vez independentemente da entrada (tile da home ou barra lateral).
   const btn=Array.from(document.querySelectorAll('.bar-nav .nb')).find(el=>el.getAttribute('onclick')?.includes(`'${id}'`));
   go(id,btn);
-  if(id==='historico'&&typeof renderHistorico==='function')setTimeout(renderHistorico,100);
-  if(id==='pacientes'&&typeof renderPacientes==='function')setTimeout(()=>{renderPacientes();baixarPacientesNuvem();},100);
-  if(id==='reportes'&&typeof carregarReportes==='function')setTimeout(carregarReportes,100);
-  if(id==='busca-ativa')setTimeout(renderBuscaAtiva,100);
-  if(id==='indicadores')setTimeout(renderIndicadores,100);
-  if(id==='territorio')setTimeout(renderTerritorio,100);
-  if(id==='relatorios')setTimeout(renderRelatorio,100);
 }
 function tab(btn,tp){
   const parent=btn.closest('.pg');
@@ -5472,7 +5469,7 @@ async function callAIExames(pref){
   if(hiv==='pos'){achados.push('HIV: reagente.');riscos.push('Alto risco: HIV');condutas.push('HIV reagente: acolher, notificar, realizar o algoritmo confirmatório com TR2 e vincular imediatamente ao CTA para início precoce de TARV; classificar como alto risco e articular AMI. A escolha do esquema e a via de parto dependem da equipe especializada e carga viral.');}
   else if(hiv==='neg') achados.push('HIV: não reagente.');
   if(!Number.isNaN(tsh)){
-    const sem=parseInt((document.getElementById('pnc-ig')?.value||'').match(/\d+/)?.[0]||'0'), limite=sem&&sem<14?2.5:3;
+    const sem=parseInt((document.getElementById(`${pref}-ig`)?.value||'').match(/\d+/)?.[0]||'0'), limite=sem&&sem<14?2.5:3;
     if(tsh>4){achados.push(`TSH ${tsh} mUI/L: acima de 4 mUI/L.`);riscos.push('Hipotireoidismo: risco habitual se controlado; alto risco se refratário ou com comorbidades');condutas.push('Colher T4 livre e realizar avaliação médica para iniciar levotiroxina após a coleta. T4L normal: hipotireoidismo subclínico, fluxo municipal lista levotiroxina 25 mcg/dia. T4L baixo: hipotireoidismo franco, fluxo lista 50–100 mcg/dia. Meta TSH < 2,5 mUI/L; dosar mensalmente até 20 semanas. Fora da meta, avaliação médica para aumentar 12–25 mcg/dia; na meta, TSH a cada 3 meses. Separar levotiroxina de ferro/cálcio por 4 horas.');}
     else if(tsh>limite){achados.push(`TSH ${tsh} mUI/L: entre o limite trimestral e 4 mUI/L.`);riscos.push('Investigar hipotireoidismo subclínico');condutas.push('Solicitar anti-TPO, repetir TSH e solicitar T4 livre. Anti-TPO negativo: não tratar e dosar TSH mensalmente no 1º trimestre, uma vez no 2º e uma vez no 3º. Anti-TPO positivo: considerar tratamento após avaliação médica; se optar por não tratar, manter o mesmo calendário de TSH.');}
     else if(tsh<0.1){achados.push(`TSH ${tsh} mUI/L: suprimido, investigar hipertireoidismo.`);riscos.push('Alto risco se hipertireoidismo confirmado');condutas.push('Repetir TSH e solicitar T4 livre + TRAb. Se T4L < 2 mg/dL: hipertireoidismo subclínico, sem tratamento pelo fluxo. Se T4L > 2 mg/dL: encaminhar à endocrinologia; avaliação médica para propiltiouracil 100–450 mg/dia dividido em 3–4 doses, com meta T4L < 2 mg/dL e controle de T4L a cada 15 dias fora da meta ou a cada 4 semanas na meta.');}
@@ -5482,7 +5479,7 @@ async function callAIExames(pref){
   if(urina==='pielo'){achados.push('Pielonefrite na gestação.');riscos.push('Alto risco: pielonefrite na gestação atual');condutas.push('Encaminhar imediatamente para avaliação médica/hospitalar e compartilhar cuidado com alto risco.');}
   if(coombs==='pos'){achados.push('Coombs indireto/TIA positivo.');riscos.push('Alto risco: isoimunização Rh');condutas.push('Coombs indireto positivo: encaminhar ao pré-natal de alto risco. Se Rh negativo e Coombs indireto negativo, repetir mensalmente a partir da 24ª semana. Imunoglobulina anti-D é indicada no pós-parto se RN Rh positivo e Coombs direto negativo, e após abortamento, ectópica, mola, sangramento vaginal ou procedimento invasivo.');}
   if(hepb==='pos'||hepc==='pos'){achados.push(`${hepb==='pos'?'Hepatite B ':''}${hepb==='pos'&&hepc==='pos'?'e ':''}${hepc==='pos'?'Hepatite C ':''}reagente.`);riscos.push('Alto risco: hepatite viral na gestação');condutas.push('Hepatite viral reagente: notificar à epidemiologia. Hepatite C: solicitar PCR quantitativo e encaminhar ao infectologista sem urgência; tratamento é contraindicado na gestação e lactação. Hepatite B: solicitar Anti-HBc IgM/IgG, Anti-HBs, Anti-HBe, HBeAg e PCR quantitativo; encaminhar ao infectologista se HBeAg reagente ou PCR VHB > 2.000 UI/mL. HBsAg reagente: solicitar imunoglobulina anti-hepatite B pelo formulário do CRIE e encaminhar com a notificação à epidemiologia.');}
-  const wrap=document.getElementById('ex-ai-wrap-pnc'), out=document.getElementById('ex-ai-out-pnc'); wrap.style.display='block';
+  const wrap=document.getElementById(`ex-ai-wrap-${pref}`), out=document.getElementById(`ex-ai-out-${pref}`); if(wrap)wrap.style.display='block';
   renderInterpretacaoLaboratorial(out,achados,riscos,condutas,'quadro clinico e idade gestacional');
 }
 
@@ -9943,7 +9940,6 @@ async function carregarPermissoesUsuario(user){
     if(data)CURRENT_USER_PROFILE={...(CURRENT_USER_PROFILE||{}),nome:data.nome||CURRENT_USER_PROFILE?.nome||'',cargo:data.cargo||CURRENT_USER_PROFILE?.cargo||'',unidade:data.unidade||CURRENT_USER_PROFILE?.unidade||'',nivel_acesso:PERMISSOES_ATUAIS.nivel_acesso,municipio:PERMISSOES_ATUAIS.municipio_escopo||'Toledo'};
   }
   aplicarPermissoesInterface();
-  baixarAtendimentosNuvem();
 }
 
 function verificarAcesso(session) {
@@ -9953,6 +9949,7 @@ function verificarAcesso(session) {
     CURRENT_AUTH_USER_ID='';
     CURRENT_USER_PROFILE=null;
     clearTimeout(inactivityTimer);
+    if(window.trialInterval){clearInterval(window.trialInterval);window.trialInterval=null;}
     authScreen.classList.add('visible');
   } else {
     authScreen.classList.remove('visible');
