@@ -334,7 +334,7 @@ input[type="file"]{padding: 5px; font-size: 13px; cursor: pointer; background: v
 /* FOOTER STAMP & OTHERS */
 .stamp-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;padding:14px 18px;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rl);margin-top:6px}
 .div{height:1px;background:var(--bd);margin:14px 0}
-@media print{.bar,.brow,.ai-wrap,.tabs,.save-bar,.q-btn-group{display:none!important}.pg{display:block!important}}
+@media print{.bar,.brow,.ai-wrap,.tabs,.save-bar,.q-btn-group,.clinical-safety-bar,.quick-actions{display:none!important}.pg{display:block!important}body{padding-left:0!important;margin:0}}
 
 /* ── MÓDULO DE EXAMES ── */
 .ex-grupo{border:1px solid var(--bd);border-radius:var(--r);margin-bottom:8px;overflow:hidden; transition: all 0.3s;}
@@ -7873,7 +7873,7 @@ function limparERSM() {
 
 function idadeSM() {
   const v = document.getElementById('sm-nasc').value; if (!v) return;
-  const nasc = new Date(v), hoje = new Date();
+  const nasc = new Date(v+'T00:00:00'), hoje = new Date();
   let anos = hoje.getFullYear() - nasc.getFullYear();
   let meses = hoje.getMonth() - nasc.getMonth();
   if (meses < 0) { anos--; meses += 12; }
@@ -8228,7 +8228,8 @@ const CAMPOS_PACIENTE={
   hip:{nome:'hip-nome',cpf:'hip-cpf',nasc:'hip-nasc',cns:'hip-cns',telefone:'hip-telefone',endereco:'hip-endereco',microarea:'hip-microarea',cronicas:'hip-diagnostico'},
   fer:{nome:'fer-nome',cpf:'fer-cpf',nasc:'fer-nasc',cns:'fer-cns',telefone:'fer-telefone',endereco:'fer-endereco',microarea:'fer-microarea'},
   puerp:{nome:'puerp-nome',cpf:'puerp-cpf',nasc:'puerp-nasc',cns:'puerp-cns',telefone:'puerp-telefone',endereco:'puerp-endereco',microarea:'puerp-microarea'},
-  ist:{nome:'ist-nome',cpf:'ist-cpf',nasc:'ist-nasc',cns:'ist-cns',telefone:'ist-telefone',endereco:'ist-endereco',microarea:'ist-microarea'}
+  ist:{nome:'ist-nome',cpf:'ist-cpf',nasc:'ist-nasc',cns:'ist-cns',telefone:'ist-telefone',endereco:'ist-endereco',microarea:'ist-microarea'},
+  vd:{nome:'vd-nome',cpf:'vd-cpf',nasc:'vd-nasc',cns:'vd-cns',telefone:'vd-telefone',microarea:'vd-microarea'}
 };
 function normalizarCPF(v){return String(v||'').replace(/\D/g,'').slice(0,11);}
 function formatarCPF(v){const n=normalizarCPF(v);return n.length===11?n.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4'):v;}
