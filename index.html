@@ -917,7 +917,7 @@ body.sidebar-collapsed .dev-nav{display:none}
     <div class="home-op home-op-clock"><span class="home-op-icon">◷</span><span><span class="home-op-label">Horário</span><span class="home-op-value" id="dash-hora">--:--</span></span></div>
   </div>
   <div class="card" style="margin-bottom:18px;padding:12px">
-    <div class="f"><label>Busca geral de pacientes</label><input id="busca-geral-esf" placeholder="Nome, CPF, CNS ou microárea" oninput="renderBuscaGeralESF()"></div>
+    <div class="f"><label for="busca-geral-esf">Busca geral de pacientes</label><input id="busca-geral-esf" placeholder="Nome, CPF, CNS ou microárea" oninput="renderBuscaGeralESF()"></div>
     <div id="busca-geral-resultado"></div>
   </div>
 
@@ -984,10 +984,10 @@ body.sidebar-collapsed .dev-nav{display:none}
   <div class="card">
     <div class="ct"><span class="dot dg"></span>Identificação para avaliação vacinal</div>
     <div class="g3">
-      <div class="f"><label>Paciente</label><input id="pni-nome" placeholder="Nome do paciente"></div>
-      <div class="f"><label>Data de nascimento *</label><input id="pni-nasc" type="date" onchange="atualizarCentralPNI()"></div>
-      <div class="f"><label>Contexto</label><select id="pni-contexto" onchange="atualizarCentralPNI()"><option value="automatico">Automático pela idade</option><option value="gestante">Gestante</option><option value="crianca">Criança</option><option value="jovem">Adolescente e jovem</option><option value="adulto">Adulto</option><option value="idoso">Idoso</option></select></div>
-      <div class="f" id="pni-ig-field" style="display:none"><label>Idade gestacional</label><input id="pni-ig" placeholder="Ex: 28 semanas" oninput="avaliarVacinasModulo('pni')"></div>
+      <div class="f"><label for="pni-nome">Paciente</label><input id="pni-nome" placeholder="Nome do paciente"></div>
+      <div class="f"><label for="pni-nasc">Data de nascimento *</label><input id="pni-nasc" type="date" onchange="atualizarCentralPNI()"></div>
+      <div class="f"><label for="pni-contexto">Contexto</label><select id="pni-contexto" onchange="atualizarCentralPNI()"><option value="automatico">Automático pela idade</option><option value="gestante">Gestante</option><option value="crianca">Criança</option><option value="jovem">Adolescente e jovem</option><option value="adulto">Adulto</option><option value="idoso">Idoso</option></select></div>
+      <div class="f" id="pni-ig-field" style="display:none"><label for="pni-ig">Idade gestacional</label><input id="pni-ig" placeholder="Ex: 28 semanas" oninput="avaliarVacinasModulo('pni')"></div>
     </div>
     <div id="pni-grupo"></div>
   </div>
@@ -1023,20 +1023,20 @@ body.sidebar-collapsed .dev-nav{display:none}
         <div class="f"><label>CPF</label><input inputmode="numeric" type="text" id="pna-cpf" class="paciente-cpf" placeholder="000.000.000-00"></div>
         <div class="f"><label>CNS</label><input type="text" id="pna-cns"></div>
         <div class="f"><label>Prontuário / Registro Local</label><input type="text" id="pna-prontuario"></div>
-        <div class="f"><label>Estado Civil</label><select id="pna-estcivil"><option value="">—</option><option>Solteira</option><option>Casada</option><option>União Estável</option><option>Separada / Divorciada</option><option>Viúva</option></select></div>
+        <div class="f"><label for="pna-estcivil">Estado Civil</label><select id="pna-estcivil"><option value="">—</option><option>Solteira</option><option>Casada</option><option>União Estável</option><option>Separada / Divorciada</option><option>Viúva</option></select></div>
         <div class="f"><label>Endereço / Microárea</label><input type="text" id="pna-end"></div>
         <div class="f"><label>Telefone / WhatsApp</label><input type="text" id="pna-tel"></div>
         <div class="f"><label>Nome do parceiro</label><input type="text" id="pna-parceiro"></div>
-        <div class="f"><label>Escolaridade</label><select id="pna-escol"><option value="">—</option><option>Sem escolaridade</option><option>Fund. incompleto</option><option>Fund. completo</option><option>Ensino médio</option><option>Superior</option></select></div>
+        <div class="f"><label for="pna-escol">Escolaridade</label><select id="pna-escol"><option value="">—</option><option>Sem escolaridade</option><option>Fund. incompleto</option><option>Fund. completo</option><option>Ensino médio</option><option>Superior</option></select></div>
         <div class="f"><label>Ocupação</label><input type="text" id="pna-ocup"></div>
-        <div class="f"><label>Raça/Cor</label><select id="pna-raca"><option value="">—</option><option>Branca</option><option>Parda</option><option>Preta</option><option>Indígena</option><option>Amarela</option></select></div>
-        <div class="f"><label>Gestação Planejada?</label><select id="pna-planejada"><option value="">—</option><option>Sim</option><option>Não</option></select></div>
+        <div class="f"><label for="pna-raca">Raça/Cor</label><select id="pna-raca"><option value="">—</option><option>Branca</option><option>Parda</option><option>Preta</option><option>Indígena</option><option>Amarela</option></select></div>
+        <div class="f"><label for="pna-planejada">Gestação Planejada?</label><select id="pna-planejada"><option value="">—</option><option>Sim</option><option>Não</option></select></div>
         <div class="f"><label>Método contraceptivo prévio</label><input type="text" id="pna-anticoncep"></div>
-        <div class="f"><label>Saneamento Básico na Residência</label><select id="pna-saneamento"><option value="">—</option><option>Adequado</option><option>Inadequado</option></select></div>
-        <div class="f"><label>Renda familiar</label><select id="pna-renda"><option value="">—</option><option>Menos de 1 SM</option><option>1 a 2 SM</option><option>3 a 5 SM</option><option>Acima de 5 SM</option></select></div>
+        <div class="f"><label for="pna-saneamento">Saneamento Básico na Residência</label><select id="pna-saneamento"><option value="">—</option><option>Adequado</option><option>Inadequado</option></select></div>
+        <div class="f"><label for="pna-renda">Renda familiar</label><select id="pna-renda"><option value="">—</option><option>Menos de 1 SM</option><option>1 a 2 SM</option><option>3 a 5 SM</option><option>Acima de 5 SM</option></select></div>
         <div class="f"><label>Nº de Residentes</label><input type="number" id="pna-residentes"></div>
         <div class="f"><label>Imigrante / Nacionalidade</label><input type="text" id="pna-imig"></div>
-        <div class="f"><label>Pré-natal do parceiro</label><select id="pna-pnparc"><option value="">—</option><option>Em andamento</option><option>Não iniciado / Recusa</option><option>Não se aplica</option></select></div>
+        <div class="f"><label for="pna-pnparc">Pré-natal do parceiro</label><select id="pna-pnparc"><option value="">—</option><option>Em andamento</option><option>Não iniciado / Recusa</option><option>Não se aplica</option></select></div>
       </div>
     </div>
     <div class="stamp-bar">
@@ -1061,7 +1061,7 @@ body.sidebar-collapsed .dev-nav{display:none}
         <div class="trim-badge" id="pna-trim-badge">—</div>
       </div>
       <div class="g2" style="margin-top:8px">
-        <div class="f"><label>DUM confiável?</label><select id="pna-dum-conf"><option value="">—</option><option>Sim</option><option>Não — solicitar USG precoce</option></select></div>
+        <div class="f"><label for="pna-dum-conf">DUM confiável?</label><select id="pna-dum-conf"><option value="">—</option><option>Sim</option><option>Não — solicitar USG precoce</option></select></div>
         <div class="f"><label>IG por USG (se realizado)</label><input type="text" id="pna-ig-usg" placeholder="Ex: 10s3d"></div>
       </div>
     </div>
@@ -1116,20 +1116,20 @@ body.sidebar-collapsed .dev-nav{display:none}
     <div class="card">
       <div class="ct"><span class="dot da"></span>Hábitos e Medicações</div>
       <div class="g2">
-        <div class="f"><label>Medicamentos em uso</label><textarea id="pna-med" placeholder="Nome, dose, frequência..."></textarea></div>
-        <div class="f"><label>Alergias medicamentosas</label><textarea id="pna-alergia" placeholder="Descreva se houver..."></textarea></div>
+        <div class="f"><label for="pna-med">Medicamentos em uso</label><textarea id="pna-med" placeholder="Nome, dose, frequência..."></textarea></div>
+        <div class="f"><label for="pna-alergia">Alergias medicamentosas</label><textarea id="pna-alergia" placeholder="Descreva se houver..."></textarea></div>
       </div>
       <div class="g3">
-        <div class="f"><label>Tabagismo</label><select id="pna-tab"><option value="">—</option><option>Não fuma</option><option>Ex-tabagista</option><option>Fuma — orientada cessação</option></select></div>
-        <div class="f"><label>Álcool / drogas</label><select id="pna-alc"><option value="">—</option><option>Não usa</option><option>Uso eventual</option><option>Uso frequente — CAPS</option></select></div>
-        <div class="f"><label>Violência doméstica</label><select id="pna-viol"><option value="">—</option><option>Nega</option><option>Suspeita</option><option>Confirmada</option></select></div>
+        <div class="f"><label for="pna-tab">Tabagismo</label><select id="pna-tab"><option value="">—</option><option>Não fuma</option><option>Ex-tabagista</option><option>Fuma — orientada cessação</option></select></div>
+        <div class="f"><label for="pna-alc">Álcool / drogas</label><select id="pna-alc"><option value="">—</option><option>Não usa</option><option>Uso eventual</option><option>Uso frequente — CAPS</option></select></div>
+        <div class="f"><label for="pna-viol">Violência doméstica</label><select id="pna-viol"><option value="">—</option><option>Nega</option><option>Suspeita</option><option>Confirmada</option></select></div>
       </div>
       <div class="g3">
         <div class="f"><label>Último preventivo / citopatológico</label><input type="text" id="pna-prev" placeholder="Ex: 2024 normal / nunca realizou / sem registro"></div>
         <div class="f"><label>Situação vacinal referida</label><input type="text" id="pna-vac-ref" placeholder="Ex: carteira apresentada, esquema incompleto..."></div>
-        <div class="f"><label>Parceiro/acompanhante na consulta</label><select id="pna-acomp"><option value="">—</option><option>Presente</option><option>Ausente</option><option>Não se aplica</option></select></div>
+        <div class="f"><label for="pna-acomp">Parceiro/acompanhante na consulta</label><select id="pna-acomp"><option value="">—</option><option>Presente</option><option>Ausente</option><option>Não se aplica</option></select></div>
       </div>
-      <div class="f"><label>Queixas atuais</label><textarea id="pna-queixas" oninput="checkPnaQueixas();avaliarProtocolosPna()" placeholder="Náuseas, vômitos, sangramento, dor..."></textarea></div>
+      <div class="f"><label for="pna-queixas">Queixas atuais</label><textarea id="pna-queixas" oninput="checkPnaQueixas();avaliarProtocolosPna()" placeholder="Náuseas, vômitos, sangramento, dor..."></textarea></div>
       <div id="pna-queixas-condutas"></div>
     </div>
   </div>
@@ -1144,7 +1144,7 @@ body.sidebar-collapsed .dev-nav{display:none}
         <div class="f"><label>PA (mmHg)</label><input type="text" id="pna-pa" placeholder="ex: 110/70" oninput="avaliarProtocolosPna()"></div>
         <div class="f"><label>FC (bpm)</label><input type="number" id="pna-fc"></div>
         <div class="f"><label>Temperatura (°C)</label><input type="number" id="pna-temp" step="0.1"></div>
-        <div class="f"><label>Edema</label><select id="pna-edema"><option value="">—</option><option>Ausente</option><option>Maleolar fisiológico</option><option>+/4+</option><option>++/4+</option><option>+++/4+</option></select></div>
+        <div class="f"><label for="pna-edema">Edema</label><select id="pna-edema"><option value="">—</option><option>Ausente</option><option>Maleolar fisiológico</option><option>+/4+</option><option>++/4+</option><option>+++/4+</option></select></div>
       </div>
       <div id="pna-imc-alerts"></div>
       <div id="pna-vitais-alerts"></div>
@@ -1153,11 +1153,11 @@ body.sidebar-collapsed .dev-nav{display:none}
       <div class="ct"><span class="dot db"></span>Exame Físico Específico</div>
       <div class="g2">
         <div class="f"><label>Estado geral</label><input type="text" id="pna-eg" placeholder="BEG, orientada..."></div>
-        <div class="f"><label>Mucosas</label><select id="pna-muc"><option value="">—</option><option>Normocoradas</option><option>Hipocoradas +/4+</option><option>Hipocoradas ++/4+</option></select></div>
+        <div class="f"><label for="pna-muc">Mucosas</label><select id="pna-muc"><option value="">—</option><option>Normocoradas</option><option>Hipocoradas +/4+</option><option>Hipocoradas ++/4+</option></select></div>
         <div class="f"><label>Altura uterina (cm)</label><input type="number" id="pna-au"></div>
         <div class="f"><label>BCF (bpm)</label><input type="number" id="pna-bcf"></div>
-        <div class="f"><label>Apresentação fetal</label><select id="pna-apres"><option value="">—</option><option>Não identificada (precoce)</option><option>Cefálica</option><option>Pélvica</option><option>Córmica/transversa</option></select></div>
-        <div class="f"><label>Movimentos fetais</label><select id="pna-mf" onchange="avaliarMovimentosFetaisPna()"><option value="">—</option><option>Ausentes (IG precoce)</option><option>Presentes / padrão habitual</option><option>Percebidos, porém reduzidos</option><option>Ausentes após já serem percebidos</option></select></div>
+        <div class="f"><label for="pna-apres">Apresentação fetal</label><select id="pna-apres"><option value="">—</option><option>Não identificada (precoce)</option><option>Cefálica</option><option>Pélvica</option><option>Córmica/transversa</option></select></div>
+        <div class="f"><label for="pna-mf">Movimentos fetais</label><select id="pna-mf" onchange="avaliarMovimentosFetaisPna()"><option value="">—</option><option>Ausentes (IG precoce)</option><option>Presentes / padrão habitual</option><option>Percebidos, porém reduzidos</option><option>Ausentes após já serem percebidos</option></select></div>
       </div>
       <div id="pna-mf-conduta"></div>
     </div>
@@ -1165,12 +1165,12 @@ body.sidebar-collapsed .dev-nav{display:none}
       <div class="ct"><span class="dot dr"></span>Vacinação na Gestação</div>
       <div class="alert alert-i">Verificar carteira e sistema de vacinação em toda consulta. O sistema abaixo sugere a conduta conforme IG e histórico informado.</div>
       <div class="g3">
-        <div class="f"><label>dT / dupla tetânica — doses comprovadas</label><select id="vac-dt-hist" onchange="avaliarVacinacaoPna()"><option value="">— selecionar —</option><option value="0">Nenhuma dose registrada</option><option value="1">1 dose registrada</option><option value="2">2 doses registradas</option><option value="3menos5">3 ou mais doses; última há menos de 5 anos</option><option value="3de5a10">3 ou mais doses; última entre 5 e 10 anos</option><option value="3mais10">3 ou mais doses; última há mais de 10 anos</option><option value="semcomprovante">Sem comprovante / histórico desconhecido</option></select></div>
-        <div class="f"><label>dTpa nesta gestação</label><select id="vac-dtpa-status" onchange="avaliarVacinacaoPna()"><option value="">— selecionar —</option><option value="nao">Ainda não realizada</option><option value="sim">Realizada nesta gestação</option></select></div>
-        <div class="f"><label>Hepatite B — situação</label><select id="vac-hepb-hist" onchange="avaliarVacinacaoPna()"><option value="">— selecionar —</option><option value="completo">Esquema completo comprovado</option><option value="incompleto">Esquema incompleto</option><option value="naovacinada">Não vacinada</option><option value="semcomprovante">Sem comprovante / desconhecido</option></select></div>
-        <div class="f"><label>Influenza</label><select id="vac-inf-status" onchange="avaliarVacinacaoPna()"><option value="">— selecionar —</option><option value="nao">Pendente na campanha atual</option><option value="sim">Realizada</option></select></div>
-        <div class="f"><label>COVID-19</label><select id="vac-covid-status" onchange="avaliarVacinacaoPna()"><option value="">— selecionar —</option><option value="avaliar">Avaliar calendário vigente</option><option value="atualizada">Atualizada</option></select></div>
-        <div class="f"><label>VSR materna</label><select id="vac-vsr-status" onchange="avaliarVacinacaoPna()"><option value="">— selecionar —</option><option value="nao">Ainda não realizada</option><option value="sim">Realizada nesta gestação</option><option value="indisponivel">Não disponível na unidade</option></select></div>
+        <div class="f"><label for="vac-dt-hist">dT / dupla tetânica — doses comprovadas</label><select id="vac-dt-hist" onchange="avaliarVacinacaoPna()"><option value="">— selecionar —</option><option value="0">Nenhuma dose registrada</option><option value="1">1 dose registrada</option><option value="2">2 doses registradas</option><option value="3menos5">3 ou mais doses; última há menos de 5 anos</option><option value="3de5a10">3 ou mais doses; última entre 5 e 10 anos</option><option value="3mais10">3 ou mais doses; última há mais de 10 anos</option><option value="semcomprovante">Sem comprovante / histórico desconhecido</option></select></div>
+        <div class="f"><label for="vac-dtpa-status">dTpa nesta gestação</label><select id="vac-dtpa-status" onchange="avaliarVacinacaoPna()"><option value="">— selecionar —</option><option value="nao">Ainda não realizada</option><option value="sim">Realizada nesta gestação</option></select></div>
+        <div class="f"><label for="vac-hepb-hist">Hepatite B — situação</label><select id="vac-hepb-hist" onchange="avaliarVacinacaoPna()"><option value="">— selecionar —</option><option value="completo">Esquema completo comprovado</option><option value="incompleto">Esquema incompleto</option><option value="naovacinada">Não vacinada</option><option value="semcomprovante">Sem comprovante / desconhecido</option></select></div>
+        <div class="f"><label for="vac-inf-status">Influenza</label><select id="vac-inf-status" onchange="avaliarVacinacaoPna()"><option value="">— selecionar —</option><option value="nao">Pendente na campanha atual</option><option value="sim">Realizada</option></select></div>
+        <div class="f"><label for="vac-covid-status">COVID-19</label><select id="vac-covid-status" onchange="avaliarVacinacaoPna()"><option value="">— selecionar —</option><option value="avaliar">Avaliar calendário vigente</option><option value="atualizada">Atualizada</option></select></div>
+        <div class="f"><label for="vac-vsr-status">VSR materna</label><select id="vac-vsr-status" onchange="avaliarVacinacaoPna()"><option value="">— selecionar —</option><option value="nao">Ainda não realizada</option><option value="sim">Realizada nesta gestação</option><option value="indisponivel">Não disponível na unidade</option></select></div>
       </div>
       <div id="pna-vac-sync-status"></div>
       <div id="pna-vac-conduta"></div>
@@ -1182,22 +1182,22 @@ body.sidebar-collapsed .dev-nav{display:none}
     <div class="card">
       <div class="ct"><span class="dot dr"></span>Configuração do atendimento</div>
       <div class="g3">
-        <div class="f"><label>Condição da pessoa principal</label><select id="tr-principal-condicao" onchange="atualizarTestesRapidosPna()"><option value="gestante">Gestante — HIV/Sífilis DUO</option><option value="naogestante">Não gestante — testes separados</option></select></div>
-        <div class="f"><label>Parceiro(a) presente?</label><select id="tr-parceiro-presente" onchange="atualizarTestesRapidosPna()"><option value="nao">Não</option><option value="sim">Sim — gerar laudo separado</option></select></div>
-        <div class="f"><label>Município</label><input id="tr-municipio" value="Toledo"></div>
+        <div class="f"><label for="tr-principal-condicao">Condição da pessoa principal</label><select id="tr-principal-condicao" onchange="atualizarTestesRapidosPna()"><option value="gestante">Gestante — HIV/Sífilis DUO</option><option value="naogestante">Não gestante — testes separados</option></select></div>
+        <div class="f"><label for="tr-parceiro-presente">Parceiro(a) presente?</label><select id="tr-parceiro-presente" onchange="atualizarTestesRapidosPna()"><option value="nao">Não</option><option value="sim">Sim — gerar laudo separado</option></select></div>
+        <div class="f"><label for="tr-municipio">Município</label><input id="tr-municipio" value="Toledo"></div>
       </div>
     </div>
     <div class="tr-person">
       <div class="tr-person-head">Pessoa principal — dados puxados da identificação</div>
       <div class="tr-person-body">
         <div class="g4">
-          <div class="f"><label>Nome</label><input id="tr-p-nome" class="ro" readonly></div>
-          <div class="f"><label>Prontuário</label><input id="tr-p-pront" class="ro" readonly></div>
-          <div class="f"><label>Data de nascimento</label><input id="tr-p-nasc" class="ro" readonly></div>
-          <div class="f"><label>Sexo</label><select id="tr-p-sexo"><option>Feminino</option><option>Masculino</option></select></div>
+          <div class="f"><label for="tr-p-nome">Nome</label><input id="tr-p-nome" class="ro" readonly></div>
+          <div class="f"><label for="tr-p-pront">Prontuário</label><input id="tr-p-pront" class="ro" readonly></div>
+          <div class="f"><label for="tr-p-nasc">Data de nascimento</label><input id="tr-p-nasc" class="ro" readonly></div>
+          <div class="f"><label for="tr-p-sexo">Sexo</label><select id="tr-p-sexo"><option>Feminino</option><option>Masculino</option></select></div>
         </div>
         <div id="tr-p-testes"></div>
-        <div class="g3" style="margin-top:10px"><div class="f"><label>Data da coleta</label><input type="date" id="tr-p-data"></div><div class="f"><label>Horário da leitura</label><input type="time" id="tr-p-hora"></div><div class="f"><label>Executor / COREN</label><input id="tr-p-executor"></div></div>
+        <div class="g3" style="margin-top:10px"><div class="f"><label>Data da coleta</label><input type="date" id="tr-p-data"></div><div class="f"><label>Horário da leitura</label><input type="time" id="tr-p-hora"></div><div class="f"><label for="tr-p-executor">Executor / COREN</label><input id="tr-p-executor"></div></div>
         <div class="brow"><button class="btn btn-p" type="button" onclick="gerarLaudoTesteRapido('p')">Gerar laudo da pessoa principal</button></div>
       </div>
     </div>
@@ -1205,13 +1205,13 @@ body.sidebar-collapsed .dev-nav{display:none}
       <div class="tr-person-head">Parceiro(a) — laudo individual</div>
       <div class="tr-person-body">
         <div class="g4">
-          <div class="f"><label>Nome completo</label><input id="tr-c-nome"></div>
-          <div class="f"><label>Prontuário</label><input id="tr-c-pront"></div>
+          <div class="f"><label for="tr-c-nome">Nome completo</label><input id="tr-c-nome"></div>
+          <div class="f"><label for="tr-c-pront">Prontuário</label><input id="tr-c-pront"></div>
           <div class="f"><label>Data de nascimento</label><input type="date" id="tr-c-nasc"></div>
-          <div class="f"><label>Sexo</label><select id="tr-c-sexo"><option>Masculino</option><option>Feminino</option></select></div>
+          <div class="f"><label for="tr-c-sexo">Sexo</label><select id="tr-c-sexo"><option>Masculino</option><option>Feminino</option></select></div>
         </div>
         <div id="tr-c-testes"></div>
-        <div class="g3" style="margin-top:10px"><div class="f"><label>Data da coleta</label><input type="date" id="tr-c-data"></div><div class="f"><label>Horário da leitura</label><input type="time" id="tr-c-hora"></div><div class="f"><label>Executor / COREN</label><input id="tr-c-executor"></div></div>
+        <div class="g3" style="margin-top:10px"><div class="f"><label>Data da coleta</label><input type="date" id="tr-c-data"></div><div class="f"><label>Horário da leitura</label><input type="time" id="tr-c-hora"></div><div class="f"><label for="tr-c-executor">Executor / COREN</label><input id="tr-c-executor"></div></div>
         <div class="brow"><button class="btn btn-p" type="button" onclick="gerarLaudoTesteRapido('c')">Gerar laudo do parceiro(a)</button></div>
       </div>
     </div>
@@ -1292,9 +1292,9 @@ body.sidebar-collapsed .dev-nav{display:none}
         <label class="cki"><input type="checkbox"> Caderneta da gestante entregue</label>
       </div>
       <div class="g3" style="margin-top:10px">
-        <div class="f"><label>Maternidade de referência / vinculação</label><input id="pna-maternidade" placeholder="Ex: HOESP / HUOP / conforme rede"></div>
-        <div class="f"><label>Odontologia</label><select id="pna-odonto"><option value="">—</option><option>Encaminhada / agendada</option><option>Já em acompanhamento</option><option>Orientar agendamento</option></select></div>
-        <div class="f"><label>Retorno programado</label><input id="pna-retorno" placeholder="Ex: 30 dias / data agendada"></div>
+        <div class="f"><label for="pna-maternidade">Maternidade de referência / vinculação</label><input id="pna-maternidade" placeholder="Ex: HOESP / HUOP / conforme rede"></div>
+        <div class="f"><label for="pna-odonto">Odontologia</label><select id="pna-odonto"><option value="">—</option><option>Encaminhada / agendada</option><option>Já em acompanhamento</option><option>Orientar agendamento</option></select></div>
+        <div class="f"><label for="pna-retorno">Retorno programado</label><input id="pna-retorno" placeholder="Ex: 30 dias / data agendada"></div>
       </div>
     </div>
   </div>
@@ -1312,10 +1312,10 @@ body.sidebar-collapsed .dev-nav{display:none}
         </div>
       </div>
       <div class="soap-grid">
-        <div class="soap-item f"><label>S — Subjetivo</label><textarea id="pna-s" style="min-height:180px"></textarea></div>
-        <div class="soap-item f"><label>O — Objetivo</label><textarea id="pna-o" style="min-height:180px"></textarea></div>
-        <div class="soap-item f"><label>A — Avaliação</label><textarea id="pna-a-soap" style="min-height:180px"></textarea></div>
-        <div class="soap-item f"><label>P — Plano</label><textarea id="pna-soap-p" style="min-height:180px"></textarea></div>
+        <div class="soap-item f"><label for="pna-s">S — Subjetivo</label><textarea id="pna-s" style="min-height:180px"></textarea></div>
+        <div class="soap-item f"><label for="pna-o">O — Objetivo</label><textarea id="pna-o" style="min-height:180px"></textarea></div>
+        <div class="soap-item f"><label for="pna-a-soap">A — Avaliação</label><textarea id="pna-a-soap" style="min-height:180px"></textarea></div>
+        <div class="soap-item f"><label for="pna-soap-p">P — Plano</label><textarea id="pna-soap-p" style="min-height:180px"></textarea></div>
       </div>
     </div>
     <div class="brow"><button class="btn btn-p" onclick="window.print()">🖨 Imprimir</button></div>
@@ -1393,16 +1393,16 @@ body.sidebar-collapsed .dev-nav{display:none}
         <label class="cki"><input type="checkbox" onchange="checkPncQueixas()"> Contrações antes de 37s</label>
       </div>
       <div class="g3" style="margin-bottom:10px">
-        <div class="f"><label>Característica da perda vaginal</label><select id="pnc-perda-tipo" onchange="checkPncQueixas()"><option value="">—</option><option>Sangue vivo</option><option>Sangue escuro / borra</option><option>Líquido claro contínuo</option><option>Líquido com cor ou odor alterado</option><option>Corrimento</option><option>Tampão mucoso</option><option>Outra</option></select></div>
-        <div class="f"><label>Quantidade</label><select id="pnc-perda-qtd" onchange="checkPncQueixas()"><option value="">—</option><option>Pequena</option><option>Moderada</option><option>Grande</option><option>Não soube informar</option></select></div>
-        <div class="f"><label>Início / duração / observações</label><input id="pnc-perda-obs" oninput="checkPncQueixas()" placeholder="Início, duração, odor, dor associada..."></div>
+        <div class="f"><label for="pnc-perda-tipo">Característica da perda vaginal</label><select id="pnc-perda-tipo" onchange="checkPncQueixas()"><option value="">—</option><option>Sangue vivo</option><option>Sangue escuro / borra</option><option>Líquido claro contínuo</option><option>Líquido com cor ou odor alterado</option><option>Corrimento</option><option>Tampão mucoso</option><option>Outra</option></select></div>
+        <div class="f"><label for="pnc-perda-qtd">Quantidade</label><select id="pnc-perda-qtd" onchange="checkPncQueixas()"><option value="">—</option><option>Pequena</option><option>Moderada</option><option>Grande</option><option>Não soube informar</option></select></div>
+        <div class="f"><label for="pnc-perda-obs">Início / duração / observações</label><input id="pnc-perda-obs" oninput="checkPncQueixas()" placeholder="Início, duração, odor, dor associada..."></div>
       </div>
       <div id="pnc-queixas-alerts"></div>
-      <div class="f" style="margin-top:8px"><label>Outras queixas</label><textarea id="pnc-queixas"></textarea></div>
+      <div class="f" style="margin-top:8px"><label for="pnc-queixas">Outras queixas</label><textarea id="pnc-queixas"></textarea></div>
       <div class="div"></div>
       <div class="g2">
-        <div class="f"><label>Movimentos fetais (MF)</label><select id="pnc-mf" onchange="checkPncQueixas()"><option value="">—</option><option>Presentes e normais</option><option>Diminuídos — avaliar</option><option>Ausentes — avaliar imediato</option></select></div>
-        <div class="f"><label>Uso correto de suplementos/medicações?</label><select id="pnc-med"><option value="">—</option><option>Sim, em uso correto</option><option>Irregular — reorientada</option><option>Não usa — orientada</option></select></div>
+        <div class="f"><label for="pnc-mf">Movimentos fetais (MF)</label><select id="pnc-mf" onchange="checkPncQueixas()"><option value="">—</option><option>Presentes e normais</option><option>Diminuídos — avaliar</option><option>Ausentes — avaliar imediato</option></select></div>
+        <div class="f"><label for="pnc-med">Uso correto de suplementos/medicações?</label><select id="pnc-med"><option value="">—</option><option>Sim, em uso correto</option><option>Irregular — reorientada</option><option>Não usa — orientada</option></select></div>
       </div>
     </div>
   </div>
@@ -1414,7 +1414,7 @@ body.sidebar-collapsed .dev-nav{display:none}
         <div class="f"><label>Peso (kg)</label><input type="number" id="pnc-peso" step="0.1"></div>
         <div class="f"><label>PA (mmHg)</label><input type="text" id="pnc-pa" placeholder="ex: 120/80" oninput="checkPncVitais()"></div>
         <div class="f"><label>FC (bpm)</label><input type="number" id="pnc-fc"></div>
-        <div class="f"><label>Edema</label><select id="pnc-edema"><option value="">—</option><option>Ausente</option><option>Maleolar</option><option>+/4+</option><option>++/4+</option></select></div>
+        <div class="f"><label for="pnc-edema">Edema</label><select id="pnc-edema"><option value="">—</option><option>Ausente</option><option>Maleolar</option><option>+/4+</option><option>++/4+</option></select></div>
       </div>
       <div id="pnc-vitais-alerts"></div>
     </div>
@@ -1428,7 +1428,7 @@ body.sidebar-collapsed .dev-nav{display:none}
       <div class="g3">
         <div class="f"><label>Altura uterina (cm)</label><input type="number" id="pnc-au"></div>
         <div class="f"><label>BCF (bpm)</label><input type="number" id="pnc-bcf" oninput="checkPncVitais()"></div>
-        <div class="f"><label>Apresentação</label><select id="pnc-apres"><option value="">—</option><option>Cefálica</option><option>Pélvica</option><option>Córmica</option></select></div>
+        <div class="f"><label for="pnc-apres">Apresentação</label><select id="pnc-apres"><option value="">—</option><option>Cefálica</option><option>Pélvica</option><option>Córmica</option></select></div>
       </div>
     </div>
   </div>
@@ -1485,10 +1485,10 @@ body.sidebar-collapsed .dev-nav{display:none}
       <div class="ct"><span class="dot dg"></span>Evolução — SOAP</div>
       <div class="brow" style="margin-top:0; margin-bottom:15px"><button class="btn btn-p" type="button" onclick="gerarSoapAutomatoPnc()" style="background:var(--blue); border-color:var(--blue)">⚡ GERAR EVOLUÇÃO (Consulta)</button> <button class="save-atend-btn" onclick="salvarAtendimento_pnc()" style="display:inline-flex">💾 Salvar Atendimento</button></div>
       <div class="soap-grid">
-        <div class="soap-item f"><label>S</label><textarea id="pnc-s" style="min-height:180px"></textarea></div>
-        <div class="soap-item f"><label>O</label><textarea id="pnc-o" style="min-height:180px"></textarea></div>
-        <div class="soap-item f"><label>A</label><textarea id="pnc-a-soap" style="min-height:180px"></textarea></div>
-        <div class="soap-item f"><label>P</label><textarea id="pnc-p" style="min-height:180px"></textarea></div>
+        <div class="soap-item f"><label for="pnc-s">S</label><textarea id="pnc-s" style="min-height:180px"></textarea></div>
+        <div class="soap-item f"><label for="pnc-o">O</label><textarea id="pnc-o" style="min-height:180px"></textarea></div>
+        <div class="soap-item f"><label for="pnc-a-soap">A</label><textarea id="pnc-a-soap" style="min-height:180px"></textarea></div>
+        <div class="soap-item f"><label for="pnc-p">P</label><textarea id="pnc-p" style="min-height:180px"></textarea></div>
       </div>
     </div>
     <div class="brow"><button class="btn btn-p" onclick="window.print()">🖨 Imprimir</button></div>
@@ -1513,14 +1513,14 @@ body.sidebar-collapsed .dev-nav{display:none}
       <div class="g3">
         <div class="f"><label>Nome da criança</label><input type="text" id="pu-nome"></div>
         <div class="f"><label>Data de nascimento</label><input type="date" id="pu-nasc" oninput="idadeCrianca(); updateAntropometria(); checkMCHATIdade();"></div>
-        <div class="f"><label>Sexo</label><select id="pu-sexo" onchange="updateAntropometria()"><option value="">—</option><option>Menina</option><option>Menino</option></select></div>
+        <div class="f"><label for="pu-sexo">Sexo</label><select id="pu-sexo" onchange="updateAntropometria()"><option value="">—</option><option>Menina</option><option>Menino</option></select></div>
         <div class="f"><label>Idade cronológica</label><input class="computed" readonly id="pu-idade" type="text" placeholder="Preencha a data de nasc."></div>
         <div class="f"><label>Nº DNV <small style="opacity:.65;font-size:.85em">(Declaração de Nascido Vivo)</small></label><input type="text" id="pu-dnv"></div>
         <div class="f"><label>CPF</label><input inputmode="numeric" type="text" id="pu-cpf" class="paciente-cpf" placeholder="000.000.000-00"></div>
         <div class="f"><label>CNS</label><input type="text" id="pu-cns"></div>
-        <div class="f"><label>Etnia / Cor</label><select id="pu-raca"><option value="">—</option><option>Branca</option><option>Preta</option><option>Parda</option><option>Amarela</option><option>Indígena</option></select></div>
+        <div class="f"><label for="pu-raca">Etnia / Cor</label><select id="pu-raca"><option value="">—</option><option>Branca</option><option>Preta</option><option>Parda</option><option>Amarela</option><option>Indígena</option></select></div>
         <div class="f"><label>Responsável principal (Nome)</label><input type="text" id="pu-resp"></div>
-        <div class="f"><label>Vínculo do responsável</label><select id="pu-vinculo"><option value="">—</option><option>Mãe</option><option>Pai</option><option>Avós</option><option>Outros</option></select></div>
+        <div class="f"><label for="pu-vinculo">Vínculo do responsável</label><select id="pu-vinculo"><option value="">—</option><option>Mãe</option><option>Pai</option><option>Avós</option><option>Outros</option></select></div>
         <div class="f"><label>Endereço / Microárea</label><input type="text" id="pu-area"></div>
         <div class="f"><label>Contato</label><input type="text" id="pu-tel"></div>
       </div>
@@ -1576,10 +1576,10 @@ body.sidebar-collapsed .dev-nav{display:none}
           <label class="rp"><input type="radio" name="cm1s-aleit" value="la"> LA <small style="opacity:.65;font-size:.85em">(Leite Artificial Exclusivo)</small></label>
         </div>
         <div class="g2">
-          <div class="f"><label>Dificuldade para amamentar?</label><select id="cm1s-dif-aleit"><option value="">—</option><option>Não</option><option>Sim</option></select></div>
-          <div class="f"><label>Parou de amamentar?</label><select id="cm1s-parou"><option value="">—</option><option>Não</option><option>Sim</option></select></div>
+          <div class="f"><label for="cm1s-dif-aleit">Dificuldade para amamentar?</label><select id="cm1s-dif-aleit"><option value="">—</option><option>Não</option><option>Sim</option></select></div>
+          <div class="f"><label for="cm1s-parou">Parou de amamentar?</label><select id="cm1s-parou"><option value="">—</option><option>Não</option><option>Sim</option></select></div>
         </div>
-        <div class="f"><label>Motivo do desmame precoce (se houver)</label><textarea id="cm1s-desmame" style="min-height:54px"></textarea></div>
+        <div class="f"><label for="cm1s-desmame">Motivo do desmame precoce (se houver)</label><textarea id="cm1s-desmame" style="min-height:54px"></textarea></div>
       </div>
       <div class="card">
         <div class="ct"><span class="dot dr"></span>3. Sinais de Alerta</div>
@@ -1594,12 +1594,12 @@ body.sidebar-collapsed .dev-nav{display:none}
           <label class="cki"><input type="checkbox"> Ausculta cardíaca alterada</label>
           <label class="cki"><input type="checkbox"> Cianose</label>
         </div>
-        <div class="f" style="margin-top:8px"><label>Outros</label><textarea id="cm1s-outros" style="min-height:54px"></textarea></div>
+        <div class="f" style="margin-top:8px"><label for="cm1s-outros">Outros</label><textarea id="cm1s-outros" style="min-height:54px"></textarea></div>
       </div>
       <div class="card">
         <div class="ct"><span class="dot da"></span>4. Vacinas</div>
         <div class="g2">
-          <div class="f"><label>Hepatite B</label><select id="cm1s-vac-hepb"><option value="">—</option><option>Não</option><option>Sim</option></select></div>
+          <div class="f"><label for="cm1s-vac-hepb">Hepatite B</label><select id="cm1s-vac-hepb"><option value="">—</option><option>Não</option><option>Sim</option></select></div>
           <div class="f"><label>BCG <small style="opacity:.65;font-size:.85em">(Bacilo Calmette-Guérin — antituberculose)</small></label><select id="cm1s-vac-bcg"><option value="">—</option><option>Não</option><option>Sim</option></select></div>
         </div>
       </div>
@@ -1632,10 +1632,10 @@ body.sidebar-collapsed .dev-nav{display:none}
       <div class="card">
         <div class="ct"><span class="dot da"></span>2. Triagem Neonatal</div>
         <div class="g4">
-          <div class="f"><label>Teste do Pezinho</label><select id="cm1m-t-pezinho"><option value="">—</option><option>Normal</option><option>Alterado</option><option>Pendente</option></select></div>
-          <div class="f"><label>Teste da Orelhinha</label><select id="cm1m-t-orelhinha"><option value="">—</option><option>Passou</option><option>Falhou</option><option>Pendente</option></select></div>
-          <div class="f"><label>Teste do Olhinho</label><select id="cm1m-t-olhinho"><option value="">—</option><option>Normal</option><option>Alterado</option><option>Pendente</option></select></div>
-          <div class="f"><label>Teste do Coraçãozinho</label><select id="cm1m-t-coracao"><option value="">—</option><option>Normal</option><option>Alterado</option><option>Pendente</option></select></div>
+          <div class="f"><label for="cm1m-t-pezinho">Teste do Pezinho</label><select id="cm1m-t-pezinho"><option value="">—</option><option>Normal</option><option>Alterado</option><option>Pendente</option></select></div>
+          <div class="f"><label for="cm1m-t-orelhinha">Teste da Orelhinha</label><select id="cm1m-t-orelhinha"><option value="">—</option><option>Passou</option><option>Falhou</option><option>Pendente</option></select></div>
+          <div class="f"><label for="cm1m-t-olhinho">Teste do Olhinho</label><select id="cm1m-t-olhinho"><option value="">—</option><option>Normal</option><option>Alterado</option><option>Pendente</option></select></div>
+          <div class="f"><label for="cm1m-t-coracao">Teste do Coraçãozinho</label><select id="cm1m-t-coracao"><option value="">—</option><option>Normal</option><option>Alterado</option><option>Pendente</option></select></div>
         </div>
       </div>
       <div class="card">
@@ -1646,10 +1646,10 @@ body.sidebar-collapsed .dev-nav{display:none}
           <label class="rp"><input type="radio" name="cm1m-aleit" value="la"> LA <small style="opacity:.65;font-size:.85em">(Leite Artificial Exclusivo)</small></label>
         </div>
         <div class="g2">
-          <div class="f"><label>Dificuldade para amamentar?</label><select id="cm1m-dif-aleit"><option value="">—</option><option>Não</option><option>Sim</option></select></div>
-          <div class="f"><label>Parou de amamentar?</label><select id="cm1m-parou"><option value="">—</option><option>Não</option><option>Sim</option></select></div>
+          <div class="f"><label for="cm1m-dif-aleit">Dificuldade para amamentar?</label><select id="cm1m-dif-aleit"><option value="">—</option><option>Não</option><option>Sim</option></select></div>
+          <div class="f"><label for="cm1m-parou">Parou de amamentar?</label><select id="cm1m-parou"><option value="">—</option><option>Não</option><option>Sim</option></select></div>
         </div>
-        <div class="f"><label>Motivo do desmame precoce (se houver)</label><textarea id="cm1m-desmame" style="min-height:54px"></textarea></div>
+        <div class="f"><label for="cm1m-desmame">Motivo do desmame precoce (se houver)</label><textarea id="cm1m-desmame" style="min-height:54px"></textarea></div>
       </div>
       <div class="card">
         <div class="ct"><span class="dot dr"></span>4. Sinais de Alerta</div>
@@ -1663,7 +1663,7 @@ body.sidebar-collapsed .dev-nav{display:none}
           <label class="cki"><input type="checkbox"> Hipotermia (<36,5°C)</label>
           <label class="cki"><input type="checkbox"> Convulsões ou movimentos anormais</label>
         </div>
-        <div class="f" style="margin-top:8px"><label>Outros</label><textarea id="cm1m-outros" style="min-height:54px"></textarea></div>
+        <div class="f" style="margin-top:8px"><label for="cm1m-outros">Outros</label><textarea id="cm1m-outros" style="min-height:54px"></textarea></div>
       </div>
       <div class="card">
         <div class="ct"><span class="dot db"></span>5. Exame Ocular</div>
@@ -1677,18 +1677,18 @@ body.sidebar-collapsed .dev-nav{display:none}
       <div class="card">
         <div class="ct"><span class="dot dg"></span>6. Verificações / Cuidados Especiais</div>
         <div class="g2">
-          <div class="f"><label>Vacinas de acordo com o calendário?</label><select id="cm1m-vacinas"><option value="">—</option><option>Sim</option><option>Não</option></select></div>
+          <div class="f"><label for="cm1m-vacinas">Vacinas de acordo com o calendário?</label><select id="cm1m-vacinas"><option value="">—</option><option>Sim</option><option>Não</option></select></div>
           <div class="f"><label>Posição de sono</label><input type="text" id="cm1m-sono-pos" placeholder="Ex: Dorsal"></div>
           <div class="f"><label>Tempo de sono (horas/dia)</label><input type="text" id="cm1m-sono-tempo"></div>
           <div class="f"><label>Funcionamento do intestino / cólicas</label><input type="text" id="cm1m-intestino"></div>
           <div class="f"><label>Higiene e cuidados gerais</label><input type="text" id="cm1m-higiene"></div>
-          <div class="f"><label>Acidentes domésticos?</label><select id="cm1m-acid"><option value="">—</option><option>Não</option><option>Sim</option></select></div>
-          <div class="f"><label>Sinais de violências/negligências?</label><select id="cm1m-violen"><option value="">—</option><option>Não</option><option>Sim</option></select></div>
+          <div class="f"><label for="cm1m-acid">Acidentes domésticos?</label><select id="cm1m-acid"><option value="">—</option><option>Não</option><option>Sim</option></select></div>
+          <div class="f"><label for="cm1m-violen">Sinais de violências/negligências?</label><select id="cm1m-violen"><option value="">—</option><option>Não</option><option>Sim</option></select></div>
         </div>
       </div>
       <div class="card">
         <div class="ct"><span class="dot dg"></span>7. Desenvolvimento</div>
-        <div class="f"><label>Observação da interação mãe-filho(a)</label><textarea id="cm1m-interacao" style="min-height:60px"></textarea></div>
+        <div class="f"><label for="cm1m-interacao">Observação da interação mãe-filho(a)</label><textarea id="cm1m-interacao" style="min-height:60px"></textarea></div>
         <div style="margin-top:10px">
           <div class="ct" style="margin-bottom:6px"><span class="dot dg"></span>Classificação dos marcos</div>
           <div class="rpills">
@@ -1697,11 +1697,11 @@ body.sidebar-collapsed .dev-nav{display:none}
             <label class="rp"><input type="radio" name="cm1m-dnpm" value="atraso"> 🔴 Provável atraso</label>
           </div>
         </div>
-        <div class="f" style="margin-top:8px"><label>Observações</label><textarea id="cm1m-dnpm-obs" style="min-height:54px"></textarea></div>
+        <div class="f" style="margin-top:8px"><label for="cm1m-dnpm-obs">Observações</label><textarea id="cm1m-dnpm-obs" style="min-height:54px"></textarea></div>
       </div>
       <div class="card">
         <div class="ct"><span class="dot da"></span>8. Laços de Afeto</div>
-        <div class="f"><label>Rede de apoio, participação dos pais, depressão materna</label><textarea id="cm1m-afeto" style="min-height:70px"></textarea></div>
+        <div class="f"><label for="cm1m-afeto">Rede de apoio, participação dos pais, depressão materna</label><textarea id="cm1m-afeto" style="min-height:70px"></textarea></div>
       </div>
       <div class="card">
         <div class="ct"><span class="dot db"></span>9. Estratificação de Risco</div>
@@ -1774,8 +1774,8 @@ body.sidebar-collapsed .dev-nav{display:none}
     <div class="card">
       <div class="ct"><span class="dot dg"></span>Dados da Gestação e Parto</div>
       <div class="g4">
-        <div class="f"><label>Realizou Pré-natal?</label><select id="pu-fezpn"><option value="">—</option><option>Sim (Adequado)</option><option>Sim (Inadequado)</option><option>Não</option></select></div>
-        <div class="f"><label>Tipo de parto</label><select id="pu-parto"><option value="">—</option><option>Normal/Vaginal</option><option>Cesárea</option><option>Fórceps</option></select></div>
+        <div class="f"><label for="pu-fezpn">Realizou Pré-natal?</label><select id="pu-fezpn"><option value="">—</option><option>Sim (Adequado)</option><option>Sim (Inadequado)</option><option>Não</option></select></div>
+        <div class="f"><label for="pu-parto">Tipo de parto</label><select id="pu-parto"><option value="">—</option><option>Normal/Vaginal</option><option>Cesárea</option><option>Fórceps</option></select></div>
         <div class="f"><label>IG ao nascer (semanas)</label><input type="number" id="pu-ig" placeholder="Ex: 38" oninput="idadeCrianca()"></div>
         <div class="f"><label>Peso ao nascer (g)</label><input type="number" id="pu-pn" placeholder="Ex: 3200"></div>
         <div class="f"><label>Estatura ao nascer (cm)</label><input type="number" id="pu-estn" placeholder="Ex: 49"></div>
@@ -1783,32 +1783,32 @@ body.sidebar-collapsed .dev-nav{display:none}
         <div class="f"><label>Apgar 1º e 5º min</label><input type="text" id="pu-apgar" placeholder="Ex: 8/9"></div>
         <div class="f"><label>Alta com</label><input type="text" id="pu-alta" placeholder="Ex: 2 dias"></div>
       </div>
-      <div class="f" style="margin-top:8px"><label>Intercorrências na gestação ou período neonatal</label><textarea id="pu-intercorrencias"></textarea></div>
+      <div class="f" style="margin-top:8px"><label for="pu-intercorrencias">Intercorrências na gestação ou período neonatal</label><textarea id="pu-intercorrencias"></textarea></div>
     </div>
 
     <div class="card">
       <div class="ct"><span class="dot db"></span>Triagem Neonatal</div>
       <div class="g3">
-        <div class="f"><label>Teste do Pezinho</label><select id="pu-t-pezinho"><option value="">—</option><option>Normal</option><option>Alterado</option><option>Pendente</option></select></div>
-        <div class="f"><label>Teste da Orelhinha</label><select id="pu-t-orelhinha"><option value="">—</option><option>Passou</option><option>Falhou</option><option>Pendente</option></select></div>
-        <div class="f"><label>Teste do Olhinho</label><select id="pu-t-olhinho"><option value="">—</option><option>Normal</option><option>Alterado</option><option>Pendente</option></select></div>
-        <div class="f"><label>Teste do Coraçãozinho</label><select id="pu-t-coracao"><option value="">—</option><option>Normal</option><option>Alterado</option><option>Pendente</option></select></div>
-        <div class="f"><label>Teste da Linguinha</label><select id="pu-t-lingua"><option value="">—</option><option>Normal</option><option>Alterado</option><option>Pendente</option></select></div>
+        <div class="f"><label for="pu-t-pezinho">Teste do Pezinho</label><select id="pu-t-pezinho"><option value="">—</option><option>Normal</option><option>Alterado</option><option>Pendente</option></select></div>
+        <div class="f"><label for="pu-t-orelhinha">Teste da Orelhinha</label><select id="pu-t-orelhinha"><option value="">—</option><option>Passou</option><option>Falhou</option><option>Pendente</option></select></div>
+        <div class="f"><label for="pu-t-olhinho">Teste do Olhinho</label><select id="pu-t-olhinho"><option value="">—</option><option>Normal</option><option>Alterado</option><option>Pendente</option></select></div>
+        <div class="f"><label for="pu-t-coracao">Teste do Coraçãozinho</label><select id="pu-t-coracao"><option value="">—</option><option>Normal</option><option>Alterado</option><option>Pendente</option></select></div>
+        <div class="f"><label for="pu-t-lingua">Teste da Linguinha</label><select id="pu-t-lingua"><option value="">—</option><option>Normal</option><option>Alterado</option><option>Pendente</option></select></div>
       </div>
     </div>
 
     <div class="card">
       <div class="ct"><span class="dot da"></span>Alimentação, Suplementação e Hábitos</div>
       <div class="g2">
-        <div class="f"><label>Padrão Alimentar Atual</label><select id="pu-alim"><option value="">—</option><option>AME — Aleitamento Materno Exclusivo</option><option>Aleitamento + Fórmula</option><option>Fórmula Exclusiva</option><option>Aleitamento + Alimentos</option><option>Dieta Familiar</option></select></div>
+        <div class="f"><label for="pu-alim">Padrão Alimentar Atual</label><select id="pu-alim"><option value="">—</option><option>AME — Aleitamento Materno Exclusivo</option><option>Aleitamento + Fórmula</option><option>Fórmula Exclusiva</option><option>Aleitamento + Alimentos</option><option>Dieta Familiar</option></select></div>
         <div class="f"><label>Suplementação em uso?</label>
           <div style="display:flex;gap:12px;margin-top:6px;padding-left:4px">
             <label style="display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" id="pu-sup-vitd" style="width:14px;height:14px;accent-color:var(--green)"> Vitamina D</label>
             <label style="display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" id="pu-sup-ferro" style="width:14px;height:14px;accent-color:var(--green)"> Sulfato Ferroso</label>
           </div>
         </div>
-        <div class="f"><label>Tempo de Tela</label><select id="pu-telas"><option value="">—</option><option>Zero (Ideal < 2 anos)</option><option>Até 1 h/dia</option><option>Mais de 2 h/dia</option></select></div>
-        <div class="f"><label>Posição de Sono</label><select id="pu-sono"><option value="">—</option><option>Dorsal (Adequado)</option><option>Cama compartilhada</option><option>Lateral/Ventral (Risco)</option></select></div>
+        <div class="f"><label for="pu-telas">Tempo de Tela</label><select id="pu-telas"><option value="">—</option><option>Zero (Ideal < 2 anos)</option><option>Até 1 h/dia</option><option>Mais de 2 h/dia</option></select></div>
+        <div class="f"><label for="pu-sono">Posição de Sono</label><select id="pu-sono"><option value="">—</option><option>Dorsal (Adequado)</option><option>Cama compartilhada</option><option>Lateral/Ventral (Risco)</option></select></div>
       </div>
     </div>
   </div>
@@ -1873,12 +1873,12 @@ body.sidebar-collapsed .dev-nav{display:none}
       <div class="g2">
         <div class="f"><label>Estado Geral/Hidratação</label><input type="text" id="pu-eg" placeholder="BEG, ativo, reativo..."></div>
         <div class="f"><label>Pele e Mucosas</label><input type="text" id="pu-pele" placeholder="Sem lesões..."></div>
-        <div class="f"><label>Fontanelas</label><select id="pu-font"><option value="">—</option><option>Normotensa/plana</option><option>Deprimida/Encovada</option><option>Abaulada</option><option>Fechada</option></select></div>
+        <div class="f"><label for="pu-font">Fontanelas</label><select id="pu-font"><option value="">—</option><option>Normotensa/plana</option><option>Deprimida/Encovada</option><option>Abaulada</option><option>Fechada</option></select></div>
         <div class="f"><label>Aparelho Respiratório</label><input type="text" id="pu-pulm" placeholder="Eupnéico, MV+..."></div>
         <div class="f"><label>Aparelho Cardiovascular</label><input type="text" id="pu-card" placeholder="RCR 2T BNF..."></div>
         <div class="f"><label>Abdômen</label><input type="text" id="pu-abd" placeholder="Flácido, indolor..."></div>
         <div class="f"><label>Genitália</label><input type="text" id="pu-gen" placeholder="Adequada..."></div>
-        <div class="f"><label>Higiene Bucal</label><select id="pu-boca"><option value="">—</option><option>Adequada</option><option>Precária / Cáries</option><option>Sem erupção dentária</option></select></div>
+        <div class="f"><label for="pu-boca">Higiene Bucal</label><select id="pu-boca"><option value="">—</option><option>Adequada</option><option>Precária / Cáries</option><option>Sem erupção dentária</option></select></div>
       </div>
     </div>
 
@@ -1984,8 +1984,8 @@ body.sidebar-collapsed .dev-nav{display:none}
 
       <div class="div" style="margin:14px 0"></div>
       <div id="pu-dnpm-resultado" style="margin-bottom:10px"></div>
-      <div class="f"><label>Classificação do Desenvolvimento</label><select id="pu-dnpm-class" onchange="atualizaDNPM()"><option value="">—</option><option>Adequado para a idade</option><option>Possível atraso — reavaliar em 30 dias</option><option>Provável atraso — encaminhar neuropsicomotor</option></select></div>
-      <div class="f"><label>Observações / Condutas — DNPM</label><textarea id="pu-dnpm-obs"></textarea></div>
+      <div class="f"><label for="pu-dnpm-class">Classificação do Desenvolvimento</label><select id="pu-dnpm-class" onchange="atualizaDNPM()"><option value="">—</option><option>Adequado para a idade</option><option>Possível atraso — reavaliar em 30 dias</option><option>Provável atraso — encaminhar neuropsicomotor</option></select></div>
+      <div class="f"><label for="pu-dnpm-obs">Observações / Condutas — DNPM</label><textarea id="pu-dnpm-obs"></textarea></div>
     </div>
 
     <!-- ── M-CHAT-R (RASTREIO TEA — 16 a 30 meses) ── -->
@@ -2001,7 +2001,7 @@ body.sidebar-collapsed .dev-nav{display:none}
       </div>
       <div class="div" style="margin:14px 0"></div>
       <div id="mchat-resultado" style="font-size:14px;font-weight:600;padding:10px 14px;border-radius:var(--r);background:var(--sf2);border:1px solid var(--bd)">Pontuação: — | Risco: —</div>
-      <div class="f" style="margin-top:10px"><label>Observações M-CHAT</label><textarea id="pu-mchat-obs" style="min-height:54px"></textarea></div>
+      <div class="f" style="margin-top:10px"><label for="pu-mchat-obs">Observações M-CHAT</label><textarea id="pu-mchat-obs" style="min-height:54px"></textarea></div>
     </div>
 
     <!-- ── ESTRATIFICAÇÃO DE RISCO (PROTOCOLO TOLEDO/CIB-PR) ── -->
@@ -2123,8 +2123,8 @@ body.sidebar-collapsed .dev-nav{display:none}
 
     <div class="card" id="pu-vac-status-card">
       <div class="ct"><span class="dot dr"></span>Situação Vacinal — PNI (Programa Nacional de Imunizações)</div>
-      <div class="f"><label>Status da Caderneta</label><select id="pu-vac-status"><option value="">—</option><option>Em dia</option><option>Atrasada (Aplicada hoje)</option><option>Atrasada (Falta de dose na UBS)</option><option>Recusa familiar</option></select></div>
-      <div class="f" style="margin-top:8px"><label>Vacinas / Pendências</label><textarea id="pu-vac-obs"></textarea></div>
+      <div class="f"><label for="pu-vac-status">Status da Caderneta</label><select id="pu-vac-status"><option value="">—</option><option>Em dia</option><option>Atrasada (Aplicada hoje)</option><option>Atrasada (Falta de dose na UBS)</option><option>Recusa familiar</option></select></div>
+      <div class="f" style="margin-top:8px"><label for="pu-vac-obs">Vacinas / Pendências</label><textarea id="pu-vac-obs"></textarea></div>
     </div>
   </div>
 
@@ -2137,10 +2137,10 @@ body.sidebar-collapsed .dev-nav{display:none}
       <div class="ct"><span class="dot dg"></span>Evolução — SOAP</div>
       <div class="brow" style="margin-top:0; margin-bottom:15px"><button class="btn btn-p" type="button" onclick="gerarSoapAutomatoPu()" style="background:var(--blue); border-color:var(--blue)">⚡ GERAR EVOLUÇÃO PUERICULTURA</button> <button class="save-atend-btn" onclick="salvarAtendimento_pu()" style="display:inline-flex">💾 Salvar Atendimento</button></div>
       <div class="soap-grid">
-        <div class="soap-item f"><label>S — Subjetivo</label><textarea id="pu-s" style="min-height:180px"></textarea></div>
-        <div class="soap-item f"><label>O — Objetivo</label><textarea id="pu-o" style="min-height:180px"></textarea></div>
-        <div class="soap-item f"><label>A — Avaliação</label><textarea id="pu-a-soap" style="min-height:180px"></textarea></div>
-        <div class="soap-item f"><label>P — Plano</label><textarea id="pu-p" style="min-height:180px"></textarea></div>
+        <div class="soap-item f"><label for="pu-s">S — Subjetivo</label><textarea id="pu-s" style="min-height:180px"></textarea></div>
+        <div class="soap-item f"><label for="pu-o">O — Objetivo</label><textarea id="pu-o" style="min-height:180px"></textarea></div>
+        <div class="soap-item f"><label for="pu-a-soap">A — Avaliação</label><textarea id="pu-a-soap" style="min-height:180px"></textarea></div>
+        <div class="soap-item f"><label for="pu-p">P — Plano</label><textarea id="pu-p" style="min-height:180px"></textarea></div>
       </div>
     </div>
     <div class="brow"><button class="btn btn-p" onclick="window.print()">🖨 Imprimir</button></div>
@@ -2172,9 +2172,9 @@ body.sidebar-collapsed .dev-nav{display:none}
         <div class="f"><label>Cartão SUS *</label><input type="text" id="prev-cns" placeholder="000 0000 0000 0000"></div>
         <div class="f"><label>Data de nascimento *</label><input type="date" id="prev-nasc" oninput="idadePrev(); prevVerificaIdade()"></div>
         <div class="f"><label>Idade</label><input class="ro" readonly id="prev-idade" type="text"></div>
-        <div class="f"><label>Raça / Cor *</label><select id="prev-raca"><option value="">—</option><option>Branca</option><option>Preta</option><option>Parda</option><option>Amarela</option><option>Indígena</option></select></div>
+        <div class="f"><label for="prev-raca">Raça / Cor *</label><select id="prev-raca"><option value="">—</option><option>Branca</option><option>Preta</option><option>Parda</option><option>Amarela</option><option>Indígena</option></select></div>
         <div class="f"><label>Nacionalidade</label><input type="text" id="prev-nac" placeholder="Brasileira"></div>
-        <div class="f"><label>Escolaridade</label><select id="prev-escol"><option value="">—</option><option>Analfabeta</option><option>Ensino Fundamental Incompleto</option><option>Ensino Fundamental Completo</option><option>Ensino Médio Completo</option><option>Ensino Superior Completo</option></select></div>
+        <div class="f"><label for="prev-escol">Escolaridade</label><select id="prev-escol"><option value="">—</option><option>Analfabeta</option><option>Ensino Fundamental Incompleto</option><option>Ensino Fundamental Completo</option><option>Ensino Médio Completo</option><option>Ensino Superior Completo</option></select></div>
       </div>
     </div>
     <div class="card">
@@ -2301,7 +2301,7 @@ body.sidebar-collapsed .dev-nav{display:none}
 
     <div class="card">
       <div class="ct"><span class="dot dg"></span>Observações da Anamnese</div>
-      <div class="f"><label>Queixas relatadas / contexto clínico relevante</label><textarea id="prev-queixas" style="min-height:90px" placeholder="Relato livre da paciente, queixas ginecológicas, histórico relevante..."></textarea></div>
+      <div class="f"><label for="prev-queixas">Queixas relatadas / contexto clínico relevante</label><textarea id="prev-queixas" style="min-height:90px" placeholder="Relato livre da paciente, queixas ginecológicas, histórico relevante..."></textarea></div>
     </div>
   </div>
 
@@ -2449,7 +2449,7 @@ body.sidebar-collapsed .dev-nav{display:none}
         <label>Achados registrados no mapa — vagina e vulva</label>
         <div id="vagina-tags" class="anat-legend" style="min-height:28px;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--r);padding:8px"></div>
       </div>
-      <div class="f" style="margin-top:10px"><label>Descrição complementar da avaliação vaginal/vulvar</label><textarea id="prev-vagina-desc" style="min-height:80px" placeholder="Aspecto das paredes vaginais e vulva, secreção, odor, lesões, dor, sangramento e demais achados..."></textarea></div>
+      <div class="f" style="margin-top:10px"><label for="prev-vagina-desc">Descrição complementar da avaliação vaginal/vulvar</label><textarea id="prev-vagina-desc" style="min-height:80px" placeholder="Aspecto das paredes vaginais e vulva, secreção, odor, lesões, dor, sangramento e demais achados..."></textarea></div>
     </div>
 
     <div class="card">
@@ -2472,7 +2472,7 @@ body.sidebar-collapsed .dev-nav{display:none}
         <label class="rp"><input type="radio" name="prev-dst" value="nao" onchange="prevPillStyle(this,'sg')"> Não</label>
       </div>
       <div id="prev-dst-alert" style="display:none" class="alert alert-e">🔴 Sinais de IST presentes — registrar achados, coletar amostras pertinentes e tratar/encaminhar conforme protocolo.</div>
-      <div class="f"><label>Descrição dos sinais de IST (se presentes)</label><textarea id="prev-dst-desc" style="min-height:66px" placeholder="Corrimento (aspecto, odor), lesões ulceradas, verrugas, hiperemia, edema..."></textarea></div>
+      <div class="f"><label for="prev-dst-desc">Descrição dos sinais de IST (se presentes)</label><textarea id="prev-dst-desc" style="min-height:66px" placeholder="Corrimento (aspecto, odor), lesões ulceradas, verrugas, hiperemia, edema..."></textarea></div>
     </div>
 
     <div class="card">
@@ -2518,7 +2518,7 @@ body.sidebar-collapsed .dev-nav{display:none}
           </select>
         </div>
       </div>
-      <div class="f"><label>Observações do exame clínico / achados adicionais</label><textarea id="prev-clinico-obs" style="min-height:80px" placeholder="Achados ao exame especular, colposcopia imediata se necessário, outras observações relevantes..."></textarea></div>
+      <div class="f"><label for="prev-clinico-obs">Observações do exame clínico / achados adicionais</label><textarea id="prev-clinico-obs" style="min-height:80px" placeholder="Achados ao exame especular, colposcopia imediata se necessário, outras observações relevantes..."></textarea></div>
     </div>
   </div>
 
@@ -2749,10 +2749,10 @@ body.sidebar-collapsed .dev-nav{display:none}
     <div class="card">
       <div class="ct"><span class="dot dr"></span>Inspeção e Descarga Papilar</div>
       <div class="g2">
-        <div class="f"><label>Inspeção estática</label><select id="prev-mama-ins"><option value="">—</option><option>Normal / Simétricas</option><option>Assimetria</option><option>Alteração de pele</option><option>Retração cutânea / mamilar</option></select></div>
-        <div class="f"><label>Inspeção dinâmica</label><select id="prev-mama-din"><option value="">—</option><option>Sem alteração</option><option>Com alteração</option></select></div>
-        <div class="f"><label>Palpação axilar e supraclavicular</label><select id="prev-mama-palp-ax"><option value="">—</option><option>Linfonodos não palpáveis</option><option>Linfonodos palpáveis</option></select></div>
-        <div class="f"><label>Descarga papilar</label><select id="prev-mama-desc"><option value="">—</option><option>Ausente</option><option>Presente — clara/serosa</option><option>Presente — sanguinolenta</option><option>Presente — leitosa</option></select></div>
+        <div class="f"><label for="prev-mama-ins">Inspeção estática</label><select id="prev-mama-ins"><option value="">—</option><option>Normal / Simétricas</option><option>Assimetria</option><option>Alteração de pele</option><option>Retração cutânea / mamilar</option></select></div>
+        <div class="f"><label for="prev-mama-din">Inspeção dinâmica</label><select id="prev-mama-din"><option value="">—</option><option>Sem alteração</option><option>Com alteração</option></select></div>
+        <div class="f"><label for="prev-mama-palp-ax">Palpação axilar e supraclavicular</label><select id="prev-mama-palp-ax"><option value="">—</option><option>Linfonodos não palpáveis</option><option>Linfonodos palpáveis</option></select></div>
+        <div class="f"><label for="prev-mama-desc">Descarga papilar</label><select id="prev-mama-desc"><option value="">—</option><option>Ausente</option><option>Presente — clara/serosa</option><option>Presente — sanguinolenta</option><option>Presente — leitosa</option></select></div>
       </div>
     </div>
 
@@ -2760,13 +2760,13 @@ body.sidebar-collapsed .dev-nav{display:none}
       <div class="ct"><span class="dot da"></span>Rastreamento Mamográfico</div>
       <div class="alert alert-i" style="margin-bottom:12px">ℹ Mamografia indicada para mulheres de <strong>50 a 69 anos</strong>, a cada 2 anos (INCA/MS). Avaliar individualmente para história familiar ou outros fatores de risco.</div>
       <div class="g2">
-        <div class="f"><label>Mamografia indicada?</label><select id="prev-mamo-ind"><option value="">—</option><option>Sim — por faixa etária</option><option>Sim — por fator de risco</option><option>Não indicada no momento</option></select></div>
+        <div class="f"><label for="prev-mamo-ind">Mamografia indicada?</label><select id="prev-mamo-ind"><option value="">—</option><option>Sim — por faixa etária</option><option>Sim — por fator de risco</option><option>Não indicada no momento</option></select></div>
         <div class="f"><label>Última mamografia</label><input type="text" id="prev-mamo-ult" placeholder="Ex: 2023 / Não realizou"></div>
-        <div class="f"><label>Resultado da última mamografia</label><select id="prev-mamo-res"><option value="">—</option><option>BI-RADS 0 — inconclusivo</option><option>BI-RADS 1 — negativo</option><option>BI-RADS 2 — benigno</option><option>BI-RADS 3 — provavelmente benigno</option><option>BI-RADS 4 — suspeito</option><option>BI-RADS 5 — altamente suspeito</option><option>BI-RADS 6 — maligno confirmado</option><option>Não realizou</option></select></div>
-        <div class="f"><label>Conduta para mama</label><select id="prev-mama-conduta"><option value="">—</option><option>Sem alteração — seguimento de rotina</option><option>Solicitada mamografia hoje</option><option>Encaminhamento para mastologia</option><option>Encaminhamento urgente</option></select></div>
+        <div class="f"><label for="prev-mamo-res">Resultado da última mamografia</label><select id="prev-mamo-res"><option value="">—</option><option>BI-RADS 0 — inconclusivo</option><option>BI-RADS 1 — negativo</option><option>BI-RADS 2 — benigno</option><option>BI-RADS 3 — provavelmente benigno</option><option>BI-RADS 4 — suspeito</option><option>BI-RADS 5 — altamente suspeito</option><option>BI-RADS 6 — maligno confirmado</option><option>Não realizou</option></select></div>
+        <div class="f"><label for="prev-mama-conduta">Conduta para mama</label><select id="prev-mama-conduta"><option value="">—</option><option>Sem alteração — seguimento de rotina</option><option>Solicitada mamografia hoje</option><option>Encaminhamento para mastologia</option><option>Encaminhamento urgente</option></select></div>
       </div>
-      <div class="f"><label>Orientações sobre autoexame e fatores de risco realizadas?</label><select id="prev-mama-orient"><option value="">—</option><option>Sim — realizadas nesta consulta</option><option>Paciente já orientada previamente</option><option>Não realizado</option></select></div>
-      <div class="f" style="margin-top:4px"><label>Observações adicionais</label><textarea id="prev-mama-obs" style="min-height:66px" placeholder="Histórico familiar de ca de mama, cirurgias mamárias anteriores, uso de implantes, outras observações..."></textarea></div>
+      <div class="f"><label for="prev-mama-orient">Orientações sobre autoexame e fatores de risco realizadas?</label><select id="prev-mama-orient"><option value="">—</option><option>Sim — realizadas nesta consulta</option><option>Paciente já orientada previamente</option><option>Não realizado</option></select></div>
+      <div class="f" style="margin-top:4px"><label for="prev-mama-obs">Observações adicionais</label><textarea id="prev-mama-obs" style="min-height:66px" placeholder="Histórico familiar de ca de mama, cirurgias mamárias anteriores, uso de implantes, outras observações..."></textarea></div>
     </div>
   </div>
 
@@ -2778,7 +2778,7 @@ body.sidebar-collapsed .dev-nav{display:none}
       <div class="ct"><span class="dot db"></span>Resultado do Exame Citopatológico</div>
       <div class="g2">
         <div class="f"><label>Data do resultado</label><input type="date" id="prev-res-data"></div>
-        <div class="f"><label>Adequabilidade do material</label><select id="prev-adequab" onchange="prevAlertaAdequab()"><option value="">—</option><option value="sat">Satisfatória</option><option value="insat">Insatisfatória para avaliação oncótica</option></select></div>
+        <div class="f"><label for="prev-adequab">Adequabilidade do material</label><select id="prev-adequab" onchange="prevAlertaAdequab()"><option value="">—</option><option value="sat">Satisfatória</option><option value="insat">Insatisfatória para avaliação oncótica</option></select></div>
       </div>
       <div id="prev-insat-alert" style="display:none" class="alert alert-w">⚠ Material insatisfatório — programar nova coleta conforme motivo da inadequação e diretriz vigente.</div>
 
@@ -2835,7 +2835,7 @@ body.sidebar-collapsed .dev-nav{display:none}
         <div id="prev-atipias-alert" style="display:none" class="alert alert-e">🔴 Atipias identificadas — ver conduta recomendada abaixo conforme o protocolo fornecido.</div>
       </div>
 
-      <div class="f" style="margin-top:8px"><label>Observações do resultado / laudo</label><textarea id="prev-res-obs" style="min-height:80px" placeholder="Transcrevê resultado do laudo, número do exame, CNES do laboratório, responsável..."></textarea></div>
+      <div class="f" style="margin-top:8px"><label for="prev-res-obs">Observações do resultado / laudo</label><textarea id="prev-res-obs" style="min-height:80px" placeholder="Transcrevê resultado do laudo, número do exame, CNES do laboratório, responsável..."></textarea></div>
     </div>
 
     <div class="card">
@@ -2857,8 +2857,8 @@ body.sidebar-collapsed .dev-nav{display:none}
         </div>
         <div class="f"><label>Data de retorno / agendamento</label><input type="date" id="prev-retorno"></div>
       </div>
-      <div class="f"><label>Orientações prestadas à paciente</label><textarea id="prev-orient" style="min-height:80px" placeholder="Orientações sobre o resultado, próximos passos, importância do retorno, sinais de alerta..."></textarea></div>
-      <div class="f"><label>Conduta complementar / encaminhamentos</label><textarea id="prev-encam" style="min-height:66px" placeholder="Encaminhamento para colposcopia, mastologia, ginecologia, tratamento de IST, etc."></textarea></div>
+      <div class="f"><label for="prev-orient">Orientações prestadas à paciente</label><textarea id="prev-orient" style="min-height:80px" placeholder="Orientações sobre o resultado, próximos passos, importância do retorno, sinais de alerta..."></textarea></div>
+      <div class="f"><label for="prev-encam">Conduta complementar / encaminhamentos</label><textarea id="prev-encam" style="min-height:66px" placeholder="Encaminhamento para colposcopia, mastologia, ginecologia, tratamento de IST, etc."></textarea></div>
     </div>
   </div>
 
@@ -2874,10 +2874,10 @@ body.sidebar-collapsed .dev-nav{display:none}
         <button class="save-atend-btn" onclick="salvarAtendimento_prev()" style="display:inline-flex">💾 Salvar Atendimento</button>
       </div>
       <div class="soap-grid">
-        <div class="soap-item f"><label>S — Subjetivo</label><textarea id="prev-s" style="min-height:180px" placeholder="Queixas, motivo da consulta, histórico relatado..."></textarea></div>
-        <div class="soap-item f"><label>O — Objetivo</label><textarea id="prev-o" style="min-height:180px" placeholder="Achados do exame físico, inspeção do colo, sinais vitais..."></textarea></div>
-        <div class="soap-item f"><label>A — Avaliação</label><textarea id="prev-a-soap" style="min-height:180px" placeholder="Diagnóstico situacional, resultado do exame, hipóteses..."></textarea></div>
-        <div class="soap-item f"><label>P — Plano</label><textarea id="prev-p" style="min-height:180px" placeholder="Conduta, prescrições, encaminhamentos, retorno..."></textarea></div>
+        <div class="soap-item f"><label for="prev-s">S — Subjetivo</label><textarea id="prev-s" style="min-height:180px" placeholder="Queixas, motivo da consulta, histórico relatado..."></textarea></div>
+        <div class="soap-item f"><label for="prev-o">O — Objetivo</label><textarea id="prev-o" style="min-height:180px" placeholder="Achados do exame físico, inspeção do colo, sinais vitais..."></textarea></div>
+        <div class="soap-item f"><label for="prev-a-soap">A — Avaliação</label><textarea id="prev-a-soap" style="min-height:180px" placeholder="Diagnóstico situacional, resultado do exame, hipóteses..."></textarea></div>
+        <div class="soap-item f"><label for="prev-p">P — Plano</label><textarea id="prev-p" style="min-height:180px" placeholder="Conduta, prescrições, encaminhamentos, retorno..."></textarea></div>
       </div>
     </div>
     <div class="brow"><button class="btn btn-p" onclick="window.print()">🖨 Imprimir</button></div>
@@ -2922,14 +2922,14 @@ body.sidebar-collapsed .dev-nav{display:none}
     <div class="card">
       <div class="ct"><span class="dot da"></span>Avaliação Funcional (AVDs/AIVDs) e Quedas</div>
       <div class="g2">
-        <div class="f"><label>AVDs Básicas</label><select id="id-avd"><option value="">—</option><option>Independente</option><option>Dependência Parcial</option><option>Dependência Total</option></select></div>
-        <div class="f"><label>AIVDs</label><select id="id-aivd"><option value="">—</option><option>Independente</option><option>Dependência Parcial</option><option>Dependência Total</option></select></div>
-        <div class="f"><label>Quedas no último ano</label><select id="id-quedas"><option value="">—</option><option>Nenhuma</option><option>1 queda sem fratura</option><option>2 ou mais / com fratura</option></select></div>
-        <div class="f"><label>Mobilidade</label><select id="id-mob"><option value="">—</option><option>Deambula sem auxílio</option><option>Usa andador/bengala</option><option>Cadeirante / Acamado</option></select></div>
-        <div class="f"><label>Risco de queda</label><select id="id-risco-queda"><option value="">—</option><option>Baixo</option><option>Médio</option><option>Alto</option></select></div>
-        <div class="f"><label>Fragilidade clínica percebida</label><select id="id-fragilidade"><option value="">—</option><option>Não identificada</option><option>Em risco</option><option>Frágil</option></select></div>
-        <div class="f"><label>Dependência para atividades diárias</label><select id="id-dependencia"><option value="">—</option><option>Independente</option><option>Dependência parcial</option><option>Dependência total</option></select></div>
-        <div class="f"><label>Necessidade de visita domiciliar</label><select id="id-visita"><option value="">—</option><option>Não</option><option>Sim</option></select></div>
+        <div class="f"><label for="id-avd">AVDs Básicas</label><select id="id-avd"><option value="">—</option><option>Independente</option><option>Dependência Parcial</option><option>Dependência Total</option></select></div>
+        <div class="f"><label for="id-aivd">AIVDs</label><select id="id-aivd"><option value="">—</option><option>Independente</option><option>Dependência Parcial</option><option>Dependência Total</option></select></div>
+        <div class="f"><label for="id-quedas">Quedas no último ano</label><select id="id-quedas"><option value="">—</option><option>Nenhuma</option><option>1 queda sem fratura</option><option>2 ou mais / com fratura</option></select></div>
+        <div class="f"><label for="id-mob">Mobilidade</label><select id="id-mob"><option value="">—</option><option>Deambula sem auxílio</option><option>Usa andador/bengala</option><option>Cadeirante / Acamado</option></select></div>
+        <div class="f"><label for="id-risco-queda">Risco de queda</label><select id="id-risco-queda"><option value="">—</option><option>Baixo</option><option>Médio</option><option>Alto</option></select></div>
+        <div class="f"><label for="id-fragilidade">Fragilidade clínica percebida</label><select id="id-fragilidade"><option value="">—</option><option>Não identificada</option><option>Em risco</option><option>Frágil</option></select></div>
+        <div class="f"><label for="id-dependencia">Dependência para atividades diárias</label><select id="id-dependencia"><option value="">—</option><option>Independente</option><option>Dependência parcial</option><option>Dependência total</option></select></div>
+        <div class="f"><label for="id-visita">Necessidade de visita domiciliar</label><select id="id-visita"><option value="">—</option><option>Não</option><option>Sim</option></select></div>
       </div>
     </div>
   </div>
@@ -2939,7 +2939,7 @@ body.sidebar-collapsed .dev-nav{display:none}
       <div class="ct"><span class="dot da"></span>Cognição (MEEM) e Rastreio Breve de Humor</div>
       <div class="g2">
         <div class="f"><label>Escore MEEM (0-30)</label><input type="number" id="id-meem" placeholder="Escore"></div>
-        <div class="f"><label>Interpretação Cognitiva</label><select id="id-meem-int"><option value="">—</option><option>Normal</option><option>Suspeita de demência</option></select></div>
+        <div class="f"><label for="id-meem-int">Interpretação Cognitiva</label><select id="id-meem-int"><option value="">—</option><option>Normal</option><option>Suspeita de demência</option></select></div>
       </div>
       <div class="alert alert-i" style="margin-top:10px">Marque os sinais relatados. Este bloco é uma triagem breve e não substitui a aplicação completa e validada da GDS-15.</div>
       <div class="cklist">
@@ -2951,11 +2951,11 @@ body.sidebar-collapsed .dev-nav{display:none}
       </div>
       <div id="gds-score" style="margin-top:10px;font-weight:600;color:var(--tx2)">Rastreio breve de humor: 0 / 5 (não substitui a GDS-15)</div>
       <div class="g2" style="margin-top:12px">
-        <div class="f"><label>Cognição — síntese clínica</label><select id="id-cognicao"><option value="">—</option><option>Sem alteração percebida</option><option>Alteração leve / investigar</option><option>Comprometimento importante</option></select></div>
-        <div class="f"><label>Humor — síntese clínica</label><select id="id-humor"><option value="">—</option><option>Sem alteração percebida</option><option>Sintomas depressivos / investigar</option><option>Risco importante</option></select></div>
-        <div class="f"><label>Cuidador principal</label><input id="id-cuidador"></div>
-        <div class="f"><label>Rede de apoio</label><select id="id-rede-apoio"><option value="">—</option><option>Adequada</option><option>Limitada</option><option>Ausente</option></select></div>
-        <div class="f"><label>Risco de violência / negligência</label><select id="id-violencia"><option value="">—</option><option>Não identificado</option><option>Suspeita</option><option>Confirmado</option></select></div>
+        <div class="f"><label for="id-cognicao">Cognição — síntese clínica</label><select id="id-cognicao"><option value="">—</option><option>Sem alteração percebida</option><option>Alteração leve / investigar</option><option>Comprometimento importante</option></select></div>
+        <div class="f"><label for="id-humor">Humor — síntese clínica</label><select id="id-humor"><option value="">—</option><option>Sem alteração percebida</option><option>Sintomas depressivos / investigar</option><option>Risco importante</option></select></div>
+        <div class="f"><label for="id-cuidador">Cuidador principal</label><input id="id-cuidador"></div>
+        <div class="f"><label for="id-rede-apoio">Rede de apoio</label><select id="id-rede-apoio"><option value="">—</option><option>Adequada</option><option>Limitada</option><option>Ausente</option></select></div>
+        <div class="f"><label for="id-violencia">Risco de violência / negligência</label><select id="id-violencia"><option value="">—</option><option>Não identificado</option><option>Suspeita</option><option>Confirmado</option></select></div>
       </div>
     </div>
   </div>
@@ -2964,14 +2964,14 @@ body.sidebar-collapsed .dev-nav{display:none}
     <div class="card">
       <div class="ct"><span class="dot da"></span>Crônicas e Medicações</div>
       <div class="f"><label>Condições Prevalentes</label><input type="text" id="id-cron" placeholder="HAS, DM, ICC..."></div>
-      <div class="f"><label>Medicamentos em uso (Polifarmácia?)</label><textarea id="id-meds" placeholder="Relacionar..."></textarea></div>
+      <div class="f"><label for="id-meds">Medicamentos em uso (Polifarmácia?)</label><textarea id="id-meds" placeholder="Relacionar..."></textarea></div>
       <div class="g2">
         <div class="f"><label>Número de medicamentos contínuos</label><input type="number" min="0" id="id-num-meds" oninput="avaliarRiscoIdoso()"></div>
-        <div class="f"><label>Polifarmácia</label><select id="id-polifarmacia"><option value="">—</option><option>Não</option><option>Sim — 5 ou mais medicamentos</option></select></div>
-        <div class="f"><label>Controle da pressão arterial</label><select id="id-controle-pa"><option value="">—</option><option>Adequado</option><option>Inadequado</option><option>Sem acompanhamento recente</option></select></div>
-        <div class="f"><label>Controle glicêmico</label><select id="id-controle-glicemia"><option value="">—</option><option>Adequado</option><option>Inadequado</option><option>Sem acompanhamento recente</option><option>Não se aplica</option></select></div>
+        <div class="f"><label for="id-polifarmacia">Polifarmácia</label><select id="id-polifarmacia"><option value="">—</option><option>Não</option><option>Sim — 5 ou mais medicamentos</option></select></div>
+        <div class="f"><label for="id-controle-pa">Controle da pressão arterial</label><select id="id-controle-pa"><option value="">—</option><option>Adequado</option><option>Inadequado</option><option>Sem acompanhamento recente</option></select></div>
+        <div class="f"><label for="id-controle-glicemia">Controle glicêmico</label><select id="id-controle-glicemia"><option value="">—</option><option>Adequado</option><option>Inadequado</option><option>Sem acompanhamento recente</option><option>Não se aplica</option></select></div>
       </div>
-      <div class="f"><label>Vacinação</label><select id="id-vac"><option value="">—</option><option>Em dia</option><option>Atualizadas hoje</option></select></div>
+      <div class="f"><label for="id-vac">Vacinação</label><select id="id-vac"><option value="">—</option><option>Em dia</option><option>Atualizadas hoje</option></select></div>
     </div>
   </div>
 
@@ -2997,8 +2997,8 @@ body.sidebar-collapsed .dev-nav{display:none}
           </label>
         </div>
         <div class="g3" style="margin-bottom:8px">
-          <div class="f"><label>Alvo do ajuste</label><select id="ivcf-cal-alvo"><option value="item">Item clicado (recomendado)</option><option value="check">Todos os X</option><option value="score">Pontuação total</option><option value="geral">Tudo junto</option></select></div>
-          <div class="f"><label>Página</label><select id="ivcf-cal-page-select" onchange="atualizarCalibradorDoc('ivcf')"><option value="1">Página única</option></select></div>
+          <div class="f"><label for="ivcf-cal-alvo">Alvo do ajuste</label><select id="ivcf-cal-alvo"><option value="item">Item clicado (recomendado)</option><option value="check">Todos os X</option><option value="score">Pontuação total</option><option value="geral">Tudo junto</option></select></div>
+          <div class="f"><label for="ivcf-cal-page-select">Página</label><select id="ivcf-cal-page-select" onchange="atualizarCalibradorDoc('ivcf')"><option value="1">Página única</option></select></div>
           <div class="f"><label>Dica</label><input class="ro" readonly value="Arraste com o mouse"></div>
         </div>
         <div class="ficha-cal-stage">
@@ -3015,10 +3015,10 @@ body.sidebar-collapsed .dev-nav{display:none}
       <div class="ct"><span class="dot da"></span>Evolução — SOAP</div>
       <div class="brow" style="margin-top:0;margin-bottom:15px"><button class="btn btn-p" type="button" onclick="gerarSoapIdoso()" style="background:var(--blue);border-color:var(--blue)">Gerar evolucao</button> <button class="save-atend-btn" onclick="salvarAtendimento_id()" style="display:inline-flex">Salvar Atendimento</button></div>
       <div class="soap-grid">
-        <div class="soap-item f"><label>S</label><textarea id="id-s"></textarea></div>
-        <div class="soap-item f"><label>O</label><textarea id="id-o"></textarea></div>
-        <div class="soap-item f"><label>A</label><textarea id="id-a-soap"></textarea></div>
-        <div class="soap-item f"><label>P</label><textarea id="id-p"></textarea></div>
+        <div class="soap-item f"><label for="id-s">S</label><textarea id="id-s"></textarea></div>
+        <div class="soap-item f"><label for="id-o">O</label><textarea id="id-o"></textarea></div>
+        <div class="soap-item f"><label for="id-a-soap">A</label><textarea id="id-a-soap"></textarea></div>
+        <div class="soap-item f"><label for="id-p">P</label><textarea id="id-p"></textarea></div>
       </div>
     </div>
     <div class="brow"><button class="btn btn-p" onclick="window.print()">🖨 Imprimir</button></div>
@@ -3045,13 +3045,13 @@ body.sidebar-collapsed .dev-nav{display:none}
         <div class="f"><label>CPF</label><input inputmode="numeric" type="text" id="sm-cpf" class="paciente-cpf" placeholder="000.000.000-00"></div>
         <div class="f"><label>CNS</label><input type="text" id="sm-cns"></div>
         <div class="f"><label>Nº de Prontuário</label><input type="text" id="sm-prontuario"></div>
-        <div class="f"><label>Sexo</label><select id="sm-sexo"><option value="">—</option><option>Feminino</option><option>Masculino</option><option>Não binário / Outro</option><option>Prefere não informar</option></select></div>
-        <div class="f"><label>Etnia / Cor</label><select id="sm-raca"><option value="">—</option><option>Branca</option><option>Preta</option><option>Parda</option><option>Amarela</option><option>Indígena</option></select></div>
+        <div class="f"><label for="sm-sexo">Sexo</label><select id="sm-sexo"><option value="">—</option><option>Feminino</option><option>Masculino</option><option>Não binário / Outro</option><option>Prefere não informar</option></select></div>
+        <div class="f"><label for="sm-raca">Etnia / Cor</label><select id="sm-raca"><option value="">—</option><option>Branca</option><option>Preta</option><option>Parda</option><option>Amarela</option><option>Indígena</option></select></div>
         <div class="f"><label>Endereço / Microárea</label><input type="text" id="sm-area"></div>
         <div class="f"><label>Contato</label><input type="text" id="sm-tel"></div>
         <div class="f"><label>Responsável (se menor)</label><input type="text" id="sm-resp"></div>
         <div class="f"><label>Ocupação / Situação de trabalho</label><input type="text" id="sm-ocupacao"></div>
-        <div class="f"><label>Escolaridade</label><select id="sm-escol"><option value="">—</option><option>Analfabeto</option><option>Fund. incompleto</option><option>Fund. completo</option><option>Médio incompleto</option><option>Médio completo</option><option>Superior incompleto</option><option>Superior completo</option></select></div>
+        <div class="f"><label for="sm-escol">Escolaridade</label><select id="sm-escol"><option value="">—</option><option>Analfabeto</option><option>Fund. incompleto</option><option>Fund. completo</option><option>Médio incompleto</option><option>Médio completo</option><option>Superior incompleto</option><option>Superior completo</option></select></div>
       </div>
     </div>
 
@@ -3588,8 +3588,8 @@ body.sidebar-collapsed .dev-nav{display:none}
           </label>
         </div>
         <div class="g3" style="margin-bottom:8px">
-          <div class="f"><label>Alvo do ajuste</label><select id="ersm-cal-alvo"><option value="item">Item clicado (recomendado)</option><option value="check">Todos os X</option><option value="text">Todos os textos</option><option value="score">Pontuação / classificação</option><option value="geral">Tudo junto</option></select></div>
-          <div class="f"><label>Página</label><select id="ersm-cal-page-select" onchange="atualizarCalibradorDoc('ersm')"><option value="1">Página 1</option><option value="2">Página 2</option></select></div>
+          <div class="f"><label for="ersm-cal-alvo">Alvo do ajuste</label><select id="ersm-cal-alvo"><option value="item">Item clicado (recomendado)</option><option value="check">Todos os X</option><option value="text">Todos os textos</option><option value="score">Pontuação / classificação</option><option value="geral">Tudo junto</option></select></div>
+          <div class="f"><label for="ersm-cal-page-select">Página</label><select id="ersm-cal-page-select" onchange="atualizarCalibradorDoc('ersm')"><option value="1">Página 1</option><option value="2">Página 2</option></select></div>
           <div class="f"><label>Dica</label><input class="ro" readonly value="Arraste com o mouse"></div>
         </div>
         <div class="ficha-cal-stage">
@@ -3612,10 +3612,10 @@ body.sidebar-collapsed .dev-nav{display:none}
         <button class="save-atend-btn" onclick="salvarAtendimento_sm()" style="display:inline-flex">Salvar Atendimento</button>
       </div>
       <div class="soap-grid">
-        <div class="soap-item f"><label>S - Subjetivo</label><textarea id="sm-s" style="min-height:220px"></textarea></div>
-        <div class="soap-item f"><label>O - Objetivo</label><textarea id="sm-o" style="min-height:220px"></textarea></div>
-        <div class="soap-item f"><label>A - Avalia&ccedil;&atilde;o</label><textarea id="sm-a" style="min-height:220px"></textarea></div>
-        <div class="soap-item f"><label>P - Plano</label><textarea id="sm-p" style="min-height:220px"></textarea></div>
+        <div class="soap-item f"><label for="sm-s">S - Subjetivo</label><textarea id="sm-s" style="min-height:220px"></textarea></div>
+        <div class="soap-item f"><label for="sm-o">O - Objetivo</label><textarea id="sm-o" style="min-height:220px"></textarea></div>
+        <div class="soap-item f"><label for="sm-a">A - Avalia&ccedil;&atilde;o</label><textarea id="sm-a" style="min-height:220px"></textarea></div>
+        <div class="soap-item f"><label for="sm-p">P - Plano</label><textarea id="sm-p" style="min-height:220px"></textarea></div>
       </div>
     </div>
     <div class="brow"><button class="btn btn-p" onclick="window.print()">🖨 Imprimir</button></div>
@@ -3640,16 +3640,16 @@ body.sidebar-collapsed .dev-nav{display:none}
       <div class="ct"><span class="dot db"></span>Dados gerais da notificação</div>
       <div class="alert alert-i"><div>Agora o SINAN usa o catálogo oficial de fichas da Vigilância de Toledo. A ficha geral só deve ser usada quando o agravo não possuir modelo próprio ou quando o próprio fluxo indicar notificação individual geral.</div></div>
       <div class="g3">
-        <div class="f"><label>Nº da notificação, se fornecido</label><input id="sinan-num-notificacao" maxlength="12"></div>
-        <div class="f"><label>1. Tipo de notificação *</label><select id="sinan-tipo" class="sinan-obrigatorio" data-label="Tipo de notificação"><option value="">Selecione...</option><option value="1">1 — Negativa</option><option value="2">2 — Individual</option><option value="3">3 — Surto</option><option value="4">4 — Inquérito Tracoma</option></select></div>
-        <div class="f"><label>2. Agravo / doença *</label><input id="sinan-agravo" class="sinan-obrigatorio" data-label="Agravo ou doença" list="sinan-agravos" placeholder="Digite ou selecione o agravo" oninput="sinanSincronizarAgravo()"></div>
-        <div class="f span2"><label>Ficha oficial do agravo</label><select id="sinan-ficha-modelo" onchange="sinanAplicarFichaSelecionada()"><option value="">Selecione o agravo para localizar a ficha...</option></select></div>
+        <div class="f"><label for="sinan-num-notificacao">Nº da notificação, se fornecido</label><input id="sinan-num-notificacao" maxlength="12"></div>
+        <div class="f"><label for="sinan-tipo">1. Tipo de notificação *</label><select id="sinan-tipo" class="sinan-obrigatorio" data-label="Tipo de notificação"><option value="">Selecione...</option><option value="1">1 — Negativa</option><option value="2">2 — Individual</option><option value="3">3 — Surto</option><option value="4">4 — Inquérito Tracoma</option></select></div>
+        <div class="f"><label for="sinan-agravo">2. Agravo / doença *</label><input id="sinan-agravo" class="sinan-obrigatorio" data-label="Agravo ou doença" list="sinan-agravos" placeholder="Digite ou selecione o agravo" oninput="sinanSincronizarAgravo()"></div>
+        <div class="f span2"><label for="sinan-ficha-modelo">Ficha oficial do agravo</label><select id="sinan-ficha-modelo" onchange="sinanAplicarFichaSelecionada()"><option value="">Selecione o agravo para localizar a ficha...</option></select></div>
         <div class="f"><label>3. Data da notificação *</label><input type="date" id="sinan-data-notif" class="sinan-obrigatorio" data-label="Data da notificação"></div>
-        <div class="f"><label>4. UF de notificação *</label><input id="sinan-uf-notif" class="sinan-obrigatorio" data-label="UF de notificação" maxlength="2" value="PR"></div>
-        <div class="f"><label>5. Município de notificação *</label><input id="sinan-mun-notif" class="sinan-obrigatorio" data-label="Município de notificação" value="Toledo"></div>
-        <div class="f"><label>Código IBGE do município</label><input id="sinan-mun-notif-cod" maxlength="7" value="4127700"></div>
-        <div class="f"><label>6. Unidade notificadora *</label><input id="sinan-unidade" class="sinan-obrigatorio" data-label="Unidade notificadora" placeholder="Unidade de Saúde ou outra fonte"></div>
-        <div class="f"><label>Código CNES da unidade</label><input id="sinan-unidade-cod" maxlength="7"></div>
+        <div class="f"><label for="sinan-uf-notif">4. UF de notificação *</label><input id="sinan-uf-notif" class="sinan-obrigatorio" data-label="UF de notificação" maxlength="2" value="PR"></div>
+        <div class="f"><label for="sinan-mun-notif">5. Município de notificação *</label><input id="sinan-mun-notif" class="sinan-obrigatorio" data-label="Município de notificação" value="Toledo"></div>
+        <div class="f"><label for="sinan-mun-notif-cod">Código IBGE do município</label><input id="sinan-mun-notif-cod" maxlength="7" value="4127700"></div>
+        <div class="f"><label for="sinan-unidade">6. Unidade notificadora *</label><input id="sinan-unidade" class="sinan-obrigatorio" data-label="Unidade notificadora" placeholder="Unidade de Saúde ou outra fonte"></div>
+        <div class="f"><label for="sinan-unidade-cod">Código CNES da unidade</label><input id="sinan-unidade-cod" maxlength="7"></div>
         <div class="f"><label>7. Data dos primeiros sintomas *</label><input type="date" id="sinan-primeiros-sintomas" class="sinan-obrigatorio" data-label="Data dos primeiros sintomas"></div>
       </div>
       <div id="sinan-ficha-status" style="margin-top:12px"></div>
@@ -3658,9 +3658,9 @@ body.sidebar-collapsed .dev-nav{display:none}
       <div class="ct"><span class="dot da"></span>Notificação de surto, quando aplicável</div>
       <div class="g3">
         <div class="f"><label>17. Data dos sintomas do 1º caso suspeito</label><input type="date" id="sinan-surto-data"></div>
-        <div class="f"><label>18. Nº de casos suspeitos / expostos</label><input id="sinan-surto-casos" type="number" min="0"></div>
-        <div class="f"><label>19. Local inicial de ocorrência</label><select id="sinan-surto-local"><option value="">Não se aplica</option><option value="1">1 — Residência</option><option value="2">2 — Hospital / Unidade de Saúde</option><option value="3">3 — Creche / Escola</option><option value="4">4 — Asilo</option><option value="5">5 — Outras instituições</option><option value="6">6 — Restaurante / Padaria</option><option value="7">7 — Eventos</option><option value="8">8 — Casos dispersos no bairro</option><option value="9">9 — Casos dispersos pelo município</option><option value="10">10 — Mais de um município</option><option value="11">11 — Outros</option></select></div>
-        <div class="f span3"><label>Especificar outro local</label><input id="sinan-surto-outro"></div>
+        <div class="f"><label for="sinan-surto-casos">18. Nº de casos suspeitos / expostos</label><input id="sinan-surto-casos" type="number" min="0"></div>
+        <div class="f"><label for="sinan-surto-local">19. Local inicial de ocorrência</label><select id="sinan-surto-local"><option value="">Não se aplica</option><option value="1">1 — Residência</option><option value="2">2 — Hospital / Unidade de Saúde</option><option value="3">3 — Creche / Escola</option><option value="4">4 — Asilo</option><option value="5">5 — Outras instituições</option><option value="6">6 — Restaurante / Padaria</option><option value="7">7 — Eventos</option><option value="8">8 — Casos dispersos no bairro</option><option value="9">9 — Casos dispersos pelo município</option><option value="10">10 — Mais de um município</option><option value="11">11 — Outros</option></select></div>
+        <div class="f span3"><label for="sinan-surto-outro">Especificar outro local</label><input id="sinan-surto-outro"></div>
       </div>
     </div>
   </div>
@@ -3670,17 +3670,17 @@ body.sidebar-collapsed .dev-nav{display:none}
       <div class="ct"><span class="dot dg"></span>Identificação do paciente</div>
       <div class="brow"><button class="btn btn-s" type="button" onclick="sinanBuscarPaciente()">Buscar paciente por CPF</button><span id="sinan-paciente-status" style="font-size:12px;color:var(--tx3)"></span></div>
       <div class="g3">
-        <div class="f span2"><label>8. Nome do paciente *</label><input id="sinan-nome" class="sinan-obrigatorio" data-label="Nome do paciente"></div>
-        <div class="f"><label>CPF para localizar cadastro</label><input id="sinan-cpf" inputmode="numeric" class="paciente-cpf" placeholder="000.000.000-00"></div>
+        <div class="f span2"><label for="sinan-nome">8. Nome do paciente *</label><input id="sinan-nome" class="sinan-obrigatorio" data-label="Nome do paciente"></div>
+        <div class="f"><label for="sinan-cpf">CPF para localizar cadastro</label><input id="sinan-cpf" inputmode="numeric" class="paciente-cpf" placeholder="000.000.000-00"></div>
         <div class="f"><label>9. Data de nascimento</label><input type="date" id="sinan-nasc" oninput="sinanAtualizarIdade()"></div>
-        <div class="f"><label>10. Idade *</label><input id="sinan-idade" class="sinan-obrigatorio" data-label="Idade"></div>
-        <div class="f"><label>Unidade da idade *</label><select id="sinan-idade-unidade" class="sinan-obrigatorio" data-label="Unidade da idade"><option value="4">4 — Ano</option><option value="3">3 — Mês</option><option value="2">2 — Dia</option><option value="1">1 — Hora</option></select></div>
-        <div class="f"><label>11. Sexo *</label><select id="sinan-sexo" class="sinan-obrigatorio" data-label="Sexo"><option value="">Selecione...</option><option value="M">M — Masculino</option><option value="F">F — Feminino</option><option value="I">I — Ignorado</option></select></div>
-        <div class="f"><label>12. Gestante *</label><select id="sinan-gestante" class="sinan-obrigatorio" data-label="Gestante"><option value="">Selecione...</option><option value="1">1 — 1º trimestre</option><option value="2">2 — 2º trimestre</option><option value="3">3 — 3º trimestre</option><option value="4">4 — Idade gestacional ignorada</option><option value="5">5 — Não</option><option value="6">6 — Não se aplica</option><option value="9">9 — Ignorado</option></select></div>
-        <div class="f"><label>13. Raça / cor *</label><select id="sinan-raca" class="sinan-obrigatorio" data-label="Raça ou cor"><option value="">Selecione...</option><option value="1">1 — Branca</option><option value="2">2 — Preta</option><option value="3">3 — Amarela</option><option value="4">4 — Parda</option><option value="5">5 — Indígena</option><option value="9">9 — Ignorado</option></select></div>
-        <div class="f"><label>14. Escolaridade *</label><select id="sinan-escolaridade" class="sinan-obrigatorio" data-label="Escolaridade"><option value="">Selecione...</option><option value="0">0 — Analfabeto</option><option value="1">1 — 1ª a 4ª série incompleta</option><option value="2">2 — 4ª série completa</option><option value="3">3 — 5ª a 8ª série incompleta</option><option value="4">4 — Ensino fundamental completo</option><option value="5">5 — Ensino médio incompleto</option><option value="6">6 — Ensino médio completo</option><option value="7">7 — Educação superior incompleta</option><option value="8">8 — Educação superior completa</option><option value="9">9 — Ignorado</option><option value="10">10 — Não se aplica</option></select></div>
-        <div class="f span2"><label>15. Número do Cartão SUS</label><input id="sinan-cns" inputmode="numeric" maxlength="15"></div>
-        <div class="f span3"><label>16. Nome da mãe *</label><input id="sinan-mae" class="sinan-obrigatorio" data-label="Nome da mãe"></div>
+        <div class="f"><label for="sinan-idade">10. Idade *</label><input id="sinan-idade" class="sinan-obrigatorio" data-label="Idade"></div>
+        <div class="f"><label for="sinan-idade-unidade">Unidade da idade *</label><select id="sinan-idade-unidade" class="sinan-obrigatorio" data-label="Unidade da idade"><option value="4">4 — Ano</option><option value="3">3 — Mês</option><option value="2">2 — Dia</option><option value="1">1 — Hora</option></select></div>
+        <div class="f"><label for="sinan-sexo">11. Sexo *</label><select id="sinan-sexo" class="sinan-obrigatorio" data-label="Sexo"><option value="">Selecione...</option><option value="M">M — Masculino</option><option value="F">F — Feminino</option><option value="I">I — Ignorado</option></select></div>
+        <div class="f"><label for="sinan-gestante">12. Gestante *</label><select id="sinan-gestante" class="sinan-obrigatorio" data-label="Gestante"><option value="">Selecione...</option><option value="1">1 — 1º trimestre</option><option value="2">2 — 2º trimestre</option><option value="3">3 — 3º trimestre</option><option value="4">4 — Idade gestacional ignorada</option><option value="5">5 — Não</option><option value="6">6 — Não se aplica</option><option value="9">9 — Ignorado</option></select></div>
+        <div class="f"><label for="sinan-raca">13. Raça / cor *</label><select id="sinan-raca" class="sinan-obrigatorio" data-label="Raça ou cor"><option value="">Selecione...</option><option value="1">1 — Branca</option><option value="2">2 — Preta</option><option value="3">3 — Amarela</option><option value="4">4 — Parda</option><option value="5">5 — Indígena</option><option value="9">9 — Ignorado</option></select></div>
+        <div class="f"><label for="sinan-escolaridade">14. Escolaridade *</label><select id="sinan-escolaridade" class="sinan-obrigatorio" data-label="Escolaridade"><option value="">Selecione...</option><option value="0">0 — Analfabeto</option><option value="1">1 — 1ª a 4ª série incompleta</option><option value="2">2 — 4ª série completa</option><option value="3">3 — 5ª a 8ª série incompleta</option><option value="4">4 — Ensino fundamental completo</option><option value="5">5 — Ensino médio incompleto</option><option value="6">6 — Ensino médio completo</option><option value="7">7 — Educação superior incompleta</option><option value="8">8 — Educação superior completa</option><option value="9">9 — Ignorado</option><option value="10">10 — Não se aplica</option></select></div>
+        <div class="f span2"><label for="sinan-cns">15. Número do Cartão SUS</label><input id="sinan-cns" inputmode="numeric" maxlength="15"></div>
+        <div class="f span3"><label for="sinan-mae">16. Nome da mãe *</label><input id="sinan-mae" class="sinan-obrigatorio" data-label="Nome da mãe"></div>
       </div>
     </div>
   </div>
@@ -3689,30 +3689,30 @@ body.sidebar-collapsed .dev-nav{display:none}
     <div class="card">
       <div class="ct"><span class="dot da"></span>Dados de residência</div>
       <div class="g3">
-        <div class="f"><label>20. UF *</label><input id="sinan-uf-res" maxlength="2" value="PR" class="sinan-obrigatorio" data-label="UF de residência"></div>
-        <div class="f"><label>21. Município de residência *</label><input id="sinan-mun-res" class="sinan-obrigatorio" data-label="Município de residência" value="Toledo"></div>
-        <div class="f"><label>Código IBGE</label><input id="sinan-mun-res-cod" maxlength="7" value="4127700"></div>
-        <div class="f"><label>22. Distrito</label><input id="sinan-distrito"></div>
-        <div class="f"><label>23. Bairro *</label><input id="sinan-bairro" class="sinan-obrigatorio" data-label="Bairro"></div>
-        <div class="f"><label>30. CEP</label><input id="sinan-cep" inputmode="numeric" maxlength="9" onblur="sinanBuscarCep()"></div>
-        <div class="f span2"><label>24. Logradouro *</label><input id="sinan-logradouro" class="sinan-obrigatorio" data-label="Logradouro"></div>
-        <div class="f"><label>Código do logradouro</label><input id="sinan-logradouro-cod"></div>
-        <div class="f"><label>25. Número</label><input id="sinan-numero"></div>
-        <div class="f span2"><label>26. Complemento</label><input id="sinan-complemento"></div>
-        <div class="f"><label>27. Geo campo 1</label><input id="sinan-geo1"></div>
-        <div class="f"><label>28. Geo campo 2</label><input id="sinan-geo2"></div>
-        <div class="f"><label>29. Ponto de referência</label><input id="sinan-referencia"></div>
-        <div class="f"><label>31. Telefone com DDD</label><input id="sinan-telefone" type="tel" inputmode="tel"></div>
-        <div class="f"><label>32. Zona *</label><select id="sinan-zona" class="sinan-obrigatorio" data-label="Zona de residência"><option value="">Selecione...</option><option value="1">1 — Urbana</option><option value="2">2 — Rural</option><option value="3">3 — Periurbana</option><option value="9">9 — Ignorado</option></select></div>
-        <div class="f"><label>33. País, se residente fora do Brasil</label><input id="sinan-pais"></div>
+        <div class="f"><label for="sinan-uf-res">20. UF *</label><input id="sinan-uf-res" maxlength="2" value="PR" class="sinan-obrigatorio" data-label="UF de residência"></div>
+        <div class="f"><label for="sinan-mun-res">21. Município de residência *</label><input id="sinan-mun-res" class="sinan-obrigatorio" data-label="Município de residência" value="Toledo"></div>
+        <div class="f"><label for="sinan-mun-res-cod">Código IBGE</label><input id="sinan-mun-res-cod" maxlength="7" value="4127700"></div>
+        <div class="f"><label for="sinan-distrito">22. Distrito</label><input id="sinan-distrito"></div>
+        <div class="f"><label for="sinan-bairro">23. Bairro *</label><input id="sinan-bairro" class="sinan-obrigatorio" data-label="Bairro"></div>
+        <div class="f"><label for="sinan-cep">30. CEP</label><input id="sinan-cep" inputmode="numeric" maxlength="9" onblur="sinanBuscarCep()"></div>
+        <div class="f span2"><label for="sinan-logradouro">24. Logradouro *</label><input id="sinan-logradouro" class="sinan-obrigatorio" data-label="Logradouro"></div>
+        <div class="f"><label for="sinan-logradouro-cod">Código do logradouro</label><input id="sinan-logradouro-cod"></div>
+        <div class="f"><label for="sinan-numero">25. Número</label><input id="sinan-numero"></div>
+        <div class="f span2"><label for="sinan-complemento">26. Complemento</label><input id="sinan-complemento"></div>
+        <div class="f"><label for="sinan-geo1">27. Geo campo 1</label><input id="sinan-geo1"></div>
+        <div class="f"><label for="sinan-geo2">28. Geo campo 2</label><input id="sinan-geo2"></div>
+        <div class="f"><label for="sinan-referencia">29. Ponto de referência</label><input id="sinan-referencia"></div>
+        <div class="f"><label for="sinan-telefone">31. Telefone com DDD</label><input id="sinan-telefone" type="tel" inputmode="tel"></div>
+        <div class="f"><label for="sinan-zona">32. Zona *</label><select id="sinan-zona" class="sinan-obrigatorio" data-label="Zona de residência"><option value="">Selecione...</option><option value="1">1 — Urbana</option><option value="2">2 — Rural</option><option value="3">3 — Periurbana</option><option value="9">9 — Ignorado</option></select></div>
+        <div class="f"><label for="sinan-pais">33. País, se residente fora do Brasil</label><input id="sinan-pais"></div>
       </div>
     </div>
     <div class="card">
       <div class="ct"><span class="dot dg"></span>Notificante</div>
       <div class="g3">
-        <div class="f"><label>Município / Unidade de Saúde *</label><input id="sinan-notificante-unidade" class="sinan-obrigatorio" data-label="Unidade do notificante"></div>
-        <div class="f"><label>Nome do notificante *</label><input id="sinan-notificante-nome" class="sinan-obrigatorio" data-label="Nome do notificante"></div>
-        <div class="f"><label>Função *</label><input id="sinan-notificante-funcao" class="sinan-obrigatorio" data-label="Função do notificante"></div>
+        <div class="f"><label for="sinan-notificante-unidade">Município / Unidade de Saúde *</label><input id="sinan-notificante-unidade" class="sinan-obrigatorio" data-label="Unidade do notificante"></div>
+        <div class="f"><label for="sinan-notificante-nome">Nome do notificante *</label><input id="sinan-notificante-nome" class="sinan-obrigatorio" data-label="Nome do notificante"></div>
+        <div class="f"><label for="sinan-notificante-funcao">Função *</label><input id="sinan-notificante-funcao" class="sinan-obrigatorio" data-label="Função do notificante"></div>
       </div>
     </div>
   </div>
@@ -3722,11 +3722,11 @@ body.sidebar-collapsed .dev-nav{display:none}
       <div class="ct"><span class="dot db"></span>Ficha específica do agravo</div>
       <div id="sinan-ficha-especifica-painel" class="alert alert-i"><div>Selecione o agravo na primeira aba para carregar a ficha oficial correta e os campos complementares esperados.</div></div>
       <div class="g3" id="sinan-campos-especificos">
-        <div class="f span3"><label>Resumo clínico / suspeita que motivou a notificação</label><textarea id="sinan-esp-resumo" placeholder="Ex.: sinais, sintomas, exposição, resultado de teste, vínculo epidemiológico..."></textarea></div>
+        <div class="f span3"><label for="sinan-esp-resumo">Resumo clínico / suspeita que motivou a notificação</label><textarea id="sinan-esp-resumo" placeholder="Ex.: sinais, sintomas, exposição, resultado de teste, vínculo epidemiológico..."></textarea></div>
         <div class="f"><label>Data da investigação</label><input type="date" id="sinan-esp-data-investigacao"></div>
-        <div class="f"><label>Classificação inicial</label><select id="sinan-esp-classificacao"><option value="">—</option><option>Suspeito</option><option>Confirmado</option><option>Descartado</option><option>Em investigação</option></select></div>
-        <div class="f"><label>Local provável de infecção/exposição</label><input id="sinan-esp-local-provavel"></div>
-        <div class="f span3"><label>Campos específicos da ficha selecionada</label><textarea id="sinan-esp-campos" placeholder="O sistema preenche os dados gerais. Use este espaço para registrar campos próprios do agravo até a ficha específica estar calibrada para sobreimpressão."></textarea></div>
+        <div class="f"><label for="sinan-esp-classificacao">Classificação inicial</label><select id="sinan-esp-classificacao"><option value="">—</option><option>Suspeito</option><option>Confirmado</option><option>Descartado</option><option>Em investigação</option></select></div>
+        <div class="f"><label for="sinan-esp-local-provavel">Local provável de infecção/exposição</label><input id="sinan-esp-local-provavel"></div>
+        <div class="f span3"><label for="sinan-esp-campos">Campos específicos da ficha selecionada</label><textarea id="sinan-esp-campos" placeholder="O sistema preenche os dados gerais. Use este espaço para registrar campos próprios do agravo até a ficha específica estar calibrada para sobreimpressão."></textarea></div>
       </div>
       <div class="brow">
         <button class="btn btn-p" type="button" onclick="gerarFichaSinanEspecifica()">Gerar ficha específica preenchida</button>
@@ -3739,35 +3739,35 @@ body.sidebar-collapsed .dev-nav{display:none}
       <div class="g3">
         <div class="f"><label>01. Data da coleta da 1ª amostra da sorologia</label><input type="date" id="sinan-comp-sorologia"></div>
         <div class="f"><label>02. Data da coleta de outra amostra</label><input type="date" id="sinan-comp-outra-data"></div>
-        <div class="f"><label>03. Especificar tipo de exame</label><input id="sinan-comp-exame"></div>
-        <div class="f"><label>04. Óbito?</label><select id="sinan-comp-obito"><option value="">—</option><option value="1">1 — Sim</option><option value="2">2 — Não</option><option value="9">9 — Ignorado</option></select></div>
-        <div class="f"><label>05. Contato com caso semelhante?</label><select id="sinan-comp-contato"><option value="">—</option><option value="1">1 — Sim</option><option value="2">2 — Não</option><option value="9">9 — Ignorado</option></select></div>
-        <div class="f"><label>06. Presença de exantema?</label><select id="sinan-comp-exantema"><option value="">—</option><option value="1">1 — Sim</option><option value="2">2 — Não</option><option value="9">9 — Ignorado</option></select></div>
+        <div class="f"><label for="sinan-comp-exame">03. Especificar tipo de exame</label><input id="sinan-comp-exame"></div>
+        <div class="f"><label for="sinan-comp-obito">04. Óbito?</label><select id="sinan-comp-obito"><option value="">—</option><option value="1">1 — Sim</option><option value="2">2 — Não</option><option value="9">9 — Ignorado</option></select></div>
+        <div class="f"><label for="sinan-comp-contato">05. Contato com caso semelhante?</label><select id="sinan-comp-contato"><option value="">—</option><option value="1">1 — Sim</option><option value="2">2 — Não</option><option value="9">9 — Ignorado</option></select></div>
+        <div class="f"><label for="sinan-comp-exantema">06. Presença de exantema?</label><select id="sinan-comp-exantema"><option value="">—</option><option value="1">1 — Sim</option><option value="2">2 — Não</option><option value="9">9 — Ignorado</option></select></div>
         <div class="f"><label>07. Data do início do exantema</label><input type="date" id="sinan-comp-exantema-data"></div>
-        <div class="f"><label>08. Petéquias ou sufusões hemorrágicas?</label><select id="sinan-comp-petequias"><option value="">—</option><option value="1">1 — Sim</option><option value="2">2 — Não</option><option value="9">9 — Ignorado</option></select></div>
-        <div class="f"><label>09. Foi realizado líquor?</label><select id="sinan-comp-liquor"><option value="">—</option><option value="1">1 — Sim</option><option value="2">2 — Não</option><option value="9">9 — Ignorado</option></select></div>
-        <div class="f span2"><label>10. Resultado da bacterioscopia</label><input id="sinan-comp-bacterioscopia"></div>
-        <div class="f"><label>11. Tomou vacina contra o agravo?</label><select id="sinan-comp-vacina"><option value="">—</option><option value="1">1 — Sim</option><option value="2">2 — Não</option><option value="9">9 — Ignorado</option></select></div>
+        <div class="f"><label for="sinan-comp-petequias">08. Petéquias ou sufusões hemorrágicas?</label><select id="sinan-comp-petequias"><option value="">—</option><option value="1">1 — Sim</option><option value="2">2 — Não</option><option value="9">9 — Ignorado</option></select></div>
+        <div class="f"><label for="sinan-comp-liquor">09. Foi realizado líquor?</label><select id="sinan-comp-liquor"><option value="">—</option><option value="1">1 — Sim</option><option value="2">2 — Não</option><option value="9">9 — Ignorado</option></select></div>
+        <div class="f span2"><label for="sinan-comp-bacterioscopia">10. Resultado da bacterioscopia</label><input id="sinan-comp-bacterioscopia"></div>
+        <div class="f"><label for="sinan-comp-vacina">11. Tomou vacina contra o agravo?</label><select id="sinan-comp-vacina"><option value="">—</option><option value="1">1 — Sim</option><option value="2">2 — Não</option><option value="9">9 — Ignorado</option></select></div>
         <div class="f"><label>12. Data da última dose</label><input type="date" id="sinan-comp-vacina-data"></div>
-        <div class="f"><label>13. Ocorreu hospitalização?</label><select id="sinan-comp-hospitalizacao"><option value="">—</option><option value="1">1 — Sim</option><option value="2">2 — Não</option><option value="9">9 — Ignorado</option></select></div>
+        <div class="f"><label for="sinan-comp-hospitalizacao">13. Ocorreu hospitalização?</label><select id="sinan-comp-hospitalizacao"><option value="">—</option><option value="1">1 — Sim</option><option value="2">2 — Não</option><option value="9">9 — Ignorado</option></select></div>
         <div class="f"><label>14. Data da hospitalização</label><input type="date" id="sinan-comp-hosp-data"></div>
-        <div class="f"><label>15. UF do hospital</label><input id="sinan-comp-hosp-uf" maxlength="2"></div>
-        <div class="f"><label>16. Município do hospital</label><input id="sinan-comp-hosp-mun"></div>
-        <div class="f"><label>Código IBGE do município</label><input id="sinan-comp-hosp-mun-cod"></div>
-        <div class="f span2"><label>17. Nome do hospital</label><input id="sinan-comp-hosp-nome"></div>
-        <div class="f"><label>Código do hospital</label><input id="sinan-comp-hosp-cod"></div>
+        <div class="f"><label for="sinan-comp-hosp-uf">15. UF do hospital</label><input id="sinan-comp-hosp-uf" maxlength="2"></div>
+        <div class="f"><label for="sinan-comp-hosp-mun">16. Município do hospital</label><input id="sinan-comp-hosp-mun"></div>
+        <div class="f"><label for="sinan-comp-hosp-mun-cod">Código IBGE do município</label><input id="sinan-comp-hosp-mun-cod"></div>
+        <div class="f span2"><label for="sinan-comp-hosp-nome">17. Nome do hospital</label><input id="sinan-comp-hosp-nome"></div>
+        <div class="f"><label for="sinan-comp-hosp-cod">Código do hospital</label><input id="sinan-comp-hosp-cod"></div>
       </div>
     </div>
     <div class="card">
       <div class="ct"><span class="dot da"></span>Surto e local provável de infecção</div>
       <div class="g2">
-        <div class="f"><label>18. 1ª hipótese diagnóstica — CID-10</label><input id="sinan-comp-hip1"></div>
-        <div class="f"><label>18. 2ª hipótese diagnóstica — CID-10</label><input id="sinan-comp-hip2"></div>
-        <div class="f"><label>19. País</label><input id="sinan-comp-inf-pais"></div>
-        <div class="f"><label>19. UF</label><input id="sinan-comp-inf-uf" maxlength="2"></div>
-        <div class="f"><label>19. Município</label><input id="sinan-comp-inf-mun"></div>
-        <div class="f"><label>19. Distrito</label><input id="sinan-comp-inf-distrito"></div>
-        <div class="f"><label>19. Bairro</label><input id="sinan-comp-inf-bairro"></div>
+        <div class="f"><label for="sinan-comp-hip1">18. 1ª hipótese diagnóstica — CID-10</label><input id="sinan-comp-hip1"></div>
+        <div class="f"><label for="sinan-comp-hip2">18. 2ª hipótese diagnóstica — CID-10</label><input id="sinan-comp-hip2"></div>
+        <div class="f"><label for="sinan-comp-inf-pais">19. País</label><input id="sinan-comp-inf-pais"></div>
+        <div class="f"><label for="sinan-comp-inf-uf">19. UF</label><input id="sinan-comp-inf-uf" maxlength="2"></div>
+        <div class="f"><label for="sinan-comp-inf-mun">19. Município</label><input id="sinan-comp-inf-mun"></div>
+        <div class="f"><label for="sinan-comp-inf-distrito">19. Distrito</label><input id="sinan-comp-inf-distrito"></div>
+        <div class="f"><label for="sinan-comp-inf-bairro">19. Bairro</label><input id="sinan-comp-inf-bairro"></div>
       </div>
     </div>
   </div>
@@ -3796,11 +3796,11 @@ body.sidebar-collapsed .dev-nav{display:none}
   <div class="sh"><div class="sh-ic ic-r">⌕</div><div><div class="sh-t">Busca Ativa ESF</div><div class="sh-s">Alertas automáticos para acompanhamento longitudinal</div></div></div>
   <div class="card">
     <div class="gestao-filtros">
-      <div class="f"><label>Buscar paciente</label><input id="ba-busca" oninput="buscaGestaoDebounce(renderBuscaAtiva)" placeholder="Nome, CPF, CNS ou microárea"></div>
-      <div class="f"><label>Linha de cuidado</label><select id="ba-linha" onchange="renderBuscaAtiva()"><option value="">Todas</option><option>Pré-natal</option><option>Puericultura</option><option>Preventivo</option><option>Idoso</option><option>Saúde Mental</option><option>Condição crônica</option></select></div>
-      <div class="f"><label>Prioridade</label><select id="ba-prioridade" onchange="renderBuscaAtiva()"><option value="">Todas</option><option value="alta">Alta</option><option value="media">Média</option><option value="baixa">Baixa</option></select></div>
-      <div class="f"><label>Microárea</label><select id="ba-microarea" onchange="renderBuscaAtiva()"><option value="">Todas</option></select></div>
-      <div class="f"><label>Situação</label><select id="ba-status" onchange="renderBuscaAtiva()"><option value="">Pendentes e concluídos</option><option value="pendente">Pendentes</option><option value="concluido">Concluídos</option></select></div>
+      <div class="f"><label for="ba-busca">Buscar paciente</label><input id="ba-busca" oninput="buscaGestaoDebounce(renderBuscaAtiva)" placeholder="Nome, CPF, CNS ou microárea"></div>
+      <div class="f"><label for="ba-linha">Linha de cuidado</label><select id="ba-linha" onchange="renderBuscaAtiva()"><option value="">Todas</option><option>Pré-natal</option><option>Puericultura</option><option>Preventivo</option><option>Idoso</option><option>Saúde Mental</option><option>Condição crônica</option></select></div>
+      <div class="f"><label for="ba-prioridade">Prioridade</label><select id="ba-prioridade" onchange="renderBuscaAtiva()"><option value="">Todas</option><option value="alta">Alta</option><option value="media">Média</option><option value="baixa">Baixa</option></select></div>
+      <div class="f"><label for="ba-microarea">Microárea</label><select id="ba-microarea" onchange="renderBuscaAtiva()"><option value="">Todas</option></select></div>
+      <div class="f"><label for="ba-status">Situação</label><select id="ba-status" onchange="renderBuscaAtiva()"><option value="">Pendentes e concluídos</option><option value="pendente">Pendentes</option><option value="concluido">Concluídos</option></select></div>
     </div>
     <div class="gestao-kpis" id="ba-kpis"></div>
     <div class="brow"><button class="btn btn-s" onclick="renderBuscaAtiva()">Atualizar alertas</button><button class="btn btn-s" onclick="exportarBuscaAtiva()">Exportar CSV</button></div>
@@ -3813,10 +3813,10 @@ body.sidebar-collapsed .dev-nav{display:none}
   <div class="card">
     <div class="gestao-filtros">
       <div class="f"><label>Mês</label><input type="month" id="ind-mes" onchange="renderIndicadores()"></div>
-      <div class="f"><label>Microárea</label><select id="ind-microarea" onchange="renderIndicadores()"><option value="">Todas</option></select></div>
-      <div class="f"><label>Profissional</label><select id="ind-profissional" onchange="renderIndicadores()"><option value="">Todos</option></select></div>
-      <div class="f"><label>Linha de cuidado</label><select id="ind-linha" onchange="renderIndicadores()"><option value="">Todas</option><option>Abertura PN</option><option>Consulta PN</option><option>Puericultura</option><option>Preventivo</option><option>Idoso</option><option>Saúde Mental</option><option>Visita Domiciliar</option></select></div>
-      <div class="f"><label>Risco / prioridade</label><select id="ind-risco" onchange="renderIndicadores()"><option value="">Todos</option><option value="alta">Alta</option><option value="media">Média</option><option value="baixa">Baixa</option></select></div>
+      <div class="f"><label for="ind-microarea">Microárea</label><select id="ind-microarea" onchange="renderIndicadores()"><option value="">Todas</option></select></div>
+      <div class="f"><label for="ind-profissional">Profissional</label><select id="ind-profissional" onchange="renderIndicadores()"><option value="">Todos</option></select></div>
+      <div class="f"><label for="ind-linha">Linha de cuidado</label><select id="ind-linha" onchange="renderIndicadores()"><option value="">Todas</option><option>Abertura PN</option><option>Consulta PN</option><option>Puericultura</option><option>Preventivo</option><option>Idoso</option><option>Saúde Mental</option><option>Visita Domiciliar</option></select></div>
+      <div class="f"><label for="ind-risco">Risco / prioridade</label><select id="ind-risco" onchange="renderIndicadores()"><option value="">Todos</option><option value="alta">Alta</option><option value="media">Média</option><option value="baixa">Baixa</option></select></div>
     </div>
     <div class="gestao-kpis" id="ind-kpis"></div>
     <div class="gestao-bars"><div class="gestao-chart"><h4>Consultas realizadas por mês</h4><div id="ind-chart-meses"></div></div><div class="gestao-chart"><h4>Atendimentos por linha de cuidado</h4><div id="ind-chart-linhas"></div></div></div>
@@ -3827,10 +3827,10 @@ body.sidebar-collapsed .dev-nav{display:none}
   <div class="sh"><div class="sh-ic ic-g">⌂</div><div><div class="sh-t">Território e ACS</div><div class="sh-s">Microáreas, famílias, vulnerabilidades e visitas domiciliares</div></div></div>
   <div class="card">
     <div class="gestao-filtros">
-      <div class="f"><label>Busca geral</label><input id="terr-busca" oninput="buscaGestaoDebounce(renderTerritorio)" placeholder="Nome, CPF, CNS, família ou microárea"></div>
-      <div class="f"><label>Microárea</label><select id="terr-filtro-microarea" onchange="renderTerritorio()"><option value="">Todas</option></select></div>
-      <div class="f"><label>ACS</label><select id="terr-filtro-acs" onchange="renderTerritorio()"><option value="">Todos</option></select></div>
-      <div class="f"><label>Grupo</label><select id="terr-filtro-grupo" onchange="renderTerritorio()"><option value="">Todos</option><option value="visita">Precisa de visita</option><option value="vulneravel">Família vulnerável</option><option value="faltoso">Faltoso</option><option value="sem_acomp">Sem acompanhamento</option></select></div>
+      <div class="f"><label for="terr-busca">Busca geral</label><input id="terr-busca" oninput="buscaGestaoDebounce(renderTerritorio)" placeholder="Nome, CPF, CNS, família ou microárea"></div>
+      <div class="f"><label for="terr-filtro-microarea">Microárea</label><select id="terr-filtro-microarea" onchange="renderTerritorio()"><option value="">Todas</option></select></div>
+      <div class="f"><label for="terr-filtro-acs">ACS</label><select id="terr-filtro-acs" onchange="renderTerritorio()"><option value="">Todos</option></select></div>
+      <div class="f"><label for="terr-filtro-grupo">Grupo</label><select id="terr-filtro-grupo" onchange="renderTerritorio()"><option value="">Todos</option><option value="visita">Precisa de visita</option><option value="vulneravel">Família vulnerável</option><option value="faltoso">Faltoso</option><option value="sem_acomp">Sem acompanhamento</option></select></div>
     </div>
     <div class="gestao-kpis" id="terr-kpis"></div>
     <div id="terr-resumo-microareas" style="margin-bottom:14px"></div>
@@ -3839,22 +3839,22 @@ body.sidebar-collapsed .dev-nav{display:none}
       <div>
         <div class="ct"><span class="dot dg"></span>Cadastro territorial do paciente</div>
         <div class="g2">
-          <div class="f required-mark"><label>CPF</label><input id="terr-cpf" inputmode="numeric" class="paciente-cpf" onblur="carregarCadastroTerritorial()"></div>
-          <div class="f"><label>Nome</label><input id="terr-nome" readonly class="ro"></div>
-          <div class="f"><label>Microárea</label><input id="terr-microarea"></div>
-          <div class="f"><label>ACS responsável</label><input id="terr-acs"></div>
-          <div class="f"><label>Família</label><input id="terr-familia"></div>
-          <div class="f"><label>Responsável familiar</label><input id="terr-responsavel-familiar"></div>
-          <div class="f span2"><label>Endereço completo</label><input id="terr-endereco"></div>
-          <div class="f"><label>Telefone</label><input id="terr-telefone" type="tel" inputmode="tel" class="telefone-mask"></div>
-          <div class="f"><label>Condição de moradia</label><select id="terr-moradia"><option value="">—</option><option>Adequada</option><option>Parcialmente adequada</option><option>Inadequada</option><option>Situação de rua</option></select></div>
-          <div class="f"><label>Rede de apoio</label><select id="terr-rede-apoio"><option value="">—</option><option>Adequada</option><option>Limitada</option><option>Ausente</option></select></div>
-          <div class="f"><label>Vulnerabilidade social</label><select id="terr-vulnerabilidade"><option value="">—</option><option>Não identificada</option><option>Baixa</option><option>Média</option><option>Alta</option></select></div>
-          <div class="f"><label>Benefício social</label><input id="terr-beneficio"></div>
-          <div class="f"><label>Dificuldade de acesso à UBS</label><select id="terr-acesso"><option value="">—</option><option>Não</option><option>Sim</option></select></div>
-          <div class="f"><label>Necessidade de visita domiciliar</label><select id="terr-visita"><option value="">—</option><option>Não</option><option>Sim</option></select></div>
-          <div class="f"><label>Paciente faltoso</label><select id="terr-faltoso"><option value="">—</option><option>Não</option><option>Sim</option></select></div>
-          <div class="f"><label>Condição crônica</label><input id="terr-cronicas" placeholder="HAS, DM, DPOC..."></div>
+          <div class="f required-mark"><label for="terr-cpf">CPF</label><input id="terr-cpf" inputmode="numeric" class="paciente-cpf" onblur="carregarCadastroTerritorial()"></div>
+          <div class="f"><label for="terr-nome">Nome</label><input id="terr-nome" readonly class="ro"></div>
+          <div class="f"><label for="terr-microarea">Microárea</label><input id="terr-microarea"></div>
+          <div class="f"><label for="terr-acs">ACS responsável</label><input id="terr-acs"></div>
+          <div class="f"><label for="terr-familia">Família</label><input id="terr-familia"></div>
+          <div class="f"><label for="terr-responsavel-familiar">Responsável familiar</label><input id="terr-responsavel-familiar"></div>
+          <div class="f span2"><label for="terr-endereco">Endereço completo</label><input id="terr-endereco"></div>
+          <div class="f"><label for="terr-telefone">Telefone</label><input id="terr-telefone" type="tel" inputmode="tel" class="telefone-mask"></div>
+          <div class="f"><label for="terr-moradia">Condição de moradia</label><select id="terr-moradia"><option value="">—</option><option>Adequada</option><option>Parcialmente adequada</option><option>Inadequada</option><option>Situação de rua</option></select></div>
+          <div class="f"><label for="terr-rede-apoio">Rede de apoio</label><select id="terr-rede-apoio"><option value="">—</option><option>Adequada</option><option>Limitada</option><option>Ausente</option></select></div>
+          <div class="f"><label for="terr-vulnerabilidade">Vulnerabilidade social</label><select id="terr-vulnerabilidade"><option value="">—</option><option>Não identificada</option><option>Baixa</option><option>Média</option><option>Alta</option></select></div>
+          <div class="f"><label for="terr-beneficio">Benefício social</label><input id="terr-beneficio"></div>
+          <div class="f"><label for="terr-acesso">Dificuldade de acesso à UBS</label><select id="terr-acesso"><option value="">—</option><option>Não</option><option>Sim</option></select></div>
+          <div class="f"><label for="terr-visita">Necessidade de visita domiciliar</label><select id="terr-visita"><option value="">—</option><option>Não</option><option>Sim</option></select></div>
+          <div class="f"><label for="terr-faltoso">Paciente faltoso</label><select id="terr-faltoso"><option value="">—</option><option>Não</option><option>Sim</option></select></div>
+          <div class="f"><label for="terr-cronicas">Condição crônica</label><input id="terr-cronicas" placeholder="HAS, DM, DPOC..."></div>
         </div>
         <div class="brow"><button class="btn btn-p" onclick="salvarCadastroTerritorial()">Salvar cadastro territorial</button><button class="btn btn-s" onclick="limparCadastroTerritorial()">Limpar</button></div>
       </div>
@@ -3866,9 +3866,9 @@ body.sidebar-collapsed .dev-nav{display:none}
   <div class="sh"><div class="sh-ic ic-a">▧</div><div><div class="sh-t">Relatórios</div><div class="sh-s">Produção assistencial, território, linhas de cuidado e gestão</div></div></div>
   <div class="card">
     <div class="gestao-filtros">
-      <div class="f"><label>Tipo de relatório</label><select id="rel-tipo" onchange="renderRelatorio()"><option value="mensal">Mensal da ESF</option><option value="microarea">Por microárea</option><option value="gestantes">Gestantes</option><option value="puericultura">Puericultura</option><option value="preventivos">Preventivos</option><option value="idosos">Idosos de risco</option><option value="mental">Saúde mental</option><option value="busca">Busca ativa</option><option value="anonimo">Anonimizado para gestão</option></select></div>
+      <div class="f"><label for="rel-tipo">Tipo de relatório</label><select id="rel-tipo" onchange="renderRelatorio()"><option value="mensal">Mensal da ESF</option><option value="microarea">Por microárea</option><option value="gestantes">Gestantes</option><option value="puericultura">Puericultura</option><option value="preventivos">Preventivos</option><option value="idosos">Idosos de risco</option><option value="mental">Saúde mental</option><option value="busca">Busca ativa</option><option value="anonimo">Anonimizado para gestão</option></select></div>
       <div class="f"><label>Mês</label><input type="month" id="rel-mes" onchange="renderRelatorio()"></div>
-      <div class="f"><label>Microárea</label><select id="rel-microarea" onchange="renderRelatorio()"><option value="">Todas</option></select></div>
+      <div class="f"><label for="rel-microarea">Microárea</label><select id="rel-microarea" onchange="renderRelatorio()"><option value="">Todas</option></select></div>
     </div>
     <div class="brow"><button class="btn btn-s" onclick="renderRelatorio()">Atualizar</button><button class="btn btn-s" onclick="exportarRelatorioCSV()">Exportar CSV</button><button class="btn btn-p" onclick="window.print()">Imprimir</button></div>
     <div id="rel-conteudo"></div>
@@ -3946,12 +3946,12 @@ body.sidebar-collapsed .dev-nav{display:none}
   <div class="card">
     <div class="ct"><span class="dot da"></span>Novo relato</div>
     <div class="g3">
-      <div class="f"><label>Tipo</label><select id="rep-categoria"><option>Erro</option><option>Sugestão</option><option>Alteração de protocolo</option><option>Outro</option></select></div>
-      <div class="f"><label>Área do sistema</label><select id="rep-modulo"><option>Geral</option><option>Abertura PN</option><option>Consulta PN</option><option>Puericultura</option><option>Preventivo / Ficha Rosa</option><option>Idoso</option><option>Saúde Mental / ERSM</option><option>SINAN</option><option>Pacientes / Histórico</option></select></div>
-      <div class="f"><label>Prioridade percebida</label><select id="rep-prioridade"><option>Normal</option><option>Importante</option><option>Urgente</option></select></div>
+      <div class="f"><label for="rep-categoria">Tipo</label><select id="rep-categoria"><option>Erro</option><option>Sugestão</option><option>Alteração de protocolo</option><option>Outro</option></select></div>
+      <div class="f"><label for="rep-modulo">Área do sistema</label><select id="rep-modulo"><option>Geral</option><option>Abertura PN</option><option>Consulta PN</option><option>Puericultura</option><option>Preventivo / Ficha Rosa</option><option>Idoso</option><option>Saúde Mental / ERSM</option><option>SINAN</option><option>Pacientes / Histórico</option></select></div>
+      <div class="f"><label for="rep-prioridade">Prioridade percebida</label><select id="rep-prioridade"><option>Normal</option><option>Importante</option><option>Urgente</option></select></div>
     </div>
-    <div class="f"><label>Título curto</label><input id="rep-titulo" placeholder="Ex: Ficha Rosa não abriu"></div>
-    <div class="f"><label>Descreva o que aconteceu ou o que deveria mudar</label><textarea id="rep-descricao" style="min-height:130px" placeholder="Conte os passos, o resultado esperado e qualquer referência útil..."></textarea></div>
+    <div class="f"><label for="rep-titulo">Título curto</label><input id="rep-titulo" placeholder="Ex: Ficha Rosa não abriu"></div>
+    <div class="f"><label for="rep-descricao">Descreva o que aconteceu ou o que deveria mudar</label><textarea id="rep-descricao" style="min-height:130px" placeholder="Conte os passos, o resultado esperado e qualquer referência útil..."></textarea></div>
     <div class="brow"><button class="btn btn-p" onclick="salvarReporte()">Enviar relato</button></div>
   </div>
   <div class="card" id="reportes-gestao" style="display:none">
@@ -4183,13 +4183,13 @@ function sinanRenderCamposEspecificos(f){
   if(!f){alvo.innerHTML='<div class="f span3"><label>Selecione uma ficha</label><textarea placeholder="Escolha o agravo na primeira aba para abrir as perguntas oficiais da ficha."></textarea></div>';return}
   const campos=SINAN_FICHA_CAMPOS_ESPECIFICOS[f.id]||[];
   alvo.innerHTML=[
-    `<div class="f span3"><label>Resumo clínico / suspeita que motivou a notificação</label><textarea id="sinan-esp-resumo" placeholder="Ex.: sinais, sintomas, exposição, resultado de teste, vínculo epidemiológico..."></textarea></div>`,
+    `<div class="f span3"><label for="sinan-esp-resumo">Resumo clínico / suspeita que motivou a notificação</label><textarea id="sinan-esp-resumo" placeholder="Ex.: sinais, sintomas, exposição, resultado de teste, vínculo epidemiológico..."></textarea></div>`,
     `<div class="f"><label>Data da investigação</label><input type="date" id="sinan-esp-data-investigacao"></div>`,
-    `<div class="f"><label>Classificação inicial</label><select id="sinan-esp-classificacao"><option value="">—</option><option>Suspeito</option><option>Confirmado</option><option>Descartado</option><option>Em investigação</option></select></div>`,
-    `<div class="f"><label>Local provável de infecção/exposição</label><input id="sinan-esp-local-provavel"></div>`,
+    `<div class="f"><label for="sinan-esp-classificacao">Classificação inicial</label><select id="sinan-esp-classificacao"><option value="">—</option><option>Suspeito</option><option>Confirmado</option><option>Descartado</option><option>Em investigação</option></select></div>`,
+    `<div class="f"><label for="sinan-esp-local-provavel">Local provável de infecção/exposição</label><input id="sinan-esp-local-provavel"></div>`,
     campos.length?`<div class="f span3"><label>Perguntas oficiais desta ficha</label><div class="alert alert-i"><div>Preencha os campos que aparecem na ficha selecionada. Campos vazios serão avisados na conferência, mas não bloqueiam a geração.</div></div></div>`:'',
     ...campos.map(c=>sinanCampoEspecificoHtml(f,c)),
-    `<div class="f span3"><label>Outros campos/observações da ficha</label><textarea id="sinan-esp-campos" placeholder="Use se houver detalhe adicional que não esteja nos campos acima."></textarea></div>`
+    `<div class="f span3"><label for="sinan-esp-campos">Outros campos/observações da ficha</label><textarea id="sinan-esp-campos" placeholder="Use se houver detalhe adicional que não esteja nos campos acima."></textarea></div>`
   ].filter(Boolean).join('');
   sinanAutoPreencherCamposEspecificos(f);
 }
@@ -9479,7 +9479,7 @@ document.querySelectorAll('[onclick*="go("]').forEach(btn => {
       </select>
     </div>
     <div class="edit-field"><label>Data / Hora</label><input type="datetime-local" id="edit-data"></div>
-    <div class="edit-field"><label>Evolução SOAP</label><textarea id="edit-soap"></textarea></div>
+    <div class="edit-field"><label for="edit-soap">Evolução SOAP</label><textarea id="edit-soap"></textarea></div>
     <div class="edit-field"><label>Profissional</label><input type="text" id="edit-prof" placeholder="Nome · Cargo"></div>
     <div class="edit-field"><label>Unidade</label><input type="text" id="edit-unidade" placeholder="ESF..."></div>
     <div class="edit-actions">
@@ -9548,8 +9548,8 @@ document.querySelectorAll('[onclick*="go("]').forEach(btn => {
             <div class="appearance-field"><label>Cor de destaque</label><input type="color" id="theme-accent" value="#3a1d68" oninput="atualizarAparenciaAdmin()"></div>
             <div class="appearance-field"><label>Fundo do sistema</label><input type="color" id="theme-bg" value="#f1f0eb" oninput="atualizarAparenciaAdmin()"></div>
             <div class="appearance-field"><label>Superfícies</label><input type="color" id="theme-surface" value="#ffffff" oninput="atualizarAparenciaAdmin()"></div>
-            <div class="appearance-field"><label>Fonte</label><select id="theme-font" onchange="atualizarAparenciaAdmin()"><option value="DM Sans">DM Sans</option><option value="Inter">Inter / sistema</option><option value="Arial">Arial</option><option value="Georgia">Georgia</option></select></div>
-            <div class="appearance-field"><label>Estilo dos cantos</label><select id="theme-corner-style" onchange="atualizarAparenciaAdmin()"><option value="8">Discreto</option><option value="10">Equilibrado</option><option value="12">Confortável</option><option value="14">Suave</option><option value="20">Arredondado</option></select></div>
+            <div class="appearance-field"><label for="theme-font">Fonte</label><select id="theme-font" onchange="atualizarAparenciaAdmin()"><option value="DM Sans">DM Sans</option><option value="Inter">Inter / sistema</option><option value="Arial">Arial</option><option value="Georgia">Georgia</option></select></div>
+            <div class="appearance-field"><label for="theme-corner-style">Estilo dos cantos</label><select id="theme-corner-style" onchange="atualizarAparenciaAdmin()"><option value="8">Discreto</option><option value="10">Equilibrado</option><option value="12">Confortável</option><option value="14">Suave</option><option value="20">Arredondado</option></select></div>
             <div class="appearance-field"><div class="appearance-range-head"><label>Transparência dos botões</label><span id="theme-opacity-out">64%</span></div><input type="range" id="theme-opacity" min="30" max="95" value="64" oninput="atualizarAparenciaAdmin()"></div>
             <div class="appearance-field"><div class="appearance-range-head"><label>Desfoque do vidro</label><span id="theme-blur-out">20px</span></div><input type="range" id="theme-blur" min="0" max="32" value="20" oninput="atualizarAparenciaAdmin()"></div>
             <div class="appearance-field"><div class="appearance-range-head"><label>Arredondamento</label><span id="theme-radius-out">18px</span></div><input type="range" id="theme-radius" min="8" max="26" value="18" oninput="atualizarAparenciaAdmin()"></div>
@@ -10896,7 +10896,7 @@ function fluxoDemanda(q){
 }
 function demandaPainelHtml(p){
   if(p!=='ger')return'';
-  return`<div class="demand-toolbar"><button type="button" class="btn btn-s" onclick="novoAcolhimentoDemanda()">Novo acolhimento</button><button type="button" class="btn btn-s" onclick="filtrarQueixasDemanda('todas')">Todas</button>${Object.keys(DEMANDA_CATEGORIAS).map(k=>`<button type="button" class="btn btn-s demand-filter" onclick="filtrarQueixasDemanda('${k}')">${k}</button>`).join('')}<button type="button" class="btn btn-ai" onclick="gerarRelatorioTestesDemanda()">Testar fluxos</button></div><div class="module-form-grid"><div class="f"><label>Modo de atendimento</label><select id="ger-modo" onchange="atualizarModoDemanda()"><option>Modo rápido</option><option>Modo completo</option><option>Modo auditoria</option></select></div><div class="f required-mark"><label>Horário de chegada</label><input id="ger-chegada" type="time" value="${new Date().toTimeString().slice(0,5)}"></div><div class="f required-mark"><label>Classificação Toledo 2026</label><select id="ger-classificacao-cor" onchange="avaliarDemandaEspontanea()"><option value="">— automática ou manual —</option><option>Vermelho</option><option>Amarelo</option><option>Verde</option><option>Azul</option></select></div><div class="f span2 required-mark"><label>Critério que justificou a classificação</label><textarea id="ger-criterio-classificacao" placeholder="O sistema sugere, mas revise e complete o critério clínico."></textarea></div><div class="f span2"><label>Justificativa técnica se rebaixar a cor sugerida</label><textarea id="ger-justificativa-rebaixamento" placeholder="Obrigatória se a cor manual for menor que a cor sugerida pelo sistema."></textarea></div><div class="f"><label>Responsável pela reavaliação</label><input id="ger-responsavel-reavaliacao" placeholder="Ex: enfermeiro/profissional responsável"></div><div class="f"><label>Monitoramento / medidas de conforto</label><input id="ger-monitoramento" placeholder="Ex: PA seriada, repouso, hidratação, observação..."></div><div class="f span2 required-mark"><label>Desfecho do acolhimento</label><select id="ger-desfecho" onchange="avaliarDemandaEspontanea()"><option value="">— selecionar —</option>${DEMANDA_DESFECHOS.map(x=>`<option>${x}</option>`).join('')}</select></div></div><div id="ger-demanda-painel" class="priority-panel"><strong>Classificação não definida</strong><small>Selecione uma queixa e sinais de alerta.</small></div><div id="ger-fluxo-queixa"></div><div id="ger-integracoes" class="alert alert-i">Integrações serão sugeridas conforme a queixa selecionada.</div><div id="ger-auditoria-demanda"></div><div id="ger-relatorio-testes"></div>`;
+  return`<div class="demand-toolbar"><button type="button" class="btn btn-s" onclick="novoAcolhimentoDemanda()">Novo acolhimento</button><button type="button" class="btn btn-s" onclick="filtrarQueixasDemanda('todas')">Todas</button>${Object.keys(DEMANDA_CATEGORIAS).map(k=>`<button type="button" class="btn btn-s demand-filter" onclick="filtrarQueixasDemanda('${k}')">${k}</button>`).join('')}<button type="button" class="btn btn-ai" onclick="gerarRelatorioTestesDemanda()">Testar fluxos</button></div><div class="module-form-grid"><div class="f"><label for="ger-modo">Modo de atendimento</label><select id="ger-modo" onchange="atualizarModoDemanda()"><option>Modo rápido</option><option>Modo completo</option><option>Modo auditoria</option></select></div><div class="f required-mark"><label for="ger-chegada">Horário de chegada</label><input id="ger-chegada" type="time" value="${new Date().toTimeString().slice(0,5)}"></div><div class="f required-mark"><label for="ger-classificacao-cor">Classificação Toledo 2026</label><select id="ger-classificacao-cor" onchange="avaliarDemandaEspontanea()"><option value="">— automática ou manual —</option><option>Vermelho</option><option>Amarelo</option><option>Verde</option><option>Azul</option></select></div><div class="f span2 required-mark"><label for="ger-criterio-classificacao">Critério que justificou a classificação</label><textarea id="ger-criterio-classificacao" placeholder="O sistema sugere, mas revise e complete o critério clínico."></textarea></div><div class="f span2"><label for="ger-justificativa-rebaixamento">Justificativa técnica se rebaixar a cor sugerida</label><textarea id="ger-justificativa-rebaixamento" placeholder="Obrigatória se a cor manual for menor que a cor sugerida pelo sistema."></textarea></div><div class="f"><label for="ger-responsavel-reavaliacao">Responsável pela reavaliação</label><input id="ger-responsavel-reavaliacao" placeholder="Ex: enfermeiro/profissional responsável"></div><div class="f"><label for="ger-monitoramento">Monitoramento / medidas de conforto</label><input id="ger-monitoramento" placeholder="Ex: PA seriada, repouso, hidratação, observação..."></div><div class="f span2 required-mark"><label for="ger-desfecho">Desfecho do acolhimento</label><select id="ger-desfecho" onchange="avaliarDemandaEspontanea()"><option value="">— selecionar —</option>${DEMANDA_DESFECHOS.map(x=>`<option>${x}</option>`).join('')}</select></div></div><div id="ger-demanda-painel" class="priority-panel"><strong>Classificação não definida</strong><small>Selecione uma queixa e sinais de alerta.</small></div><div id="ger-fluxo-queixa"></div><div id="ger-integracoes" class="alert alert-i">Integrações serão sugeridas conforme a queixa selecionada.</div><div id="ger-auditoria-demanda"></div><div id="ger-relatorio-testes"></div>`;
 }
 function filtrarQueixasDemanda(cat){
   const permitidas=cat==='todas'?null:new Set(DEMANDA_CATEGORIAS[cat]||[]);
@@ -11187,9 +11187,9 @@ function visitaDomiciliarExtraHtml(p){
     ${vdStep('Etapa 5 — Alimentação e sondas','abre alerta se houver risco de broncoaspiração',`<div class="module-form-grid">${vdField('alimentacao-via','Via de alimentação','select',['Oral','SNE / SNG','Gastrostomia','Jejunostomia','Parenteral','Mista'])}${vdField('sonda-tipo','Tipo de sonda/dispositivo alimentar','select',['Não utiliza / não avaliado','SNE','SNG','Gastrostomia','Jejunostomia','Outra'])}${vdField('sonda-data','Data de instalação/troca','date')}${vdField('sonda-formula','Fórmula/dieta utilizada')}${vdField('sonda-volume','Volume por horário')}${vdField('sonda-horarios','Horários / frequência')}${vdField('sonda-agua','Água antes/depois / lavagem')}${vdField('sonda-metodo','Método','select',['Bolus','Gravitacional','Bomba','Outro','Não avaliado'])}${vdField('sonda-cabeceira','Posição durante administração','select',['Cabeceira elevada','Cabeceira inadequada','Não avaliado'])}${vdField('sonda-quem','Quem administra')}${vdField('sonda-prescricao','Prescrição nutricional conferida','select',['Sim','Não','Não disponível'])}${vdField('sonda-vomitos','Náuseas/vômitos','select',['Não','Sim'])}${vdField('sonda-distensao','Distensão abdominal','select',['Não','Sim'])}${vdField('sonda-diarreia','Diarreia','select',['Não','Sim'])}${vdField('sonda-constipacao','Constipação','select',['Não','Sim'])}${vdField('sonda-engasgo','Tosse/engasgo durante dieta','select',['Não','Sim'])}${vdField('sonda-obstrucao','Obstrução/intercorrência','select',['Não','Sim'])}${vdField('sonda-pele','Pele ao redor da GTT/JTT','textarea')}${vdField('sonda-dieta','Complemento livre sobre alimentação/sonda','textarea')}</div>`,'dispositivo,acamado,idoso-fragil')}
     ${vdStep('Etapa 6 — Cuidador e família','sobrecarga e rede de apoio',`<div class="module-form-grid">${vdField('cuidador-sozinho','Cuidador cuida sozinho','select',['Não','Sim','Parcial'])}${vdField('cuidador-medicacao','Sabe administrar medicações','select',['Sim','Não','Parcial'])}${vdField('cuidador-dispositivo','Sabe manejar sonda/dispositivo','select',['Sim','Não','Parcial','Não se aplica'])}${vdField('cuidador-higiene','Sabe realizar higiene e mudança de decúbito','select',['Sim','Não','Parcial'])}${vdField('cuidador-sobrecarga-sel','Demonstra cansaço/sobrecarga','select',['Não','Sim'])}${vdField('rede-apoio','Há rede de apoio','select',['Sim','Não','Parcial'])}${vdField('cuidador-avaliacao','Avaliação do cuidador: compreensão, sobrecarga, rede de apoio','textarea')}${vdField('cuidador-plano','Plano para cuidador/família','textarea')}</div><label class="soft-check"><input type="checkbox" id="vd-cuidador-sobrecarga" onchange="classificarRiscoVD();validarVisitaDomiciliar()"> Cuidador sobrecarregado</label>`,'cuidador,acamado,idoso-fragil,social')}
     ${vdStep('Etapa 7 — Ambiente domiciliar','risco ambiental e social separado do risco clínico',`<div class="module-form-grid">${vdField('condicao-moradia','Condição de moradia','select',['Própria','Alugada','Cedida','Situação instável','Outra'])}${vdField('saneamento','Saneamento básico','select',['Adequado','Inadequado','Ausente'])}${vdField('agua','Água tratada','select',['Sim','Não','Parcial'])}${vdField('energia','Energia elétrica','select',['Sim','Não'])}${vdField('acesso-domicilio','Acesso ao domicílio','select',['Adequado','Difícil','Muito difícil'])}${vdField('cama-adequada','Cama adequada','select',['Sim','Não','Parcial'])}${vdField('banheiro-acessivel','Banheiro acessível','select',['Sim','Não','Parcial'])}${vdField('riscos-queda-ambiente','Tapetes/fios/piso/escadas/iluminação','textarea')}${vdField('armazenamento','Armazenamento de medicações/dieta','textarea')}${vdField('acessibilidade','Acessibilidade do domicílio','textarea')}${vdField('escadas','Escadas/barreiras arquitetônicas','select',['Não','Sim'])}${vdField('risco-ambiental','Risco ambiental / higiene / ventilação / animais','textarea')}${vdField('beneficio-social','Benefício/contexto social','textarea')}${vdField('mora-sozinho','Mora sozinho','select',['Não','Sim'])}${vdField('moradores','Número de moradores','number')}</div>`,'social,acamado,idoso-fragil,busca-ativa')}
-    ${vdStep('Etapa 8 — Insumos','faltas essenciais viram pendência',`${vdInsumosTable()}<div class="module-form-grid" style="margin-top:10px"><div class="f"><label>Suficiência geral de insumos</label><select id="vd-insumos-suficientes" onchange="classificarRiscoVD();validarVisitaDomiciliar()"><option value="">Não avaliado</option><option>Suficientes</option><option>Parcial</option><option>Insuficientes</option></select></div><div class="f span2"><label>Solicitações/observações de insumos</label><textarea id="vd-insumos-obs" oninput="validarVisitaDomiciliar()"></textarea></div></div>`)}
+    ${vdStep('Etapa 8 — Insumos','faltas essenciais viram pendência',`${vdInsumosTable()}<div class="module-form-grid" style="margin-top:10px"><div class="f"><label for="vd-insumos-suficientes">Suficiência geral de insumos</label><select id="vd-insumos-suficientes" onchange="classificarRiscoVD();validarVisitaDomiciliar()"><option value="">Não avaliado</option><option>Suficientes</option><option>Parcial</option><option>Insuficientes</option></select></div><div class="f span2"><label for="vd-insumos-obs">Solicitações/observações de insumos</label><textarea id="vd-insumos-obs" oninput="validarVisitaDomiciliar()"></textarea></div></div>`)}
     ${vdStep('Escalas condicionais','aplique só quando fizer sentido',`${escalasVDHtml(p)}<div class="alert alert-i"><strong>Uso sugerido:</strong> acamado/restrito ao leito → Braden + Katz/Barthel; risco de queda → Morse; baixa ingesta/perda de peso → MNA; cuidador sobrecarregado → checklist familiar.</div>`)}
-    ${vdStep('Risco, pendências e plano','revise antes de salvar ou gerar PDF',`<div class="vd-risk-grid" id="vd-risco-dimensoes"></div><div id="vd-risco-painel" class="priority-panel rotina" style="margin-top:10px"><strong>Risco não calculado</strong><small>Preencha a avaliação.</small></div><div class="module-form-grid" style="margin-top:10px"><div class="f"><label>Risco revisado pelo profissional</label><select id="vd-risco-manual" onchange="classificarRiscoVD();validarVisitaDomiciliar()"><option value="">Usar risco automático</option><option>Baixo</option><option>Moderado</option><option>Alto</option></select></div><div class="f span2"><label>Justificativa se ajustar o risco</label><textarea id="vd-risco-justificativa"></textarea></div><div class="f"><label>Modelo SOAP</label><select id="vd-soap-modelo"><option>SOAP completo</option><option>SOAP resumido PEC/e-SUS</option></select></div>${vdField('conduta','Condutas de enfermagem realizadas / pactuadas','textarea')}${vdField('orientacoes','Orientações realizadas','textarea')}${vdField('retorno','Retorno / próxima visita','text')}${vdField('sinais-alerta-orientados','Sinais de alerta orientados','textarea')}</div><div id="vd-pendencias-painel" style="margin-top:10px"></div><div class="pre-save-review"><input type="checkbox" id="vd-revisao-final"><div><span>Declaro que revisei as informações e validei a conduta registrada.</span><small>Permite salvar com pendências leves; pendências críticas exigem conduta/justificativa registrada.</small></div></div>`)}
+    ${vdStep('Risco, pendências e plano','revise antes de salvar ou gerar PDF',`<div class="vd-risk-grid" id="vd-risco-dimensoes"></div><div id="vd-risco-painel" class="priority-panel rotina" style="margin-top:10px"><strong>Risco não calculado</strong><small>Preencha a avaliação.</small></div><div class="module-form-grid" style="margin-top:10px"><div class="f"><label for="vd-risco-manual">Risco revisado pelo profissional</label><select id="vd-risco-manual" onchange="classificarRiscoVD();validarVisitaDomiciliar()"><option value="">Usar risco automático</option><option>Baixo</option><option>Moderado</option><option>Alto</option></select></div><div class="f span2"><label for="vd-risco-justificativa">Justificativa se ajustar o risco</label><textarea id="vd-risco-justificativa"></textarea></div><div class="f"><label for="vd-soap-modelo">Modelo SOAP</label><select id="vd-soap-modelo"><option>SOAP completo</option><option>SOAP resumido PEC/e-SUS</option></select></div>${vdField('conduta','Condutas de enfermagem realizadas / pactuadas','textarea')}${vdField('orientacoes','Orientações realizadas','textarea')}${vdField('retorno','Retorno / próxima visita','text')}${vdField('sinais-alerta-orientados','Sinais de alerta orientados','textarea')}</div><div id="vd-pendencias-painel" style="margin-top:10px"></div><div class="pre-save-review"><input type="checkbox" id="vd-revisao-final"><div><span>Declaro que revisei as informações e validei a conduta registrada.</span><small>Permite salvar com pendências leves; pendências críticas exigem conduta/justificativa registrada.</small></div></div>`)}
     ${vdStep('Painel de acompanhamento de acamados','resumo local a partir do histórico salvo',`<div class="brow"><button type="button" class="btn btn-s" onclick="atualizarPainelAcamadosVD()">Atualizar painel</button><button type="button" class="btn btn-s" onclick="filtrarPainelVD('alto')">Alto risco</button><button type="button" class="btn btn-s" onclick="filtrarPainelVD('acamado')">Acamados</button><button type="button" class="btn btn-s" onclick="filtrarPainelVD('lpp')">Com LPP</button><button type="button" class="btn btn-s" onclick="filtrarPainelVD('insumo')">Falta de insumos</button></div><div id="vd-painel-acamados" class="vd-panel-table"><table><tbody><tr><td>Nenhum dado carregado ainda.</td></tr></tbody></table></div>`)}
   </div>`}
 if(typeof MODULOS_CLINICOS!=='undefined'&&MODULOS_CLINICOS.vd)MODULOS_CLINICOS.vd.extraHtml=visitaDomiciliarExtraHtml;
@@ -11303,7 +11303,7 @@ function filtrarPainelVD(f){atualizarPainelAcamadosVD(f)}
 function atualizarSoftChecks(root=document){root.querySelectorAll?.('label.soft-check').forEach(label=>{const input=label.querySelector('input[type="checkbox"]');if(input)label.classList.toggle('selected',!!input.checked)})}
 document.addEventListener('change',e=>{const label=e.target?.closest?.('label.soft-check');if(label&&e.target.matches?.('input[type="checkbox"]'))label.classList.toggle('selected',e.target.checked);if(e.target?.id?.startsWith('vd-')||e.target?.classList?.contains('vd-device'))setTimeout(()=>{classificarRiscoVD();validarVisitaDomiciliar();atualizarSoftChecks(document.getElementById('pg-visita-domiciliar')||document)},0)});
 document.addEventListener('input',e=>{if(e.target?.id?.startsWith('vd-')||String(e.target?.className||'').includes('vd-'))clearTimeout(window._vdTimer),window._vdTimer=setTimeout(()=>{classificarRiscoVD();validarVisitaDomiciliar();atualizarSoftChecks(document.getElementById('pg-visita-domiciliar')||document)},180)});
-function testesRapidosISTHtml(){return`<div class="card"><div class="ct"><span class="dot dr"></span>Testes rápidos e laudos padronizados</div><div class="alert alert-i"><strong>Modelo completo:</strong> gestante utiliza DUO HIV/Sífilis como TR1; não gestante utiliza testes separados. Registre TR2, marca/lote, coleta, executor e parceiro(a) quando presente.</div><div class="g3"><div class="f"><label>Condição da pessoa principal</label><select id="ist-tr-condicao" onchange="atualizarTestesRapidosIST()"><option value="naogestante">Não gestante — testes separados</option><option value="gestante">Gestante — HIV/Sífilis DUO</option></select></div><div class="f"><label>Parceiro(a) presente?</label><select id="ist-tr-parceiro-presente" onchange="atualizarTestesRapidosIST()"><option value="nao">Não</option><option value="sim">Sim — gerar laudo separado</option></select></div><div class="f"><label>Município</label><input id="ist-tr-municipio" value="Toledo"></div></div><div class="tr-person"><div class="tr-person-head">Pessoa principal — dados puxados da identificação</div><div class="tr-person-body"><div class="g4"><div class="f"><label>Nome</label><input id="ist-tr-p-nome" class="ro" readonly></div><div class="f"><label>Prontuário</label><input id="ist-tr-p-pront"></div><div class="f"><label>Data de nascimento</label><input id="ist-tr-p-nasc" class="ro" readonly></div><div class="f"><label>Sexo</label><select id="ist-tr-p-sexo"><option>Feminino</option><option>Masculino</option></select></div></div><div id="ist-tr-p-testes"></div><div class="g3" style="margin-top:10px"><div class="f"><label>Data da coleta</label><input type="date" id="ist-tr-p-data"></div><div class="f"><label>Horário da leitura</label><input type="time" id="ist-tr-p-hora"></div><div class="f"><label>Executor / COREN</label><input id="ist-tr-p-executor"></div></div><div class="brow"><button class="btn btn-p" type="button" onclick="gerarLaudoISTStandalone('p')">Gerar laudo da pessoa principal</button></div></div></div><div class="tr-person" id="ist-tr-parceiro-box" style="display:none"><div class="tr-person-head">Parceiro(a) — laudo individual</div><div class="tr-person-body"><div class="g4"><div class="f"><label>Nome completo</label><input id="ist-tr-c-nome"></div><div class="f"><label>Prontuário</label><input id="ist-tr-c-pront"></div><div class="f"><label>Data de nascimento</label><input type="date" id="ist-tr-c-nasc"></div><div class="f"><label>Sexo</label><select id="ist-tr-c-sexo"><option>Masculino</option><option>Feminino</option></select></div></div><div id="ist-tr-c-testes"></div><div class="g3" style="margin-top:10px"><div class="f"><label>Data da coleta</label><input type="date" id="ist-tr-c-data"></div><div class="f"><label>Horário da leitura</label><input type="time" id="ist-tr-c-hora"></div><div class="f"><label>Executor / COREN</label><input id="ist-tr-c-executor"></div></div><div class="brow"><button class="btn btn-p" type="button" onclick="gerarLaudoISTStandalone('c')">Gerar laudo do parceiro(a)</button></div></div></div><div id="ist-tr-alertas"></div><div class="brow"><button class="btn btn-ai" type="button" onclick="gerarTodosLaudosIST()">Gerar todos os laudos necessários</button></div></div>`}
+function testesRapidosISTHtml(){return`<div class="card"><div class="ct"><span class="dot dr"></span>Testes rápidos e laudos padronizados</div><div class="alert alert-i"><strong>Modelo completo:</strong> gestante utiliza DUO HIV/Sífilis como TR1; não gestante utiliza testes separados. Registre TR2, marca/lote, coleta, executor e parceiro(a) quando presente.</div><div class="g3"><div class="f"><label for="ist-tr-condicao">Condição da pessoa principal</label><select id="ist-tr-condicao" onchange="atualizarTestesRapidosIST()"><option value="naogestante">Não gestante — testes separados</option><option value="gestante">Gestante — HIV/Sífilis DUO</option></select></div><div class="f"><label for="ist-tr-parceiro-presente">Parceiro(a) presente?</label><select id="ist-tr-parceiro-presente" onchange="atualizarTestesRapidosIST()"><option value="nao">Não</option><option value="sim">Sim — gerar laudo separado</option></select></div><div class="f"><label for="ist-tr-municipio">Município</label><input id="ist-tr-municipio" value="Toledo"></div></div><div class="tr-person"><div class="tr-person-head">Pessoa principal — dados puxados da identificação</div><div class="tr-person-body"><div class="g4"><div class="f"><label for="ist-tr-p-nome">Nome</label><input id="ist-tr-p-nome" class="ro" readonly></div><div class="f"><label for="ist-tr-p-pront">Prontuário</label><input id="ist-tr-p-pront"></div><div class="f"><label for="ist-tr-p-nasc">Data de nascimento</label><input id="ist-tr-p-nasc" class="ro" readonly></div><div class="f"><label for="ist-tr-p-sexo">Sexo</label><select id="ist-tr-p-sexo"><option>Feminino</option><option>Masculino</option></select></div></div><div id="ist-tr-p-testes"></div><div class="g3" style="margin-top:10px"><div class="f"><label>Data da coleta</label><input type="date" id="ist-tr-p-data"></div><div class="f"><label>Horário da leitura</label><input type="time" id="ist-tr-p-hora"></div><div class="f"><label for="ist-tr-p-executor">Executor / COREN</label><input id="ist-tr-p-executor"></div></div><div class="brow"><button class="btn btn-p" type="button" onclick="gerarLaudoISTStandalone('p')">Gerar laudo da pessoa principal</button></div></div></div><div class="tr-person" id="ist-tr-parceiro-box" style="display:none"><div class="tr-person-head">Parceiro(a) — laudo individual</div><div class="tr-person-body"><div class="g4"><div class="f"><label for="ist-tr-c-nome">Nome completo</label><input id="ist-tr-c-nome"></div><div class="f"><label for="ist-tr-c-pront">Prontuário</label><input id="ist-tr-c-pront"></div><div class="f"><label>Data de nascimento</label><input type="date" id="ist-tr-c-nasc"></div><div class="f"><label for="ist-tr-c-sexo">Sexo</label><select id="ist-tr-c-sexo"><option>Masculino</option><option>Feminino</option></select></div></div><div id="ist-tr-c-testes"></div><div class="g3" style="margin-top:10px"><div class="f"><label>Data da coleta</label><input type="date" id="ist-tr-c-data"></div><div class="f"><label>Horário da leitura</label><input type="time" id="ist-tr-c-hora"></div><div class="f"><label for="ist-tr-c-executor">Executor / COREN</label><input id="ist-tr-c-executor"></div></div><div class="brow"><button class="btn btn-p" type="button" onclick="gerarLaudoISTStandalone('c')">Gerar laudo do parceiro(a)</button></div></div></div><div id="ist-tr-alertas"></div><div class="brow"><button class="btn btn-ai" type="button" onclick="gerarTodosLaudosIST()">Gerar todos os laudos necessários</button></div></div>`}
 function rotuloId(txt){return String(txt).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}
 function campoModulo(p,c){const[id,l,t,ops]=c,full=`${p}-${id}`,span=t==='textarea'?' span2':'';if(t==='textarea')return`<div class="f${span}"><label>${l}</label><textarea id="${full}"></textarea></div>`;if(t==='select')return`<div class="f"><label>${l}</label><select id="${full}" onchange="avaliarPrioridadeModulo('${p}')"><option value="">—</option>${ops.map(x=>`<option>${x}</option>`).join('')}</select></div>`;return`<div class="f"><label>${l}</label><input id="${full}" type="${t}" oninput="avaliarPrioridadeModulo('${p}')"></div>`}
 function identificacaoModulo(p){return`<div class="module-form-grid"><div class="f required-mark"><label>Paciente</label><input id="${p}-nome" required></div><div class="f required-mark"><label>CPF</label><input id="${p}-cpf" class="paciente-cpf" inputmode="numeric" required></div><div class="f"><label>CNS</label><input id="${p}-cns" inputmode="numeric"></div><div class="f"><label>Data de nascimento</label><input id="${p}-nasc" type="date"></div><div class="f"><label>Data e horário</label><input id="${p}-data-hora" type="datetime-local" value="${new Date().toISOString().slice(0,16)}"></div><div class="f"><label>Profissional</label><input id="${p}-profissional" value="${escTR(getUsuarioAtual()?.nome||'')}"></div><div class="f"><label>Telefone</label><input id="${p}-telefone" class="telefone-mask" type="tel" inputmode="tel"></div><div class="f"><label>Microárea</label><input id="${p}-microarea"></div><div class="f"><label>CEP</label><input id="${p}-cep" class="cep-auto" inputmode="numeric" maxlength="9" placeholder="00000-000"><small id="${p}-cep-status"></small></div><div class="f span2"><label>Logradouro</label><input id="${p}-logradouro"></div><div class="f"><label>Número</label><input id="${p}-numero"></div><div class="f"><label>Complemento</label><input id="${p}-complemento"></div><div class="f"><label>Bairro</label><input id="${p}-bairro"></div><div class="f"><label>Município</label><input id="${p}-municipio"></div><div class="f"><label>UF</label><input id="${p}-uf" maxlength="2"></div><input type="hidden" id="${p}-endereco"></div>`}
