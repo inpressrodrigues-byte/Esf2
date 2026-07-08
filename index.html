@@ -11349,86 +11349,11 @@ function escalasVDHtml(p){
   const bloco=(titulo,items)=>`<div class="scale-card"><h4>${titulo}</h4><div class="module-form-grid">${items.map(x=>vdSelectPontuado(`${p}-${x[0]}`,x[1],x[2])).join('')}</div></div>`;
   return`${bloco('Braden — risco de lesão por pressão',braden)}${bloco('Katz — atividades básicas de vida diária',katz)}${bloco('Barthel — índice de funcionalidade',barthel)}${bloco('Morse — risco de queda',morse)}${bloco('Triagem nutricional MNA-SF simplificada',mna)}<div class="module-form-grid"><div class="f span2"><label>Justificativa quando escala não aplicada</label><textarea id="${p}-escala-nao-aplicada" placeholder="Ex: paciente indisponível, recusa, condição clínica impediu aplicação completa..."></textarea></div></div><div id="${p}-escalas-resultado" class="alert alert-i">Escalas ainda não calculadas.</div><input type="hidden" id="${p}-escalas-resumo">`;
 }
-function visitaDomiciliarExtraHtml(p){
-  const ck=(id,label)=>`<label class="soft-check"><input type="checkbox" id="${p}-${id}" onchange="classificarRiscoVD()">${label}</label>`;
-  return`<div class="home-visit-extra">
-    <div class="alert alert-i"><strong>Visita domiciliar:</strong> o sistema organiza a avaliação e destaca riscos. Não sugere dose, prescrição médica ou encaminhamento sem registro profissional/protocolo local.</div>
-    <div class="ct"><span class="dot dg"></span>Escalas e checklists da visita</div>
-    ${escalasVDHtml(p)}
-    <div class="check-row">${ck('broncoaspiracao','Risco de broncoaspiração')}${ck('constipacao','Constipação')}${ck('incontinencia','Incontinência/umidade')}${ck('queda-risco','Risco de queda no domicílio')}${ck('cuidador-sobrecarga','Sobrecarga do cuidador')}${ck('infeccao-risco','Suspeita de infecção')}</div>
-    <div class="ct"><span class="dot db"></span>Alimentação por sonda / gastrostomia / jejunostomia</div>
-    <div class="module-form-grid">
-      <div class="f"><label>Tipo de sonda/dispositivo alimentar</label><select id="vd-sonda-tipo" onchange="classificarRiscoVD()"><option value="">Não utiliza / não avaliado</option><option>SNE</option><option>SNG</option><option>Gastrostomia</option><option>Jejunostomia</option><option>Outra</option></select></div>
-      <div class="f"><label>Data de instalação / última troca</label><input id="vd-sonda-data" type="date"></div>
-      <div class="f"><label>Dieta/fórmula</label><input id="vd-sonda-formula"></div>
-      <div class="f"><label>Volume por dieta</label><input id="vd-sonda-volume" placeholder="Ex: 200 mL"></div>
-      <div class="f"><label>Horários</label><input id="vd-sonda-horarios" placeholder="Ex: 06h, 10h, 14h..."></div>
-      <div class="f"><label>Água antes/depois</label><input id="vd-sonda-agua" placeholder="Ex: 20 mL antes e após"></div>
-      <div class="f"><label>Lavagem da sonda</label><select id="vd-sonda-lavagem"><option value="">Não avaliado</option><option>Realizada conforme orientação</option><option>Irregular</option><option>Não realizada</option></select></div>
-      <div class="f"><label>Método de administração</label><select id="vd-sonda-metodo"><option value="">Não avaliado</option><option>Bomba</option><option>Bolus</option><option>Gravitacional</option></select></div>
-      <div class="f"><label>Cabeceira elevada</label><select id="vd-sonda-cabeceira" onchange="classificarRiscoVD()"><option value="">Não avaliado</option><option>Sim</option><option>Não</option><option>Parcial</option></select></div>
-      <div class="f"><label>Náuseas/vômitos</label><select id="vd-sonda-vomitos" onchange="classificarRiscoVD()"><option>Não</option><option>Sim</option></select></div>
-      <div class="f"><label>Distensão abdominal</label><select id="vd-sonda-distensao" onchange="classificarRiscoVD()"><option>Não</option><option>Sim</option></select></div>
-      <div class="f"><label>Diarreia</label><select id="vd-sonda-diarreia" onchange="classificarRiscoVD()"><option>Não</option><option>Sim</option></select></div>
-      <div class="f"><label>Constipação</label><select id="vd-sonda-constipacao" onchange="classificarRiscoVD()"><option>Não</option><option>Sim</option></select></div>
-      <div class="f"><label>Tosse/engasgo durante dieta</label><select id="vd-sonda-engasgo" onchange="classificarRiscoVD()"><option>Não</option><option>Sim</option></select></div>
-      <div class="f"><label>Obstrução/intercorrência</label><select id="vd-sonda-obstrucao" onchange="classificarRiscoVD()"><option>Não</option><option>Sim</option></select></div>
-      <div class="f span2"><label>Pele ao redor da GTT/JTT ou fixação da sonda</label><textarea id="vd-sonda-pele"></textarea></div>
-    </div>
-    <div class="ct"><span class="dot da"></span>Medicações em uso no domicílio</div>
-    <div class="alert alert-w"><strong>Segurança:</strong> registre exatamente como está na prescrição/embalagem. O sistema não sugere dose nem altera medicação.</div>
-    <div class="brow"><button type="button" class="btn btn-s" onclick="adicionarMedicamentoVD()">Adicionar medicação</button><button type="button" class="btn btn-s" onclick="atualizarAlertasMedicamentosVD()">Conferir medicações</button></div>
-    <div class="vac-table-wrap"><table class="vac-table" id="vd-med-table"><thead><tr><th>Medicação</th><th>Dose/uso como registrado</th><th>Via</th><th>Horários</th><th>Quem administra</th><th>Receita atual?</th><th></th></tr></thead><tbody id="vd-med-body"></tbody></table></div><div id="vd-med-alertas"></div>
-    <div class="ct"><span class="dot db"></span>Dispositivos, sondas e insumos</div>
-    <div class="check-row">${VD_DISPOSITIVOS.map((x,i)=>`<label class="soft-check"><input type="checkbox" class="vd-device" value="${escTR(x)}" onchange="atualizarDispositivosVD()">${escTR(x)}</label>`).join('')}</div>
-    <div id="vd-dispositivos-detalhes"></div>
-    <div class="ct"><span class="dot dg"></span>Insumos disponíveis no domicílio</div>
-    <div class="check-row">${VD_INSUMOS.map((x,i)=>`<label class="soft-check"><input type="checkbox" class="vd-insumo" value="${escTR(x)}" onchange="classificarRiscoVD()">${escTR(x)}</label>`).join('')}</div>
-    <div class="module-form-grid"><div class="f"><label>Suficiência de insumos</label><select id="vd-insumos-suficientes" onchange="classificarRiscoVD()"><option value="">Não avaliado</option><option>Suficientes</option><option>Parcial</option><option>Insuficientes</option></select></div><div class="f span2"><label>Solicitações/observações de insumos</label><textarea id="vd-insumos-obs"></textarea></div></div>
-    <div class="ct"><span class="dot dr"></span>Classificação automática de risco da visita</div>
-    <div id="vd-risco-painel" class="priority-panel rotina"><strong>Risco não calculado</strong><small>Preencha a avaliação e clique em gerar SOAP.</small></div>
-    <div class="module-form-grid"><div class="f"><label>Risco revisado pelo profissional</label><select id="vd-risco-manual"><option value="">Usar risco automático</option><option>Baixo</option><option>Moderado</option><option>Alto</option></select></div><div class="f span2"><label>Justificativa se ajustar o risco</label><textarea id="vd-risco-justificativa"></textarea></div></div>
-    <div class="alert alert-i"><strong>Checklist antes de finalizar:</strong> confirmar sinais vitais, alergias/medicações, cuidador, dispositivos, pele/feridas, insumos, sinais de alerta, orientações e retorno/próxima visita.</div>
-  </div>`;
-}
-function adicionarMedicamentoVD(dados={}){
-  const body=document.getElementById('vd-med-body');if(!body)return;
-  const tr=document.createElement('tr');tr.innerHTML=`<td><input class="vd-med-nome" value="${escTR(dados.nome||'')}" oninput="atualizarAlertasMedicamentosVD()"></td><td><input class="vd-med-dose" value="${escTR(dados.dose||'')}" placeholder="Como está prescrito/embalagem"></td><td><select class="vd-med-via"><option>VO</option><option>SC</option><option>IM</option><option>EV</option><option>Tópica</option><option>Inalatória</option><option>Sonda</option><option>Outra</option></select></td><td><input class="vd-med-horarios" value="${escTR(dados.horarios||'')}" oninput="atualizarAlertasMedicamentosVD()"></td><td><input class="vd-med-admin" value="${escTR(dados.admin||'')}"></td><td><select class="vd-med-receita" onchange="atualizarAlertasMedicamentosVD()"><option>Sim</option><option>Não</option><option>Não conferida</option></select></td><td><button class="btn btn-s" type="button" onclick="this.closest('tr').remove();atualizarAlertasMedicamentosVD()">Remover</button></td>`;
-  body.appendChild(tr);atualizarAlertasMedicamentosVD();
-}
-function coletarMedicamentosVD(){
-  return Array.from(document.querySelectorAll('#vd-med-body tr')).map(r=>({nome:r.querySelector('.vd-med-nome')?.value.trim()||'',dose:r.querySelector('.vd-med-dose')?.value.trim()||'',via:r.querySelector('.vd-med-via')?.value||'',horarios:r.querySelector('.vd-med-horarios')?.value.trim()||'',admin:r.querySelector('.vd-med-admin')?.value.trim()||'',receita:r.querySelector('.vd-med-receita')?.value||''})).filter(x=>x.nome||x.dose||x.horarios);
-}
-function atualizarAlertasMedicamentosVD(){
-  const meds=coletarMedicamentosVD(),alertas=[],nomes={};
-  meds.forEach(m=>{const k=m.nome.toLowerCase();if(k)nomes[k]=(nomes[k]||0)+1;if(m.nome&&!m.dose)alertas.push(`${m.nome}: dose/uso não registrado.`);if(m.nome&&!m.horarios)alertas.push(`${m.nome}: horário não registrado.`);if(m.nome&&m.receita==='Não')alertas.push(`${m.nome}: sem prescrição atual conferida.`)});
-  Object.entries(nomes).filter(([,n])=>n>1).forEach(([n])=>alertas.push(`Possível duplicidade: ${n}.`));
-  const out=document.getElementById('vd-med-alertas');if(out)out.innerHTML=alertas.length?`<div class="alert alert-w"><strong>Conferir medicações:</strong><br>${alertas.map(escTR).join('<br>')}</div>`:`<div class="alert alert-s">Sem alerta automático nas medicações preenchidas.</div>`;
-  classificarRiscoVD();return alertas;
-}
 function campoDispVD(i,k,label,t='text',ops=[]){
   const id=`vd-device-${i}-${k}`,attr=`data-device-field="${escTR(label)}"`;
   if(t==='textarea')return`<div class="f span2"><label>${label}</label><textarea id="${id}" ${attr} oninput="classificarRiscoVD()"></textarea></div>`;
   if(t==='select')return`<div class="f"><label>${label}</label><select id="${id}" ${attr} onchange="classificarRiscoVD()"><option value="">Não avaliado</option>${ops.map(x=>`<option>${escTR(x)}</option>`).join('')}</select></div>`;
   return`<div class="f"><label>${label}</label><input id="${id}" ${attr} type="${t}" oninput="classificarRiscoVD()"></div>`;
-}
-function camposDispositivoVD(nome,i){
-  let campos=[];
-  if(/traqueostomia/i.test(nome))campos=[['secrecao','Secreção','select',['Ausente','Clara/fluida','Espessa','Purulenta/odor forte']],['aspiracao','Aspiração','select',['Não necessita','Realizada pelo cuidador','Necessita apoio da equipe','Cuidador não sabe realizar']],['pele','Pele ao redor','select',['Íntegra','Hiperemia','Lesão/macerada','Secreção/odor']],['fixacao','Fixação','select',['Adequada','Folga/risco de deslocamento','Úmida/suja','Não avaliada']],['canula','Cânula / troca / limpeza','text'],['cuidador','Cuidador sabe manejar?','select',['Sim','Parcial','Não']],['infeccao','Sinais de infecção','select',['Não','Sim']],['insumos','Insumos necessários/intercorrências','textarea']];
-  else if(/sonda vesical/i.test(nome))campos=[['data','Data da instalação/última troca','date'],['urina','Aspecto da urina','select',['Clara','Turva','Hematúria','Odor forte','Pouco débito']],['fixacao','Fixação','select',['Adequada','Inadequada/tração','Não avaliada']],['higiene','Higiene/cuidados','select',['Adequados','Necessitam reforço','Inadequados']],['vazamento','Vazamento/obstrução','select',['Não','Vazamento','Obstrução','Dor/desconforto']],['infeccao','Sinais de infecção','select',['Não','Sim']],['obs','Observações','textarea']];
-  else if(/SNE|SNG|Gastrostomia|Jejunostomia/i.test(nome))campos=[['data','Data da instalação/última troca','date'],['fixacao','Fixação/posição','select',['Adequada','Risco de deslocamento','Não avaliada']],['pele','Pele ao redor / estoma','select',['Íntegra','Hiperemia','Macerada','Secreção/odor']],['vazamento','Vazamento','select',['Não','Sim']],['obstrucao','Obstrução/intercorrência','select',['Não','Sim']],['cuidador','Cuidador sabe manejar?','select',['Sim','Parcial','Não']],['insumos','Insumos e orientações pendentes','textarea']];
-  else if(/oxigenoterapia/i.test(nome))campos=[['fluxo','Fluxo prescrito/usado','text'],['dispositivo','Dispositivo','select',['Cateter nasal','Máscara','Concentrador','Cilindro','Outro']],['saturacao','SpO2 observada','text'],['equipamento','Equipamento/segurança','select',['Funcionando e seguro','Falha/intercorrência','Não avaliado']],['pele','Pele em pontos de contato','select',['Íntegra','Hiperemia/lesão','Não avaliada']],['obs','Observações','textarea']];
-  else if(/ostomia/i.test(nome))campos=[['estoma','Estoma','select',['Rosado/úmido','Pálido/escurecido','Edema/sangramento','Não avaliado']],['pele','Pele periestoma','select',['Íntegra','Hiperemia','Macerada/lesão']],['efluente','Efluente','text'],['equipamento','Bolsa/equipamento','select',['Adequado','Vazamento','Falta de insumo','Não avaliado']],['cuidador','Cuidador/paciente sabe manejar?','select',['Sim','Parcial','Não']],['obs','Observações','textarea']];
-  else campos=[['local','Local/tipo','text'],['pele','Pele ao redor','select',['Íntegra','Hiperemia','Lesão/macerada','Não avaliada']],['fixacao','Fixação/cobertura','select',['Adequada','Inadequada','Não avaliada']],['funcionamento','Funcionamento','select',['Adequado','Intercorrência','Não avaliado']],['infeccao','Sinais de infecção','select',['Não','Sim']],['insumos','Insumos/intercorrências/orientações','textarea']];
-  return`<div class="vd-device-card" data-device="${escTR(nome)}"><h4>${escTR(nome)}</h4><div class="module-form-grid">${campos.map(c=>campoDispVD(i,...c)).join('')}</div></div>`;
-}
-function atualizarDispositivosVD(){
-  const area=document.getElementById('vd-dispositivos-detalhes');if(!area)return;
-  const anteriores={};area.querySelectorAll('input,select,textarea').forEach(el=>anteriores[el.id]=el.value);
-  const marcados=Array.from(document.querySelectorAll('.vd-device:checked')).map(x=>x.value);
-  area.innerHTML=marcados.length?`<div class="module-form-grid">${marcados.map((x,i)=>camposDispositivoVD(x,i)).join('')}</div>`:'';
-  Object.entries(anteriores).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v});
-  classificarRiscoVD();
 }
 function coletarMarcadosVD(sel){return Array.from(document.querySelectorAll(sel+':checked')).map(x=>x.value||x.closest('label')?.textContent?.trim()).filter(Boolean)}
 function resumoDispositivosVD(){
@@ -11437,12 +11362,6 @@ function resumoDispositivosVD(){
     card.querySelectorAll('[data-device-field]').forEach(el=>{const v=String(el.value||'').trim();if(v)partes.push(`${el.dataset.deviceField}: ${v}`)});
     return partes.length?`${nome}: ${partes.join('; ')}`:nome;
   });
-}
-function resumoSondaVD(){
-  const sintomas=[['Náuseas/vômitos','vd-sonda-vomitos'],['distensão','vd-sonda-distensao'],['diarreia','vd-sonda-diarreia'],['constipação','vd-sonda-constipacao'],['tosse/engasgo','vd-sonda-engasgo'],['obstrução/intercorrência','vd-sonda-obstrucao']].filter(([,id])=>val(id)==='Sim').map(x=>x[0]);
-  const partes=[['tipo',val('vd-sonda-tipo')],['instalação/última troca',val('vd-sonda-data')],['fórmula',val('vd-sonda-formula')],['volume por dieta',val('vd-sonda-volume')],['horários',val('vd-sonda-horarios')],['água antes/depois',val('vd-sonda-agua')],['lavagem',val('vd-sonda-lavagem')],['método',val('vd-sonda-metodo')],['cabeceira elevada',val('vd-sonda-cabeceira')],['pele/fixação',val('vd-sonda-pele')],['complemento livre',val('vd-sonda-dieta')]].filter(x=>x[1]).map(x=>`${x[0]}: ${x[1]}`);
-  if(sintomas.length)partes.push(`intercorrências/sintomas: ${sintomas.join(', ')}`);
-  return partes.length?`Alimentação por sonda/GTT/JTT — ${partes.join('; ')}.`:'';
 }
 function calcularEscalasVD(){
   const n=id=>{const el=document.getElementById(id);if(!el||el.value==='')return null;const v=Number(el.value);return Number.isFinite(v)?v:null},linhas=[],pend=[],riscos=[];
@@ -11462,36 +11381,8 @@ function calcularEscalasVD(){
   const out=document.getElementById('vd-escalas-resultado');if(out)out.innerHTML=resumo.length?`<strong>Resultado das escalas:</strong><br>${resumo.map(escTR).join('<br>')}`:'Escalas ainda não calculadas.';
   return{linhas,pendencias:pend,riscos};
 }
-function classificarRiscoVD(){
-  const esc=calcularEscalasVD(),motivos=[],alto=/sim|total|restrito|acamado|alto|muito alto|intensa|insuficientes/i,texto=[val('vd-acamado'),val('vd-mobilidade'),val('vd-adl'),val('vd-consciencia'),val('vd-escalas-resumo'),val('vd-alerts'),val('vd-pele'),val('vd-feridas'),val('vd-respiratorio'),val('vd-insumos-suficientes'),resumoSondaVD(),resumoDispositivosVD().join(' ')].join(' ');
-  if(/rebaixado|confuso|dispneia|saturação baixa|saturacao baixa|necrose|purulento|odor forte|sangramento|violência|negligência|hipoglicemia/i.test(texto))motivos.push('sinal de gravidade ou segurança identificado');
-  if(alto.test(val('vd-acamado')+' '+val('vd-mobilidade')+' '+val('vd-adl')))motivos.push('restrição importante de mobilidade/dependência');
-  esc.riscos.forEach(r=>motivos.push(r));
-  if(/insuficientes/i.test(val('vd-insumos-suficientes')))motivos.push('insumos insuficientes no domicílio');
-  if(document.getElementById('vd-cuidador-sobrecarga')?.checked)motivos.push('sobrecarga do cuidador');
-  if(val('vd-sonda-cabeceira')==='Não')motivos.push('risco de broncoaspiração por cabeceira não elevada durante dieta');
-  if(['vd-sonda-engasgo','vd-sonda-obstrucao','vd-sonda-vomitos','vd-sonda-distensao'].some(id=>val(id)==='Sim'))motivos.push('intercorrência relacionada à alimentação por sonda');
-  if(atualizarAlertasMedicamentosVD._rodando!==true){atualizarAlertasMedicamentosVD._rodando=true;try{if(atualizarAlertasMedicamentosVD().length)motivos.push('alertas em medicações')}finally{atualizarAlertasMedicamentosVD._rodando=false}}
-  const risco=motivos.some(m=>/gravidade|muito alto|alto risco|risco alto|dependência total|dependência grave|desnutrição provável|insuficientes|medicações|broncoaspiração|intercorrência/i.test(m))?'Alto':motivos.length?'Moderado':'Baixo',final=val('vd-risco-manual')||risco;
-  const p=document.getElementById('vd-risco-painel');if(p){p.className='priority-panel '+(final==='Alto'?'alta':final==='Moderado'?'media':'rotina');p.innerHTML=`<strong>Risco da visita: ${final}</strong><small>${motivos.length?`Motivos: ${[...new Set(motivos)].join('; ')}.`:'Sem fator automático de risco alto nos campos preenchidos.'}</small>`}
-  return{risco:final,motivos:[...new Set(motivos)]};
-}
-function gerarSoapVisitaDomiciliar(){
-  const risco=classificarRiscoVD(),escalas=calcularEscalasVD(),meds=coletarMedicamentosVD(),dispDetalhe=resumoDispositivosVD(),ins=coletarMarcadosVD('.vd-insumo'),sonda=resumoSondaVD(),guia=coletarGuiaClinico('vd'),vitais=[['PA',val('vd-pa')],['FC',val('vd-fc')],['FR',val('vd-fr')],['SpO2',val('vd-sat')],['T',val('vd-temp')],['Glicemia capilar',val('vd-glicemia')],['Dor',val('vd-dor-escala')],['IMC',val('vd-imc')]].filter(x=>x[1]).map(x=>`${x[0]}: ${x[1]}`).join(' | ');
-  const linha=x=>x?x:'',nome=val('vd-nome'),idade=idadePorNascimento(val('vd-nasc'));
-  document.getElementById('vd-s').value=limparTextoSoap([`DESCRIÇÃO DA CONSULTA\nVisita domiciliar de enfermagem${nome?` a ${nome}`:''}${idade?`, ${idade}`:''}.`,`S:\n${linha(val('vd-motivo')?`Visita realizada por ${val('vd-motivo').toLowerCase()}.`:'')}`,val('vd-queixa')?`Demanda referida: ${val('vd-queixa')}.`:'',val('vd-historia'),val('vd-cuidador')?`Cuidador principal: ${val('vd-cuidador')}${val('vd-parentesco-cuidador')?` (${val('vd-parentesco-cuidador')})`:''}.`:'',val('vd-mora-sozinho')?`Mora sozinho: ${val('vd-mora-sozinho')}.`:'',val('vd-beneficio-social')?`Benefício/contexto social: ${val('vd-beneficio-social')}.`:'' ].filter(Boolean).join('\n\n'));
-  document.getElementById('vd-o').value=limparTextoSoap([`O:`,vitais,val('vd-condicao-moradia')?`Moradia: ${val('vd-condicao-moradia')}; saneamento: ${val('vd-saneamento')||'não avaliado'}; água tratada: ${val('vd-agua')||'não avaliada'}; energia elétrica: ${val('vd-energia')||'não avaliada'}.`:'',val('vd-acessibilidade')?`Acessibilidade/barreiras: ${val('vd-acessibilidade')}.`:'',`Mobilidade/dependência: ${[val('vd-acamado'),val('vd-mobilidade'),val('vd-adl')].filter(Boolean).join('; ')}.`,val('vd-consciencia')?`Consciência/comunicação: ${[val('vd-consciencia'),val('vd-comunicacao')].filter(Boolean).join('; ')}.`:'',val('vd-decubito')||val('vd-transferencia')||val('vd-higiene')?[val('vd-decubito'),val('vd-transferencia'),val('vd-higiene'),val('vd-fraldas')].filter(Boolean).join('\n'):'',val('vd-alimentacao-via')?`Alimentação: via ${val('vd-alimentacao-via')}. ${val('vd-dieta')}`:'',sonda,escalas.linhas.length?`Escalas aplicadas:\n${escalas.linhas.join('\n')}`:'',escalas.pendencias.length?`Escalas pendentes/não aplicadas:\n${escalas.pendencias.join('\n')}`:'',val('vd-pele')?`Pele/LPP: ${val('vd-pele')}.`:'',val('vd-feridas')?`Feridas/curativos: ${val('vd-feridas')}.`:'',val('vd-eliminacoes')?`Eliminações: ${val('vd-eliminacoes')}.`:'',val('vd-respiratorio')?`Respiratório: ${val('vd-respiratorio')}.`:'',meds.length?`Medicações conferidas: ${meds.map(m=>`${m.nome}${m.dose?` (${m.dose})`:''}${m.horarios?`, horários: ${m.horarios}`:''}${m.admin?`, administra: ${m.admin}`:''}${m.receita?`, receita: ${m.receita}`:''}`).join('; ')}.`:'',dispDetalhe.length?`Dispositivos avaliados:\n${dispDetalhe.join('\n')}`:'',ins.length?`Insumos disponíveis: ${ins.join('; ')}. Suficiência: ${val('vd-insumos-suficientes')||'não avaliada'}.`:'',guia.resumo?`Achados guiados: ${guia.resumo}`:''].filter(Boolean).join('\n'));
-  document.getElementById('vd-a').value=limparTextoSoap([`A:`,`Visita domiciliar com classificação de risco ${risco.risco.toLowerCase()}${risco.motivos.length?`, por ${risco.motivos.join('; ')}`:''}.`,val('vd-cuidador-avaliacao')?`Cuidador/rede: ${val('vd-cuidador-avaliacao')}.`:'',val('vd-alerts')?`Alertas selecionados: ${val('vd-alerts')}.`:'',guia.alertas?`Pontos de atenção do exame/anamnese: ${guia.alertas}.`:'' ].filter(Boolean).join('\n'));
-  document.getElementById('vd-p').value=limparTextoSoap([`P:`,val('vd-conduta')?`Condutas de enfermagem realizadas/pactuadas: ${val('vd-conduta')}.`:'',val('vd-orientacoes')?`Orientações ao paciente/cuidador: ${val('vd-orientacoes')}.`:'',val('vd-insumos-obs')?`Insumos/solicitações: ${val('vd-insumos-obs')}.`:'',risco.risco==='Alto'?'Reforçada necessidade de acompanhamento próximo e validação profissional dos achados de maior risco conforme fluxo local.':'',val('vd-sinais-alerta-orientados')?`Sinais de alerta orientados: ${val('vd-sinais-alerta-orientados')}.`:'',val('vd-retorno')?`Próxima visita/retorno: ${val('vd-retorno')}.`:'',`Base protocolar: ${SOAP_BASE_PROTOCOLAR.vd}`].filter(Boolean).join('\n'));
-  const op=document.getElementById('vd-orientacao-paciente');if(op)op.value=[val('vd-orientacoes'),val('vd-sinais-alerta-orientados'),val('vd-retorno')?`Retorno/próxima visita: ${val('vd-retorno')}.`:'' ].filter(Boolean).join('\n');
-  showToast('SOAP de visita domiciliar gerado. Revise antes de salvar.');
-}
 function textoSoapAnonimizadoVD(){const nome=String(val('vd-nome')||'').replace(/[.*+?^${}()|[\]\\]/g,'\\$&');return textoSoapAtual(false).replace(nome?new RegExp(nome,'gi'):/__nomex__/g,'Paciente').replace(/\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b/g,'CPF oculto').replace(/\b\d{15}\b/g,'CNS oculto').replace(/\(?\d{2}\)?\s?\d{4,5}-?\d{4}/g,'telefone oculto')}
 function copiarSoapAnonimizadoVD(){copiarTextoSeguro(textoSoapAnonimizadoVD());showToast('SOAP anonimizado copiado.')}
-function relatorioTextoVisitaDomiciliar(){
-  if(!val('vd-s')&&!val('vd-o')&&!val('vd-a')&&!val('vd-p'))gerarSoapVisitaDomiciliar();
-  return [`RELATÓRIO DE VISITA DOMICILIAR`,new Date().toLocaleString('pt-BR'),`Paciente: ${val('vd-nome')||''}`,`CPF/CNS: ${val('vd-cpf')||''} / ${val('vd-cns')||''}`,`Endereço: ${[val('vd-logradouro'),val('vd-numero'),val('vd-bairro'),val('vd-municipio'),val('vd-uf')].filter(Boolean).join(', ')}`,`Cuidador: ${val('vd-cuidador')||''} ${val('vd-telefone-cuidador')||''}`,`Profissional: ${val('vd-profissional')||''}`,'',textoSoapAtual(false),'','Aviso: documento de apoio ao registro profissional. Revisar, validar clinicamente e seguir protocolos/fluxos locais antes de uso assistencial.'].join('\n');
-}
 async function gerarPDFVisitaDomiciliar(){
   if(!exigirPermissao('gerar_documentos'))return;
   try{await carregarPdfLibPN();const {PDFDocument,StandardFonts,rgb}=PDFLib,pdf=await PDFDocument.create(),font=await pdf.embedFont(StandardFonts.Helvetica),bold=await pdf.embedFont(StandardFonts.HelveticaBold),cor=rgb(.03,.09,.19);let page=pdf.addPage([595.28,841.89]),y=802;page.drawText('RELATÓRIO DE VISITA DOMICILIAR — ESF',{x:44,y,size:13,font:bold,color:cor});y-=24;const linhas=relatorioTextoVisitaDomiciliar().split('\n');for(const l of linhas){const partes=pnPdfLinhas(l,font,9,505);for(const p of partes){if(y<48){page=pdf.addPage([595.28,841.89]);y=802}page.drawText(p,{x:44,y,size:9,font,color:cor});y-=12}if(!l.trim())y-=4}await baixarPdfPN(pdf,`visita-domiciliar-${rotuloId(val('vd-nome')||'paciente')}.pdf`);showToast('Relatório PDF da visita gerado.')}catch(e){console.error(e);showToast('Não foi possível gerar o PDF da visita domiciliar.')}
