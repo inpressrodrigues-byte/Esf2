@@ -4694,6 +4694,7 @@ function go(id,btn){
   if(id==='indicadores')setTimeout(renderIndicadores,50);
   if(id==='territorio')setTimeout(renderTerritorio,50);
   if(id==='relatorios')setTimeout(renderRelatorio,50);
+  if(id==='preventivo'&&typeof resetMapasAnatomicos==='function')resetMapasAnatomicos();
   if(window.innerWidth<=760)alternarMenuLateral(true);
   setTimeout(atualizarBarraAcoesRapidas,30);
   window.scrollTo({top:0,behavior:'smooth'});
@@ -7619,6 +7620,18 @@ function limparMarcadoresVagina() {
   const cont=document.getElementById('vagina-tags');if(cont)cont.innerHTML='';
   const ta=document.getElementById('prev-vagina-desc');
   if(ta)ta.value=ta.value.replace(/^Achados mapeados:[\s\S]*?\n\n/,'');
+}
+
+// Zera os achados dos 3 mapas anatômicos (arrays globais + marcadores SVG + tags).
+// Chamado ao abrir o Preventivo, para não carregar achados de um paciente ao próximo.
+function resetMapasAnatomicos() {
+  if (typeof limparMarcadores === 'function') limparMarcadores();
+  if (typeof limparMarcadoresColo === 'function') limparMarcadoresColo();
+  if (typeof limparMarcadoresVagina === 'function') limparMarcadoresVagina();
+  ['prev-mama-palp','prev-colo-desc'].forEach(id => {
+    const t = document.getElementById(id);
+    if (t) t.value = t.value.replace(/^Achados mapeados:[\s\S]*?\n\n/, '');
+  });
 }
 
 function atualizarTextareaMama() {
