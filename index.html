@@ -9504,23 +9504,6 @@ document.querySelectorAll('[onclick*="go("]').forEach(btn => {
       <div style="text-align:center;margin-top:10px"><button type="button" onclick="diagnosticarConexao()" style="background:none;border:none;color:var(--green);font:inherit;font-size:12px;text-decoration:underline;cursor:pointer">Diagnóstico de conexão</button></div>
       <div id="auth-network-diagnostic" style="display:none;margin-top:12px;padding:10px;border:1px solid var(--bd);border-radius:8px;background:var(--sf2);font-size:11px;line-height:1.55;white-space:pre-wrap"></div>
     </div>
-    <div id="auth-register-view" style="display:none">
-      <div class="auth-title">Criar conta</div>
-      <div class="auth-sub">Preencha seus dados profissionais</div>
-      <div class="auth-err" id="auth-err-reg"></div>
-      <div class="auth-field"><label>Nome completo</label><input type="text" id="reg-nome" placeholder="Ana Paula Silva"></div>
-      <div class="auth-field"><label>Email ou Usuário</label><input type="text" id="reg-email" placeholder="seu@email.com ou joao123"></div>
-      <div class="auth-field"><label>Senha</label><input type="password" id="reg-pass" placeholder="mínimo 6 caracteres"></div>
-      <div class="auth-field"><label>Cargo</label>
-        <select id="reg-cargo" style="border:1px solid var(--bd);border-radius:8px;padding:10px 12px;font-size:14px;background:var(--sf);color:var(--tx)">
-          <option>Enfermeiro(a)</option><option>Técnico(a) de Enfermagem</option><option>Médico(a)</option><option>ACS</option><option>Outro</option>
-        </select>
-      </div>
-      <div class="auth-field"><label>COREN / CRM (opcional)</label><input type="text" id="reg-conselho" placeholder="COREN-PR 123456"></div>
-      <div class="auth-field"><label>Unidade de Saúde</label><input type="text" id="reg-unidade" placeholder="ESF Centro"></div>
-      <button class="auth-btn" id="auth-reg-btn" onclick="authRegister()">Criar conta</button>
-      <div class="auth-switch">Já tem conta? <a onclick="authShowLogin()">Entrar</a></div>
-    </div>
   </div>
 </div>
 
@@ -9932,17 +9915,6 @@ function verificarAcesso(session) {
   }
 }
 
-function authShowLogin() {
-  document.getElementById('auth-login-view').style.display = 'block';
-  document.getElementById('auth-register-view').style.display = 'none';
-}
-
-function authShowRegister() {
-  const err=document.getElementById('auth-err-login');
-  err.textContent='O cadastro público está desativado. Solicite uma conta ao administrador.';
-  err.style.display='block';
-}
-
 async function authLogin() {
   let email = document.getElementById('auth-email').value.trim();
   const pass = document.getElementById('auth-pass').value;
@@ -9970,14 +9942,6 @@ async function authLogin() {
   }
 }
 
-async function authRegister() {
-  const errDiv = document.getElementById('auth-err-reg');
-  errDiv.innerText='O cadastro público está desativado. Solicite uma conta ao administrador.';
-  errDiv.style.display = 'none';
-  errDiv.style.display = 'block';
-}
-
-// Aparência personalizável
 const APARENCIA_KEY='esf_aparencia_v1';
 const APARENCIA_PADRAO={primary:'#175930',accent:'#3a1d68',bg:'#f1f0eb',surface:'#ffffff',font:'DM Sans',corner:8,opacity:64,blur:20,radius:18,shadow:12};
 let APARENCIA_ATUAL={...APARENCIA_PADRAO};
