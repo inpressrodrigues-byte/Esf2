@@ -3818,7 +3818,7 @@ body.sidebar-collapsed .dev-nav{display:none}
   <div class="sh"><div class="sh-ic ic-r">⌕</div><div><div class="sh-t">Busca Ativa ESF</div><div class="sh-s">Alertas automáticos para acompanhamento longitudinal</div></div></div>
   <div class="card">
     <div class="gestao-filtros">
-      <div class="f"><label>Buscar paciente</label><input id="ba-busca" oninput="renderBuscaAtiva()" placeholder="Nome, CPF, CNS ou microárea"></div>
+      <div class="f"><label>Buscar paciente</label><input id="ba-busca" oninput="buscaGestaoDebounce(renderBuscaAtiva)" placeholder="Nome, CPF, CNS ou microárea"></div>
       <div class="f"><label>Linha de cuidado</label><select id="ba-linha" onchange="renderBuscaAtiva()"><option value="">Todas</option><option>Pré-natal</option><option>Puericultura</option><option>Preventivo</option><option>Idoso</option><option>Saúde Mental</option><option>Condição crônica</option></select></div>
       <div class="f"><label>Prioridade</label><select id="ba-prioridade" onchange="renderBuscaAtiva()"><option value="">Todas</option><option value="alta">Alta</option><option value="media">Média</option><option value="baixa">Baixa</option></select></div>
       <div class="f"><label>Microárea</label><select id="ba-microarea" onchange="renderBuscaAtiva()"><option value="">Todas</option></select></div>
@@ -3849,7 +3849,7 @@ body.sidebar-collapsed .dev-nav{display:none}
   <div class="sh"><div class="sh-ic ic-g">⌂</div><div><div class="sh-t">Território e ACS</div><div class="sh-s">Microáreas, famílias, vulnerabilidades e visitas domiciliares</div></div></div>
   <div class="card">
     <div class="gestao-filtros">
-      <div class="f"><label>Busca geral</label><input id="terr-busca" oninput="renderTerritorio()" placeholder="Nome, CPF, CNS, família ou microárea"></div>
+      <div class="f"><label>Busca geral</label><input id="terr-busca" oninput="buscaGestaoDebounce(renderTerritorio)" placeholder="Nome, CPF, CNS, família ou microárea"></div>
       <div class="f"><label>Microárea</label><select id="terr-filtro-microarea" onchange="renderTerritorio()"><option value="">Todas</option></select></div>
       <div class="f"><label>ACS</label><select id="terr-filtro-acs" onchange="renderTerritorio()"><option value="">Todos</option></select></div>
       <div class="f"><label>Grupo</label><select id="terr-filtro-grupo" onchange="renderTerritorio()"><option value="">Todos</option><option value="visita">Precisa de visita</option><option value="vulneravel">Família vulnerável</option><option value="faltoso">Faltoso</option><option value="sem_acomp">Sem acompanhamento</option></select></div>
@@ -8301,9 +8301,11 @@ async function baixarPacientesNuvem(forcar=false){
   }catch(e){if(forcar)showToast('Não foi possível atualizar o banco de pacientes.');}
 }
 function enderecoPaciente(d){return d.endereco||[d.logradouro,d.numero,d.bairro,d.municipio].filter(Boolean).join(', ')||'-'}
-function consultasDoPaciente(cpf,nome){
+function consultasDoPaciente(cpf,nome,ats){
   const n=String(nome||'').toLowerCase();
-  return carregarAtendimentos().filter(a=>(cpf&&a.cpf===cpf)||(!cpf&&n&&String(a.nome||'').toLowerCase()===n)).sort((a,b)=>new Date(b.data)-new Date(a.data));
+  // ats opcional: quando o chamador já carregou os atendimentos, evita re-parsear o
+  // localStorage a cada paciente (era O(pacientes × atendimentos) com JSON.parse repetido).
+  return (ats||carregarAtendimentos()).filter(a=>(cpf&&a.cpf===cpf)||(!cpf&&n&&String(a.nome||'').toLowerCase()===n)).sort((a,b)=>new Date(b.data)-new Date(a.data));
 }
 function renderPacientes(){
   if(!temPermissao('ver_historico'))return;
@@ -8317,7 +8319,7 @@ function renderPacientes(){
   const stats=document.getElementById('pac-stats');if(stats)stats.innerHTML=`<div class="hist-stat"><strong>${pacientes.length}</strong>pacientes</div><div class="hist-stat"><strong>${comConsulta.size}</strong>com consulta</div><div class="hist-stat"><strong>${pacientes.filter(p=>p.parceiro_nome).length}</strong>com parceiro</div>`;
   const el=document.getElementById('pac-lista');if(!el)return;
   if(!pacientes.length){el.innerHTML='<div class="pac-empty">Nenhum paciente cadastrado. O cadastro será criado automaticamente ao salvar uma consulta com CPF.</div>';return;}
-  el.innerHTML=pacientes.map(p=>{const cs=consultasDoPaciente(p.cpf,p.nome),ult=cs[0];return`<div class="pac-card" onclick="abrirPaciente('${p.cpf}')"><div class="pac-name">${escTR(p.nome||'Paciente sem nome')}</div><div class="pac-meta">CPF: ${escTR(formatarCPF(p.cpf))}${p.cns?`<br>CNS: ${escTR(p.cns)}`:''}${p.telefone?`<br>Contato: ${escTR(p.telefone)}`:''}<br>Endereço: ${escTR(enderecoPaciente(p))}</div><div class="pac-last">${ult?`Última consulta: <strong>${escTR(ult.tipo)}</strong> · ${new Date(ult.data).toLocaleDateString('pt-BR')}`:'Sem consulta relacionada'}</div></div>`}).join('');
+  el.innerHTML=pacientes.map(p=>{const cs=consultasDoPaciente(p.cpf,p.nome,consultas),ult=cs[0];return`<div class="pac-card" onclick="abrirPaciente('${p.cpf}')"><div class="pac-name">${escTR(p.nome||'Paciente sem nome')}</div><div class="pac-meta">CPF: ${escTR(formatarCPF(p.cpf))}${p.cns?`<br>CNS: ${escTR(p.cns)}`:''}${p.telefone?`<br>Contato: ${escTR(p.telefone)}`:''}<br>Endereço: ${escTR(enderecoPaciente(p))}</div><div class="pac-last">${ult?`Última consulta: <strong>${escTR(ult.tipo)}</strong> · ${new Date(ult.data).toLocaleDateString('pt-BR')}`:'Sem consulta relacionada'}</div></div>`}).join('');
 }
 let PACIENTE_MODAL_CPF='';
 function abrirPaciente(cpf){
@@ -8507,8 +8509,11 @@ const idadeAnos=nasc=>{if(!nasc)return null;const d=new Date(nasc+'T00:00:00'),h
 function preencherSelectGestao(id,valores){const s=document.getElementById(id);if(!s)return;const atual=s.value;s.innerHTML='<option value="">Todos</option>'+[...new Set(valores.filter(Boolean))].sort().map(v=>`<option>${gestEsc(v)}</option>`).join('');s.value=atual}
 function dadosGestao(){
   const ats=carregarAtendimentos(), pacientes=Object.entries(carregarPacientes()).map(([cpf,d])=>({cpf,...d}));
-  return pacientes.map(p=>{const cs=consultasDoPaciente(p.cpf,p.nome),ult=cs[0];return{...p,consultas:cs,ultima:ult,idade:idadeAnos(p.nasc),microarea:p.microarea||p.area||'',acs:p.acs||''}});
+  return pacientes.map(p=>{const cs=consultasDoPaciente(p.cpf,p.nome,ats),ult=cs[0];return{...p,consultas:cs,ultima:ult,idade:idadeAnos(p.nasc),microarea:p.microarea||p.area||'',acs:p.acs||''}});
 }
+// Debounce para buscas de gestão: evita recomputar dadosGestao a cada tecla digitada.
+let _debGestao;
+function buscaGestaoDebounce(fn){clearTimeout(_debGestao);_debGestao=setTimeout(fn,350);}
 function renderBuscaGeralESF(){const q=(val('busca-geral-esf')||'').toLowerCase(),el=document.getElementById('busca-geral-resultado');if(!el)return;if(q.length<2){el.innerHTML='';return}const ps=dadosGestao().filter(p=>[p.nome,p.cpf,p.cns,p.microarea].join(' ').toLowerCase().includes(q)).slice(0,8);el.innerHTML=ps.length?`<div class="gestao-table-wrap"><table class="gestao-table"><tbody>${ps.map(p=>`<tr><td><strong>${gestEsc(p.nome)}</strong><br><small>${gestEsc(p.microarea||'Sem microárea')}</small></td><td>${gestEsc(formatarCPF(p.cpf))}</td><td>${p.ultima?gestEsc(p.ultima.tipo)+' · '+new Date(p.ultima.data).toLocaleDateString('pt-BR'):'Sem atendimento'}</td><td><button class="btn btn-s" onclick="abrirModulo('pacientes');setTimeout(()=>abrirPaciente('${p.cpf}'),100)">Abrir</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="alert alert-i">Nenhum paciente encontrado.</div>'}
 function dadoAtendimento(a,id){const v=a?.dados?.[id];return typeof v==='object'?v.value||'':v||''}
 function temDadoAtendimento(a,fragmento){return Object.entries(a?.dados||{}).some(([k,v])=>k.includes(fragmento)&&String(typeof v==='object'?v.value||v.checked:v||'').trim()&&!['false','-','—'].includes(String(v)))}
