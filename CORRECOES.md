@@ -64,7 +64,7 @@ DEFERIDO (baixo valor): ~20 classes CSS mortas (badge-*, modal-*, bg-blue/purple
 FEITO: contraste --tx3 (WCAG AA); erros de login em PT-BR; inputmode=numeric em CPF/CNS/CEP + type=tel em telefones (gerador + estáticos); 296 labels ligados aos campos (for=).
 PENDENTE:
 - Obrigatoriedade nome/CPF ao salvar — **DECISÃO SUA (regra de negócio)**: bloquear ou avisar? CPF é sempre exigido (ex.: acolhimento sem identificação)? Não implementei para não impor regra.
-- Emojis -> SVG/dots — **DESIGN SEU**: 100+ emojis (ícones de nav 🤰🩺👶🌸🧓🧠, indicadores 🟢🟡🔴, ⚠️🚨✅). Não fiz às cegas (risco de ficar grotesco); precisa escolher ícones/estilo. Contraria a regra "nunca emojis".
+- Emojis -> SVG: **FEITO** (a seu pedido). 281 emojis pictográficos trocados por ~55 ícones SVG (helper ic() + data-ic hidratado; risco -> .dot .dg/.da/.dr); em texto puro (SOAP/PDF/toast) viraram texto limpo. Verificado: 0 emoji restante, 125 svg no DOM, 122 data-ic hidratados, console limpo. FALTA: sua validação visual do desenho dos ícones em dispositivo real. Obs.: o commit normalizou CRLF->LF; revisar com `git diff -w`.
 - Recuperação de senha (resetPasswordForEmail), botão "sincronizar agora", poda/arquivamento de esf_atendimentos_*.
 
 ## Fase 4 — Estrutura (PENDENTE — a mais arriscada; contexto fresco)

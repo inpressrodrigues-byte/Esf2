@@ -26,7 +26,7 @@ Documento vivo. Atualizado a cada grupo de correção. Serve de ponto de retomad
 | 2 | Performance: externalizar blobs + runtime | FEITO (4.65MB→2.19MB; runtime perf feito) |
 | 3 | Faxina de código morto | FEITO (só CSS mortas deferidas, ~500 linhas + 883KB removidos) |
 | 4 | Estrutura para escala (seção 5) | PENDENTE (mais arriscada — fazer com contexto fresco) |
-| 5 | UX (seção 8) | PARCIAL (contraste, erros PT-BR, inputmode, label for) |
+| 5 | UX (seção 8) | PARCIAL (contraste, erros PT-BR, inputmode, label for, EMOJIS->SVG) |
 | Final | CORRECOES.md (relatório item-a-item) | FEITO (parcial — reflete o estado atual) |
 
 ### Estado do index.html: 4.65 MB (baseline) -> 1.36 MB (atual). Meta <1.6MB ATINGIDA.
