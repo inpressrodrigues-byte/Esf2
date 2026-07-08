@@ -46,7 +46,7 @@ function exigirPermissao(chave,mensagem='Você não possui permissão para usar 
 <style>
 :root{
   --bg:#f1f0eb;--sf:#fff;--sf2:#f6f5f0;--bd:#dddad1;--bd2:#c5c2b6;
-  --tx:#1c1b17;--tx2:#59574f;--tx3:#96938a;
+  --tx:#1c1b17;--tx2:#59574f;--tx3:#7a776d;
   --green:#175930;--gbg:#eaf3ee;--gmid:#b6dcc5;
   --rose:#781a3a;--rbg:#f6e9ed;--rmid:#efbdcc;
   --blue:#193b6a;--bbg:#e6edf7;--bmid:#b1c7e9;
@@ -1020,7 +1020,7 @@ body.sidebar-collapsed .dev-nav{display:none}
         <div class="f"><label>Nome completo</label><input type="text" id="pna-nome" placeholder="Nome da gestante"></div>
         <div class="f"><label>Data de nascimento</label><input type="date" id="pna-nasc" oninput="idadeGest()"></div>
         <div class="f"><label>Idade</label><input class="ro" readonly id="pna-idade" type="text"></div>
-        <div class="f"><label>CPF</label><input type="text" id="pna-cpf" class="paciente-cpf" placeholder="000.000.000-00"></div>
+        <div class="f"><label>CPF</label><input inputmode="numeric" type="text" id="pna-cpf" class="paciente-cpf" placeholder="000.000.000-00"></div>
         <div class="f"><label>CNS</label><input type="text" id="pna-cns"></div>
         <div class="f"><label>Prontuário / Registro Local</label><input type="text" id="pna-prontuario"></div>
         <div class="f"><label>Estado Civil</label><select id="pna-estcivil"><option value="">—</option><option>Solteira</option><option>Casada</option><option>União Estável</option><option>Separada / Divorciada</option><option>Viúva</option></select></div>
@@ -1340,7 +1340,7 @@ body.sidebar-collapsed .dev-nav{display:none}
         <div class="f"><label>Nome</label><input type="text" id="pnc-nome"></div>
         <div class="f"><label>Data de nascimento</label><input type="date" id="pnc-nasc" oninput="calcAge('pnc-nasc','pnc-idade');avaliarVacinasModulo('pnc')"></div>
         <div class="f"><label>Idade</label><input class="ro" readonly id="pnc-idade" type="text"></div>
-        <div class="f"><label>CPF</label><input type="text" id="pnc-cpf" class="paciente-cpf" placeholder="000.000.000-00"></div>
+        <div class="f"><label>CPF</label><input inputmode="numeric" type="text" id="pnc-cpf" class="paciente-cpf" placeholder="000.000.000-00"></div>
         <div class="f"><label>CNS</label><input type="text" id="pnc-cns"></div>
         <div class="f"><label>Nº da consulta PN</label><input type="number" id="pnc-num" min="1"></div>
       </div>
@@ -1516,7 +1516,7 @@ body.sidebar-collapsed .dev-nav{display:none}
         <div class="f"><label>Sexo</label><select id="pu-sexo" onchange="updateAntropometria()"><option value="">—</option><option>Menina</option><option>Menino</option></select></div>
         <div class="f"><label>Idade cronológica</label><input class="computed" readonly id="pu-idade" type="text" placeholder="Preencha a data de nasc."></div>
         <div class="f"><label>Nº DNV <small style="opacity:.65;font-size:.85em">(Declaração de Nascido Vivo)</small></label><input type="text" id="pu-dnv"></div>
-        <div class="f"><label>CPF</label><input type="text" id="pu-cpf" class="paciente-cpf" placeholder="000.000.000-00"></div>
+        <div class="f"><label>CPF</label><input inputmode="numeric" type="text" id="pu-cpf" class="paciente-cpf" placeholder="000.000.000-00"></div>
         <div class="f"><label>CNS</label><input type="text" id="pu-cns"></div>
         <div class="f"><label>Etnia / Cor</label><select id="pu-raca"><option value="">—</option><option>Branca</option><option>Preta</option><option>Parda</option><option>Amarela</option><option>Indígena</option></select></div>
         <div class="f"><label>Responsável principal (Nome)</label><input type="text" id="pu-resp"></div>
@@ -2168,7 +2168,7 @@ body.sidebar-collapsed .dev-nav{display:none}
         <div class="f"><label>Nome completo *</label><input type="text" id="prev-nome" placeholder="Nome completo da mulher"></div>
         <div class="f"><label>Nome da mãe *</label><input type="text" id="prev-nome-mae" placeholder="Nome completo da mãe"></div>
         <div class="f"><label>Apelido</label><input type="text" id="prev-apelido"></div>
-        <div class="f"><label>CPF</label><input type="text" id="prev-cpf" class="paciente-cpf" placeholder="000.000.000-00"></div>
+        <div class="f"><label>CPF</label><input inputmode="numeric" type="text" id="prev-cpf" class="paciente-cpf" placeholder="000.000.000-00"></div>
         <div class="f"><label>Cartão SUS *</label><input type="text" id="prev-cns" placeholder="000 0000 0000 0000"></div>
         <div class="f"><label>Data de nascimento *</label><input type="date" id="prev-nasc" oninput="idadePrev(); prevVerificaIdade()"></div>
         <div class="f"><label>Idade</label><input class="ro" readonly id="prev-idade" type="text"></div>
@@ -2901,7 +2901,7 @@ body.sidebar-collapsed .dev-nav{display:none}
       <div class="ct"><span class="dot da"></span>Identificação e Vitais</div>
       <div class="g3">
         <div class="f"><label>Nome</label><input type="text" id="id-nome"></div>
-        <div class="f"><label>CPF</label><input type="text" id="id-cpf" class="paciente-cpf" placeholder="000.000.000-00"></div>
+        <div class="f"><label>CPF</label><input inputmode="numeric" type="text" id="id-cpf" class="paciente-cpf" placeholder="000.000.000-00"></div>
         <div class="f"><label>Data de nascimento</label><input type="date" id="id-nasc" oninput="idadeIdoso()"></div>
         <div class="f"><label>Idade</label><input class="ro" readonly id="id-idade" type="text"></div>
         <div class="f"><label>Peso (kg)</label><input type="number" id="id-peso" step="0.1" oninput="idmoIdoso()"></div>
@@ -3042,7 +3042,7 @@ body.sidebar-collapsed .dev-nav{display:none}
         <div class="f"><label>Nome completo</label><input type="text" id="sm-nome"></div>
         <div class="f"><label>Data de nascimento</label><input type="date" id="sm-nasc" oninput="idadeSM()"></div>
         <div class="f"><label>Idade</label><input class="ro" readonly id="sm-idade" type="text" placeholder="Preencha a data de nasc."></div>
-        <div class="f"><label>CPF</label><input type="text" id="sm-cpf" class="paciente-cpf" placeholder="000.000.000-00"></div>
+        <div class="f"><label>CPF</label><input inputmode="numeric" type="text" id="sm-cpf" class="paciente-cpf" placeholder="000.000.000-00"></div>
         <div class="f"><label>CNS</label><input type="text" id="sm-cns"></div>
         <div class="f"><label>Nº de Prontuário</label><input type="text" id="sm-prontuario"></div>
         <div class="f"><label>Sexo</label><select id="sm-sexo"><option value="">—</option><option>Feminino</option><option>Masculino</option><option>Não binário / Outro</option><option>Prefere não informar</option></select></div>
@@ -3671,7 +3671,7 @@ body.sidebar-collapsed .dev-nav{display:none}
       <div class="brow"><button class="btn btn-s" type="button" onclick="sinanBuscarPaciente()">Buscar paciente por CPF</button><span id="sinan-paciente-status" style="font-size:12px;color:var(--tx3)"></span></div>
       <div class="g3">
         <div class="f span2"><label>8. Nome do paciente *</label><input id="sinan-nome" class="sinan-obrigatorio" data-label="Nome do paciente"></div>
-        <div class="f"><label>CPF para localizar cadastro</label><input id="sinan-cpf" class="paciente-cpf" placeholder="000.000.000-00"></div>
+        <div class="f"><label>CPF para localizar cadastro</label><input id="sinan-cpf" inputmode="numeric" class="paciente-cpf" placeholder="000.000.000-00"></div>
         <div class="f"><label>9. Data de nascimento</label><input type="date" id="sinan-nasc" oninput="sinanAtualizarIdade()"></div>
         <div class="f"><label>10. Idade *</label><input id="sinan-idade" class="sinan-obrigatorio" data-label="Idade"></div>
         <div class="f"><label>Unidade da idade *</label><select id="sinan-idade-unidade" class="sinan-obrigatorio" data-label="Unidade da idade"><option value="4">4 — Ano</option><option value="3">3 — Mês</option><option value="2">2 — Dia</option><option value="1">1 — Hora</option></select></div>
@@ -3679,7 +3679,7 @@ body.sidebar-collapsed .dev-nav{display:none}
         <div class="f"><label>12. Gestante *</label><select id="sinan-gestante" class="sinan-obrigatorio" data-label="Gestante"><option value="">Selecione...</option><option value="1">1 — 1º trimestre</option><option value="2">2 — 2º trimestre</option><option value="3">3 — 3º trimestre</option><option value="4">4 — Idade gestacional ignorada</option><option value="5">5 — Não</option><option value="6">6 — Não se aplica</option><option value="9">9 — Ignorado</option></select></div>
         <div class="f"><label>13. Raça / cor *</label><select id="sinan-raca" class="sinan-obrigatorio" data-label="Raça ou cor"><option value="">Selecione...</option><option value="1">1 — Branca</option><option value="2">2 — Preta</option><option value="3">3 — Amarela</option><option value="4">4 — Parda</option><option value="5">5 — Indígena</option><option value="9">9 — Ignorado</option></select></div>
         <div class="f"><label>14. Escolaridade *</label><select id="sinan-escolaridade" class="sinan-obrigatorio" data-label="Escolaridade"><option value="">Selecione...</option><option value="0">0 — Analfabeto</option><option value="1">1 — 1ª a 4ª série incompleta</option><option value="2">2 — 4ª série completa</option><option value="3">3 — 5ª a 8ª série incompleta</option><option value="4">4 — Ensino fundamental completo</option><option value="5">5 — Ensino médio incompleto</option><option value="6">6 — Ensino médio completo</option><option value="7">7 — Educação superior incompleta</option><option value="8">8 — Educação superior completa</option><option value="9">9 — Ignorado</option><option value="10">10 — Não se aplica</option></select></div>
-        <div class="f span2"><label>15. Número do Cartão SUS</label><input id="sinan-cns" maxlength="15"></div>
+        <div class="f span2"><label>15. Número do Cartão SUS</label><input id="sinan-cns" inputmode="numeric" maxlength="15"></div>
         <div class="f span3"><label>16. Nome da mãe *</label><input id="sinan-mae" class="sinan-obrigatorio" data-label="Nome da mãe"></div>
       </div>
     </div>
@@ -3694,7 +3694,7 @@ body.sidebar-collapsed .dev-nav{display:none}
         <div class="f"><label>Código IBGE</label><input id="sinan-mun-res-cod" maxlength="7" value="4127700"></div>
         <div class="f"><label>22. Distrito</label><input id="sinan-distrito"></div>
         <div class="f"><label>23. Bairro *</label><input id="sinan-bairro" class="sinan-obrigatorio" data-label="Bairro"></div>
-        <div class="f"><label>30. CEP</label><input id="sinan-cep" maxlength="9" onblur="sinanBuscarCep()"></div>
+        <div class="f"><label>30. CEP</label><input id="sinan-cep" inputmode="numeric" maxlength="9" onblur="sinanBuscarCep()"></div>
         <div class="f span2"><label>24. Logradouro *</label><input id="sinan-logradouro" class="sinan-obrigatorio" data-label="Logradouro"></div>
         <div class="f"><label>Código do logradouro</label><input id="sinan-logradouro-cod"></div>
         <div class="f"><label>25. Número</label><input id="sinan-numero"></div>
@@ -3702,7 +3702,7 @@ body.sidebar-collapsed .dev-nav{display:none}
         <div class="f"><label>27. Geo campo 1</label><input id="sinan-geo1"></div>
         <div class="f"><label>28. Geo campo 2</label><input id="sinan-geo2"></div>
         <div class="f"><label>29. Ponto de referência</label><input id="sinan-referencia"></div>
-        <div class="f"><label>31. Telefone com DDD</label><input id="sinan-telefone"></div>
+        <div class="f"><label>31. Telefone com DDD</label><input id="sinan-telefone" type="tel" inputmode="tel"></div>
         <div class="f"><label>32. Zona *</label><select id="sinan-zona" class="sinan-obrigatorio" data-label="Zona de residência"><option value="">Selecione...</option><option value="1">1 — Urbana</option><option value="2">2 — Rural</option><option value="3">3 — Periurbana</option><option value="9">9 — Ignorado</option></select></div>
         <div class="f"><label>33. País, se residente fora do Brasil</label><input id="sinan-pais"></div>
       </div>
@@ -3839,14 +3839,14 @@ body.sidebar-collapsed .dev-nav{display:none}
       <div>
         <div class="ct"><span class="dot dg"></span>Cadastro territorial do paciente</div>
         <div class="g2">
-          <div class="f required-mark"><label>CPF</label><input id="terr-cpf" class="paciente-cpf" onblur="carregarCadastroTerritorial()"></div>
+          <div class="f required-mark"><label>CPF</label><input id="terr-cpf" inputmode="numeric" class="paciente-cpf" onblur="carregarCadastroTerritorial()"></div>
           <div class="f"><label>Nome</label><input id="terr-nome" readonly class="ro"></div>
           <div class="f"><label>Microárea</label><input id="terr-microarea"></div>
           <div class="f"><label>ACS responsável</label><input id="terr-acs"></div>
           <div class="f"><label>Família</label><input id="terr-familia"></div>
           <div class="f"><label>Responsável familiar</label><input id="terr-responsavel-familiar"></div>
           <div class="f span2"><label>Endereço completo</label><input id="terr-endereco"></div>
-          <div class="f"><label>Telefone</label><input id="terr-telefone" class="telefone-mask"></div>
+          <div class="f"><label>Telefone</label><input id="terr-telefone" type="tel" inputmode="tel" class="telefone-mask"></div>
           <div class="f"><label>Condição de moradia</label><select id="terr-moradia"><option value="">—</option><option>Adequada</option><option>Parcialmente adequada</option><option>Inadequada</option><option>Situação de rua</option></select></div>
           <div class="f"><label>Rede de apoio</label><select id="terr-rede-apoio"><option value="">—</option><option>Adequada</option><option>Limitada</option><option>Ausente</option></select></div>
           <div class="f"><label>Vulnerabilidade social</label><select id="terr-vulnerabilidade"><option value="">—</option><option>Não identificada</option><option>Baixa</option><option>Média</option><option>Alta</option></select></div>
@@ -9937,7 +9937,13 @@ async function authLogin() {
   btn.innerText = 'Entrar';
 
   if (error) {
-    errDiv.innerText = 'Erro: ' + error.message;
+    const m=(error.message||'').toLowerCase();
+    let msg='Não foi possível entrar. Verifique o email e a senha.';
+    if(/invalid login|invalid credentials|credentials/.test(m))msg='Email ou senha incorretos.';
+    else if(/email not confirmed|not confirmed/.test(m))msg='Seu email ainda não foi confirmado. Fale com o administrador.';
+    else if(/network|failed to fetch|timeout|não respondeu|rede/.test(m))msg='Sem resposta do servidor. Verifique a conexão ou o bloqueio da rede da unidade (use o Diagnóstico de conexão).';
+    else if(/too many|rate limit/.test(m))msg='Muitas tentativas de login. Aguarde alguns minutos e tente novamente.';
+    errDiv.innerText = msg;
     errDiv.style.display = 'block';
   }
 }
@@ -11300,7 +11306,7 @@ document.addEventListener('input',e=>{if(e.target?.id?.startsWith('vd-')||String
 function testesRapidosISTHtml(){return`<div class="card"><div class="ct"><span class="dot dr"></span>Testes rápidos e laudos padronizados</div><div class="alert alert-i"><strong>Modelo completo:</strong> gestante utiliza DUO HIV/Sífilis como TR1; não gestante utiliza testes separados. Registre TR2, marca/lote, coleta, executor e parceiro(a) quando presente.</div><div class="g3"><div class="f"><label>Condição da pessoa principal</label><select id="ist-tr-condicao" onchange="atualizarTestesRapidosIST()"><option value="naogestante">Não gestante — testes separados</option><option value="gestante">Gestante — HIV/Sífilis DUO</option></select></div><div class="f"><label>Parceiro(a) presente?</label><select id="ist-tr-parceiro-presente" onchange="atualizarTestesRapidosIST()"><option value="nao">Não</option><option value="sim">Sim — gerar laudo separado</option></select></div><div class="f"><label>Município</label><input id="ist-tr-municipio" value="Toledo"></div></div><div class="tr-person"><div class="tr-person-head">Pessoa principal — dados puxados da identificação</div><div class="tr-person-body"><div class="g4"><div class="f"><label>Nome</label><input id="ist-tr-p-nome" class="ro" readonly></div><div class="f"><label>Prontuário</label><input id="ist-tr-p-pront"></div><div class="f"><label>Data de nascimento</label><input id="ist-tr-p-nasc" class="ro" readonly></div><div class="f"><label>Sexo</label><select id="ist-tr-p-sexo"><option>Feminino</option><option>Masculino</option></select></div></div><div id="ist-tr-p-testes"></div><div class="g3" style="margin-top:10px"><div class="f"><label>Data da coleta</label><input type="date" id="ist-tr-p-data"></div><div class="f"><label>Horário da leitura</label><input type="time" id="ist-tr-p-hora"></div><div class="f"><label>Executor / COREN</label><input id="ist-tr-p-executor"></div></div><div class="brow"><button class="btn btn-p" type="button" onclick="gerarLaudoISTStandalone('p')">Gerar laudo da pessoa principal</button></div></div></div><div class="tr-person" id="ist-tr-parceiro-box" style="display:none"><div class="tr-person-head">Parceiro(a) — laudo individual</div><div class="tr-person-body"><div class="g4"><div class="f"><label>Nome completo</label><input id="ist-tr-c-nome"></div><div class="f"><label>Prontuário</label><input id="ist-tr-c-pront"></div><div class="f"><label>Data de nascimento</label><input type="date" id="ist-tr-c-nasc"></div><div class="f"><label>Sexo</label><select id="ist-tr-c-sexo"><option>Masculino</option><option>Feminino</option></select></div></div><div id="ist-tr-c-testes"></div><div class="g3" style="margin-top:10px"><div class="f"><label>Data da coleta</label><input type="date" id="ist-tr-c-data"></div><div class="f"><label>Horário da leitura</label><input type="time" id="ist-tr-c-hora"></div><div class="f"><label>Executor / COREN</label><input id="ist-tr-c-executor"></div></div><div class="brow"><button class="btn btn-p" type="button" onclick="gerarLaudoISTStandalone('c')">Gerar laudo do parceiro(a)</button></div></div></div><div id="ist-tr-alertas"></div><div class="brow"><button class="btn btn-ai" type="button" onclick="gerarTodosLaudosIST()">Gerar todos os laudos necessários</button></div></div>`}
 function rotuloId(txt){return String(txt).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}
 function campoModulo(p,c){const[id,l,t,ops]=c,full=`${p}-${id}`,span=t==='textarea'?' span2':'';if(t==='textarea')return`<div class="f${span}"><label>${l}</label><textarea id="${full}"></textarea></div>`;if(t==='select')return`<div class="f"><label>${l}</label><select id="${full}" onchange="avaliarPrioridadeModulo('${p}')"><option value="">—</option>${ops.map(x=>`<option>${x}</option>`).join('')}</select></div>`;return`<div class="f"><label>${l}</label><input id="${full}" type="${t}" oninput="avaliarPrioridadeModulo('${p}')"></div>`}
-function identificacaoModulo(p){return`<div class="module-form-grid"><div class="f required-mark"><label>Paciente</label><input id="${p}-nome" required></div><div class="f required-mark"><label>CPF</label><input id="${p}-cpf" class="paciente-cpf" required></div><div class="f"><label>CNS</label><input id="${p}-cns"></div><div class="f"><label>Data de nascimento</label><input id="${p}-nasc" type="date"></div><div class="f"><label>Data e horário</label><input id="${p}-data-hora" type="datetime-local" value="${new Date().toISOString().slice(0,16)}"></div><div class="f"><label>Profissional</label><input id="${p}-profissional" value="${escTR(getUsuarioAtual()?.nome||'')}"></div><div class="f"><label>Telefone</label><input id="${p}-telefone" class="telefone-mask"></div><div class="f"><label>Microárea</label><input id="${p}-microarea"></div><div class="f"><label>CEP</label><input id="${p}-cep" class="cep-auto" inputmode="numeric" maxlength="9" placeholder="00000-000"><small id="${p}-cep-status"></small></div><div class="f span2"><label>Logradouro</label><input id="${p}-logradouro"></div><div class="f"><label>Número</label><input id="${p}-numero"></div><div class="f"><label>Complemento</label><input id="${p}-complemento"></div><div class="f"><label>Bairro</label><input id="${p}-bairro"></div><div class="f"><label>Município</label><input id="${p}-municipio"></div><div class="f"><label>UF</label><input id="${p}-uf" maxlength="2"></div><input type="hidden" id="${p}-endereco"></div>`}
+function identificacaoModulo(p){return`<div class="module-form-grid"><div class="f required-mark"><label>Paciente</label><input id="${p}-nome" required></div><div class="f required-mark"><label>CPF</label><input id="${p}-cpf" class="paciente-cpf" inputmode="numeric" required></div><div class="f"><label>CNS</label><input id="${p}-cns" inputmode="numeric"></div><div class="f"><label>Data de nascimento</label><input id="${p}-nasc" type="date"></div><div class="f"><label>Data e horário</label><input id="${p}-data-hora" type="datetime-local" value="${new Date().toISOString().slice(0,16)}"></div><div class="f"><label>Profissional</label><input id="${p}-profissional" value="${escTR(getUsuarioAtual()?.nome||'')}"></div><div class="f"><label>Telefone</label><input id="${p}-telefone" class="telefone-mask" type="tel" inputmode="tel"></div><div class="f"><label>Microárea</label><input id="${p}-microarea"></div><div class="f"><label>CEP</label><input id="${p}-cep" class="cep-auto" inputmode="numeric" maxlength="9" placeholder="00000-000"><small id="${p}-cep-status"></small></div><div class="f span2"><label>Logradouro</label><input id="${p}-logradouro"></div><div class="f"><label>Número</label><input id="${p}-numero"></div><div class="f"><label>Complemento</label><input id="${p}-complemento"></div><div class="f"><label>Bairro</label><input id="${p}-bairro"></div><div class="f"><label>Município</label><input id="${p}-municipio"></div><div class="f"><label>UF</label><input id="${p}-uf" maxlength="2"></div><input type="hidden" id="${p}-endereco"></div>`}
 function exameGuiadoModulo(p){return`<div class="guided-exam-grid">${EXAME_GUIADO_SISTEMAS.map(s=>{const k=rotuloId(s);return`<div class="guided-exam-item"><strong>${s}</strong><div class="guided-exam-controls"><select id="${p}-ef-${k}" onchange="atualizarExameGuiado('${p}','${k}')"><option value="">Não avaliado</option><option>Normal</option><option>Alterado</option></select><input id="${p}-ef-${k}-desc" placeholder="Descrição se alterado" disabled></div></div>`}).join('')}</div><input type="hidden" id="${p}-exame-guiado">`}
 function atualizarExameGuiado(p,k){const s=document.getElementById(`${p}-ef-${k}`),d=document.getElementById(`${p}-ef-${k}-desc`);if(d){d.disabled=s.value!=='Alterado';if(d.disabled)d.value=''}const linhas=EXAME_GUIADO_SISTEMAS.map(x=>{const id=rotuloId(x),v=val(`${p}-ef-${id}`),desc=val(`${p}-ef-${id}-desc`);return v?`${x}: ${v}${desc?` — ${desc}`:''}.`:''}).filter(Boolean);document.getElementById(`${p}-exame-guiado`).value=linhas.join('\n')}
 function chipsModulo(p,lista,tipo){return`<div class="${tipo==='alert'?'alert-check-list':'complaint-list'}">${lista.map(x=>`<button type="button" class="${tipo==='alert'?'alert-chip':'complaint-chip'}" onclick="alternarChipModulo('${p}','${tipo}',this)">${x}</button>`).join('')}</div><input type="hidden" id="${p}-${tipo==='alert'?'alerts':'complaints'}">`}
