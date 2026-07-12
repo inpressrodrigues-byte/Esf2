@@ -1,12 +1,11 @@
 # CORRECOES — Execução da Auditoria (branch `correcoes-auditoria`)
 
-Estado: **Fases 1 e 2 concluídas; Fase 3 concluída (só CSS mortas deferidas); Fase 5 parcial. Fase 4 pendente.**
-21 commits, cada grupo verificado. Nenhum push, nenhum deploy, `main` intocado.
+Estado: **Fases 1, 2, 3, 5 concluídas. Fase 4: consolidações seguras feitas; refactors de texto clínico DEFERIDOS de propósito (segurança).** 26 commits, cada grupo verificado por sintaxe + console headless real (P0 e itens sensíveis por CDP). Nenhum push, nenhum deploy, `main` intocado.
 
 ## Métricas antes/depois
 | Métrica | Baseline | Atual |
 |---|---|---|
-| index.html | 4,65 MB / 13.184 linhas | **1,28 MB / 12.751 linhas** (−73%) |
+| index.html | 4,65 MB / 13.184 linhas | **1,29 MB / 12.952 linhas** (−72%) |
 | Blobs base64 no HTML | ~3,34 MB inline | externalizados (defer) / ~883KB mortos removidos |
 | Arquivos novos | — | vendor/pdf-lib.min.js (513KB), assets/modelos.js (2MB), img/anatomia-vulva-vagina.jpg (258KB) |
 | Código morto removido | — | ~500 linhas (calibrador, VD 1.0, cadeia SINAN, 26 fns, cadastro, helpers) |
@@ -60,15 +59,29 @@ FEITO (~500 linhas + 883KB de blobs mortos):
 Cada remoção: confirmada sem chamadores externos + sintaxe/console verificados.
 DEFERIDO (baixo valor): ~20 classes CSS mortas (badge-*, modal-*, bg-blue/purple, clinical-tabs, ai-soap-pill, admin-chip, lab-high/low/critical, etc. — confirmadas mortas via node; regras agrupadas tornam a remoção fiddly; harmless).
 
-## Fase 5 — UX (PARCIAL)
-FEITO: contraste --tx3 (WCAG AA); erros de login em PT-BR; inputmode=numeric em CPF/CNS/CEP + type=tel em telefones (gerador + estáticos); 296 labels ligados aos campos (for=).
-PENDENTE:
-- Obrigatoriedade nome/CPF ao salvar — **DECISÃO SUA (regra de negócio)**: bloquear ou avisar? CPF é sempre exigido (ex.: acolhimento sem identificação)? Não implementei para não impor regra.
-- Emojis -> SVG: **FEITO** (a seu pedido). 281 emojis pictográficos trocados por ~55 ícones SVG (helper ic() + data-ic hidratado; risco -> .dot .dg/.da/.dr); em texto puro (SOAP/PDF/toast) viraram texto limpo. Verificado: 0 emoji restante, 125 svg no DOM, 122 data-ic hidratados, console limpo. FALTA: sua validação visual do desenho dos ícones em dispositivo real. Obs.: o commit normalizou CRLF->LF; revisar com `git diff -w`.
-- Recuperação de senha (resetPasswordForEmail), botão "sincronizar agora", poda/arquivamento de esf_atendimentos_*.
+## Fase 4 — Estrutura (consolidações seguras FEITAS; refactors de texto clínico DEFERIDOS)
+FEITO (provado sem mudança de output, por CDP):
+- Função de escape única: `vacEsc`/`protoEsc` viraram alias de `escTR`. `docCalEsc`/`gestEsc` NÃO unificados (usam `??` em vez de `||` — saída diferente para 0/false/NaN; preservados).
+- `paginaDoModulo(prefix)`: 1 helper substitui 4 cópias da ternária + 1 variante (mapeamento idêntico provado nos 13 prefixos + desconhecido).
+- Coordenadas ERSM (`sourceYPage1/2`) extraídas para constante única (byte-idênticas).
+DEFERIDO DE PROPÓSITO (segurança clínica — NÃO fazer às cegas):
+- Unificar pipeline SOAP do Preventivo/Saúde Mental (montarSoapClinico): reescreve a geração inteira da nota de 2 módulos; espaço de entrada grande demais para provar saída byte-idêntica em ambiente headless. Risco de mudança silenciosa de texto clínico.
+- Registro canônico de módulos: as ~9 listas têm MEMBROS e SHAPES diferentes (não é dedup, é redesenho); forçar unificação arriscaria mudar quais módulos aparecem onde. O caso concreto do bug (vd faltando) já foi corrigido pontualmente (bug 2).
+- Unificar cálculo de idade: as 3 convenções (T00:00:00 / T12:00:00 / UTC) dão resultados diferentes em bordas; unificar MUDA a idade calculada de algum módulo (não é preservável por design).
+- Desenhador SINAN único / mapas anatômicos genéricos: refactor de saída em PDF / DOM interativo, inviável provar exaustivamente headless.
+- IDs SOAP divergentes (bug 15): renomear é mecânico mas SEM benefício atual (os geradores usam listas de ids explícitas, não convenção — não há automação quebrada hoje) e com risco real. Deixado como está.
+- **checkPnaQueixas vs checkPncQueixas**: a auditoria dizia "quase palavra por palavra", mas investigação exaustiva mostrou que **NÃO são duplicatas**: 12/12 textos de conduta divergem, HTML de saída diferente (complaint-protocol vs alert), ordem diferente, fontes diferentes (chips+livre vs checkboxes), itens exclusivos da pnc. Deduplicar seria mais complexo e sem ganho real. Correto NÃO mexer.
+Recomendação: se quiser esses refactors no futuro, faça um por um, com teste de diff de texto gerado e validação sua em produção — não em lote cego.
 
-## Fase 4 — Estrutura (PENDENTE — a mais arriscada; contexto fresco)
-Registro canônico de módulos, padronizar IDs SOAP (bug 15), unificar pipeline SOAP (preventivo/SM), mapas anatômicos genéricos, coords ERSM únicas, escape/idade únicos, dedup checkPnaQueixas/Pnc. Refactor de geração de SOAP clínico — preservar texto (diff antes/depois). Ver seção 5 do AUDITORIA.md e passos (a)-(j) do PROMPT-CORRECAO.md.
+## Fase 5 — UX (COMPLETA no que é seguro/aditivo)
+FEITO:
+- Contraste --tx3 (WCAG AA); erros de login em PT-BR; inputmode=numeric em CPF/CNS/CEP + type=tel em telefones (gerador + estáticos); 296 labels ligados (for=).
+- Emojis -> SVG: 281 emojis pictográficos trocados por ~55 ícones SVG (helper ic() + data-ic hidratado; risco -> .dot .dg/.da/.dr); em texto puro (SOAP/PDF/toast) viraram texto limpo. Verificado: 0 emoji, 125 svg no DOM, 122 data-ic hidratados. (Commit normalizou CRLF->LF; revisar com `git diff -w`.) FALTA sua validação visual do desenho dos ícones em dispositivo real.
+- Recuperação de senha ("Esqueci minha senha" -> resetPasswordForEmail, mensagem neutra).
+- Botão "Sincronizar agora" (menu do usuário; reusa sync existente, guarda offline).
+- Poda não-destrutiva: arquivarAtendimentosAntigos() exporta TUDO e só depois remove >12 meses do localStorage (nuvem permanece); botão no Histórico; aviso 1x/sessão acima de 800.
+- Aviso soft (não bloqueia) ao salvar sem nome/CPF, via modal próprio.
+DECISÃO SUA (mantida como aviso, não implementei bloqueio): se salvar sem nome/CPF deve ser BLOQUEADO de vez, ou se CPF é sempre exigido (ex.: acolhimento sem identificação). Hoje é só aviso não-bloqueante.
 
 ## Recomendação de teste (dispositivo real, antes de merge/deploy)
 1. Gerar 1 PDF de CADA tipo: laudo TR, ERSM, IVCF-20, SINAN específico, Ficha Rosa, pacote diabetes (confirma que a externalização defer não quebrou geração).
