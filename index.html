@@ -283,7 +283,7 @@ input[type="file"]{padding: 5px; font-size: 13px; cursor: pointer; background: v
 .free-lab-table{width:100%;min-width:760px;border-collapse:collapse;font-size:12px}
 .free-lab-table th{padding:9px 10px;text-align:left;background:var(--sf2);border-bottom:1px solid var(--bd);font-size:10px;text-transform:uppercase;color:var(--tx2)}
 .free-lab-table td{padding:9px 10px;border-bottom:1px solid var(--bd);vertical-align:top}
-.free-lab-table tr:last-child td{border-bottom:0}.free-lab-table tr.lab-high td,.free-lab-table tr.lab-low td{background:var(--abg)}.free-lab-table tr.lab-critical td{background:var(--rbg)}
+.free-lab-table tr:last-child td{border-bottom:0}
 .free-lab-status{font-weight:700;white-space:nowrap}.free-lab-status.ok{color:var(--green)}.free-lab-status.att{color:var(--amber)}.free-lab-status.crit{color:var(--rose)}
 .free-lab-group{margin-top:14px;border:1px solid var(--bd);border-radius:8px;overflow:hidden;background:var(--sf)}
 .free-lab-group:first-child{margin-top:10px}.free-lab-group-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;background:var(--sf2);border-bottom:1px solid var(--bd);font-weight:800;color:var(--green)}
@@ -351,8 +351,6 @@ input[type="file"]{padding: 5px; font-size: 13px; cursor: pointer; background: v
 .clinical-guide-card{padding:0;overflow:hidden}.clinical-guide-card .clinical-guide{border:0;border-radius:0;margin:0}
 .clinical-guide-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;background:var(--sf2);border-bottom:1px solid var(--bd)}
 .clinical-guide-head strong{font-size:13px}.clinical-guide-head span{font-size:11px;color:var(--tx2)}
-.clinical-tabs{display:flex;gap:5px;padding:8px 10px 0}.clinical-tab{border:1px solid var(--bd);background:var(--sf2);color:var(--tx2);padding:6px 10px;border-radius:5px;cursor:pointer;font-size:12px;font-weight:600}
-.clinical-tab.on{background:var(--green);border-color:var(--green);color:#fff}
 .clinical-pane{display:none;padding:10px}.clinical-pane.on{display:block}
 .clinical-group{padding:8px 0;border-bottom:1px solid var(--bd)}.clinical-group:last-child{border-bottom:0}
 .clinical-group-title{font-size:10px;font-weight:800;color:var(--tx2);text-transform:uppercase;margin-bottom:6px}
@@ -440,21 +438,18 @@ input[type="file"]{padding: 5px; font-size: 13px; cursor: pointer; background: v
 .pb-title{font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px}
 .pb-badge{font-size:11px;font-family:var(--mono);padding:2px 7px;border-radius:4px;font-weight:500}
 .bg-green{background:var(--gbg);color:var(--green)}.bg-rose{background:var(--rbg);color:var(--rose)}
-.bg-blue{background:var(--bbg);color:var(--blue)}.bg-amber{background:var(--abg);color:var(--amber)}
-.bg-purple{background:var(--pbg);color:var(--purple)}
+.bg-amber{background:var(--abg);color:var(--amber)}
 .pb-actions{display:flex;gap:6px;align-items:center}
 .pb-arrow{font-size:11px;color:var(--tx3);transition:transform .2s}
 .pb.open .pb-arrow{transform:rotate(180deg)}
 .pb-body{display:none;padding:14px 16px;border-top:1px solid var(--bd);background:var(--sf)}
 .pb.open .pb-body{display:block}
-.list-ed{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
 .list-row{display:flex;align-items:flex-start;gap:7px;}
 .list-row input,.list-row select{flex:1;border:1px solid var(--bd);border-radius:var(--r);padding:7px 10px;font-family:var(--font);font-size:13px;color:var(--tx);background:var(--sf);transition:border-color .15s}
 .del-btn{width:28px;height:28px;border-radius:6px;border:1px solid var(--rmid);background:var(--rbg);color:var(--rose);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .12s;line-height:1;padding:0}
 .add-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border:1px dashed var(--gmid);border-radius:var(--r);background:transparent;color:var(--green);font-family:var(--font);font-size:13px;cursor:pointer;font-weight:500;transition:background .12s}
 .drug-row{display:grid;grid-template-columns:2fr 1.5fr 1fr 1.5fr 28px;gap:6px;align-items:start;margin-bottom:6px;}
 .drug-row input,.drug-row select,.drug-row textarea{border:1px solid var(--bd);border-radius:var(--r);padding:6px 8px;font-family:var(--font);font-size:13px;color:var(--tx);background:var(--sf)}
-.info-box-ed{border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;margin-bottom:8px;}
 .info-box-head{display:flex;gap:8px;align-items:center;padding:8px 10px;background:var(--sf2);border-bottom:1px solid var(--bd)}
 .info-box-head input{flex:1;border:none;background:transparent;font-family:var(--font);font-size:13px;font-weight:600;color:var(--tx);outline:none}
 .info-box-head select{border:1px solid var(--bd);border-radius:5px;padding:3px 6px;font-size:12px;background:var(--sf);font-family:var(--font)}
@@ -467,7 +462,6 @@ input[type="file"]{padding: 5px; font-size: 13px; cursor: pointer; background: v
 @keyframes blink2{from{opacity:.4}to{opacity:1}}
 .export-area{background:var(--sf2);border:1px solid var(--bd);border-radius:var(--r);padding:12px;font-family:var(--mono);font-size:12px;min-height:100px;resize:vertical;width:100%;color:var(--tx2)}
 .ed-section-title{font-size:16px;font-weight:600;margin-bottom:4px}
-.ed-section-sub{font-size:12px;color:var(--tx2);margin-bottom:16px}
 
 /* ── USUÁRIO / HISTÓRICO ─────────────────────────────────── */
 .user-chip{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.22);border-radius:20px;padding:4px 12px 4px 6px;cursor:pointer;font-size:12px;color:#fff;transition:background .15s;flex-shrink:0}
@@ -569,13 +563,7 @@ input[type="file"]{padding: 5px; font-size: 13px; cursor: pointer; background: v
 .admin-table th{text-align:left;padding:9px 12px;background:var(--sf2);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);border-bottom:1px solid var(--bd)}
 .admin-table td{padding:10px 12px;border-bottom:1px solid var(--bd);color:var(--tx);vertical-align:top}
 .admin-table tr:hover td{background:var(--sf2)}
-.badge-role{font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600}
-.badge-admin{background:#fef3c7;color:#92400e}
-.badge-user{background:#e0f2fe;color:#075985}
-.badge-trial{background:#f3e8ff;color:#6b21a8}
 .badge-ok{background:#dcfce7;color:#166534}
-.badge-block{background:#fee2e2;color:#991b1b}
-.badge-expired{background:#fef9c3;color:#713f12}
 .admin-card{background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:16px 20px;margin-bottom:16px;overflow-x:auto}
 .admin-card-title{font-size:13px;font-weight:700;color:var(--tx);margin-bottom:12px}
 .admin-stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:20px}
@@ -612,18 +600,10 @@ input[type="file"]{padding: 5px; font-size: 13px; cursor: pointer; background: v
 .ai-soap-field input,.ai-soap-field select,.ai-soap-field textarea{border:1px solid var(--bd);border-radius:9px;padding:9px 10px;background:var(--sf);color:var(--tx);font-family:var(--font);font-size:13px}
 .ai-soap-field textarea{min-height:72px;resize:vertical}
 .ai-soap-status{margin-top:10px;font-size:12px;color:var(--tx2);white-space:pre-wrap}
-.ai-soap-pill{display:inline-flex;align-items:center;gap:6px;border:1px solid #bbf7d0;background:#dcfce7;color:#166534;border-radius:999px;padding:4px 9px;font-size:11px;font-weight:700}
 .quick-action-btn.ai{border-color:#c4b5fd;background:#f5f3ff;color:#4c1d95}
 @media(max-width:800px){.appearance-layout{grid-template-columns:1fr}.appearance-preview{position:relative}.appearance-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:760px){.ai-soap-grid{grid-template-columns:1fr}}
 @media(max-width:460px){.appearance-grid{grid-template-columns:1fr}}
-/* User chip admin button */
-.admin-chip{padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;background:var(--abg);color:var(--amber);border:1px solid var(--amid);margin-left:6px}
-/* Create trial modal */
-.modal-overlay{display:none;position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,.4);align-items:center;justify-content:center;padding:16px}
-.modal-overlay.open{display:flex}
-.modal-box{background:var(--sf);border-radius:14px;padding:24px;width:100%;max-width:420px}
-.modal-title{font-size:16px;font-weight:700;margin-bottom:16px;color:var(--tx)}
 
 /* ══════════════════════════════════════════════
    MOBILE OPTIMIZATIONS — max-width: 768px
@@ -972,6 +952,9 @@ body.sidebar-collapsed .dev-nav{display:none}
     <div class="user-input-row"><label>COREN / CRM (opcional)</label><input type="text" id="u-conselho" placeholder="Ex: COREN-PR 123456"></div>
     <div class="user-input-row"><label>Unidade de Saúde</label><input type="text" id="u-unidade" placeholder="Ex: ESF Jardim Europa"></div>
     <button class="user-save-btn" onclick="event.stopPropagation();salvarUsuario()">✓ Salvar</button>
+    <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--bd)">
+      <button class="btn btn-s" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:6px" onclick="event.stopPropagation();sincronizarAgora()"><span data-ic="globe"></span> Sincronizar agora</button>
+    </div>
     <div style="text-align:center;margin-top:10px">
       <button onclick="document.getElementById('user-modal').classList.remove('open')" style="background:none;border:none;color:var(--tx3);font-size:12px;cursor:pointer">Fechar</button>
     </div>
@@ -4001,7 +3984,9 @@ body.sidebar-collapsed .dev-nav{display:none}
       <button class="btn" onclick="exportarTodosJSON()" style="background:var(--blue);border-color:var(--blue);color:#fff">⬇ Exportar JSON</button>
       <button class="btn" onclick="exportarTodosTexto()" style="background:var(--green);border-color:var(--green);color:#fff">⬇ Exportar TXT</button>
       <button class="btn" onclick="importarJSON()" style="background:var(--sf2);border-color:var(--bd);color:var(--tx)">⬆ Importar JSON</button>
+      <button class="btn" onclick="arquivarAtendimentosAntigos()" style="background:var(--sf2);border-color:var(--bd);color:var(--tx)">Arquivar antigos (exporta e libera espaço)</button>
     </div>
+    <div style="margin-top:8px;font-size:11px;color:var(--tx2);line-height:1.5">Exporta um backup de todos os atendimentos e remove deste aparelho apenas os com mais de 12 meses. A cópia na nuvem permanece.</div>
     <input type="file" id="import-file" accept=".json" style="display:none" onchange="processarImport(event)">
     <div id="hist-export-area" style="margin-top:12px"></div>
   </div>
@@ -9122,6 +9107,28 @@ async function baixarAtendimentosNuvem(){
   }catch(e){console.warn('[ESF] Leitura da nuvem indisponivel:',e?.message||e);}
 }
 
+async function sincronizarAgora(){
+  if(window.MODO_OFFLINE){
+    showToast('Modo offline: os dados serão sincronizados automaticamente ao reconectar.');
+    return;
+  }
+  if(!_sb||!navigator.onLine){
+    showToast('Sem conexão para sincronizar agora.');
+    return;
+  }
+  showToast('Sincronizando...');
+  try{
+    if(typeof sincronizarAtendimentosPendentes==='function')await sincronizarAtendimentosPendentes();
+    if(typeof sincronizarPacientesPendentes==='function')await sincronizarPacientesPendentes();
+    if(typeof baixarAtendimentosNuvem==='function')await baixarAtendimentosNuvem();
+    if(typeof baixarPacientesNuvem==='function')await baixarPacientesNuvem(true);
+    showToast('Sincronização concluída.');
+  }catch(e){
+    console.warn('[ESF] Sincronizar agora:',e?.message||e);
+    showToast('Não foi possível concluir a sincronização. Tente novamente.');
+  }
+}
+
 function coletarSOAP(ids) {
   return ids.map(id => {
     const el = document.getElementById(id);
@@ -9181,11 +9188,32 @@ function criarAtendimento(tipo) {
   };
 }
 
+// Aviso soft (não bloqueia) quando nome/CPF do paciente estão vazios.
+function confirmarSalvarSemIdentificacao(faltando){
+  return new Promise(resolve=>{
+    let m=document.getElementById('sem-ident-modal');
+    if(!m){m=document.createElement('div');m.id='sem-ident-modal';m.className='edit-modal';document.body.appendChild(m);}
+    m.innerHTML=`<div class="edit-panel" style="max-width:480px"><h3><span data-ic="warning"></span> Identificação incompleta</h3><p style="font-size:13px;color:var(--tx2);line-height:1.6">Salvar atendimento sem ${faltando} do paciente? Isso dificulta a rastreabilidade.</p><div class="edit-actions" style="margin-top:18px"><button class="btn btn-p" id="sem-ident-voltar">Voltar e preencher</button><button class="edit-cancel-btn" id="sem-ident-salvar">Salvar mesmo assim</button></div></div>`;
+    m.classList.add('open');
+    if(typeof hidratarIcones==='function')hidratarIcones(m);
+    const fechar=v=>{m.classList.remove('open');resolve(v);};
+    m.querySelector('#sem-ident-voltar').onclick=()=>fechar(false);
+    m.querySelector('#sem-ident-salvar').onclick=()=>fechar(true);
+  });
+}
+
 async function salvarAtendimentoModulo(tipo){
   const cfgSalvar=MODULOS_ATENDIMENTO[tipo],prefixSalvar=cfgSalvar?.prefix;
   if(prefixSalvar){
     validarEntradaPreSoap(prefixSalvar);
     renderAlertasVermelhosSoap(prefixSalvar);renderInconsistenciasSoap(prefixSalvar);
+    // Aviso soft (não bloqueia): nome ou CPF do paciente ausentes.
+    const dadosPac=coletarDadosPaciente(prefixSalvar);
+    const semNome=!dadosPac.nome, semCpf=!dadosPac.cpf;
+    if(semNome||semCpf){
+      const faltando=semNome&&semCpf?'nome e CPF':(semNome?'nome':'CPF');
+      if(!(await confirmarSalvarSemIdentificacao(faltando)))return;
+    }
   }
   if(typeof abrirChecklistPreSalvar==='function'&&!(await abrirChecklistPreSalvar(tipo)))return;
   const a=criarAtendimento(tipo);if(!a)return;
@@ -9292,6 +9320,7 @@ function renderHistorico() {
   </div>
 </div>`;
   }).join('');
+  verificarVolumeAtendimentos();
 }
 
 function toggleHistCard(id) {
@@ -9349,6 +9378,66 @@ function exportarTodosJSON() {
   link.click();
   URL.revokeObjectURL(url);
   showToast(`${lista.length} atendimento(s) exportado(s)!`);
+}
+
+// ══ ARQUIVAMENTO NÃO-DESTRUTIVO DE ATENDIMENTOS ANTIGOS ══════════
+// Exporta TODOS antes de remover; só remove do aparelho os mais antigos que N meses.
+// A cópia na nuvem (Supabase) permanece intacta.
+async function arquivarAtendimentosAntigos(mesesLimite){
+  const meses = Number.isFinite(mesesLimite) ? mesesLimite : 12;
+  const chave = chaveAtendimentosAtual();
+  let bruto;
+  try{ bruto = JSON.parse(localStorage.getItem(chave) || '[]'); }
+  catch(e){ bruto = []; }
+  if(!Array.isArray(bruto) || !bruto.length){ showToast('Não há atendimentos para arquivar.'); return; }
+
+  // (a) EXPORTA TUDO ANTES de qualquer remoção.
+  try{
+    const blob = new Blob([JSON.stringify(bruto, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `esf-atendimentos-backup-${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 120000);
+  }catch(e){
+    showToast('Não foi possível exportar o backup. Nada foi removido.');
+    return;
+  }
+
+  // (b) SÓ DEPOIS remove os mais antigos que o limite; mantém os recentes.
+  const corte = new Date();
+  corte.setMonth(corte.getMonth() - meses);
+  const limite = corte.getTime();
+  const antes = bruto.length;
+  const mantidos = bruto.filter(a=>{
+    const t = a && a.data ? new Date(a.data).getTime() : NaN;
+    // Mantém: recentes, sem data válida (não perde por engano) ou ainda não sincronizados.
+    if(!Number.isFinite(t)) return true;
+    if(a.synced === false) return true;
+    return t >= limite;
+  });
+  const arquivados = antes - mantidos.length;
+  if(!arquivados){ showToast(`Backup exportado. Nenhum atendimento com mais de ${meses} meses para liberar.`); return; }
+
+  localStorage.setItem(chave, JSON.stringify(mantidos));
+  registrarAuditoria('Atendimentos antigos arquivados', `${arquivados} removido(s) do aparelho (backup exportado)`);
+  if(document.getElementById('pg-historico')?.classList.contains('on')) renderHistorico();
+  showToast(`${arquivados} atendimento(s) arquivado(s) e liberado(s) do aparelho. Backup exportado.`);
+}
+
+// Aviso não-bloqueante, uma vez por sessão, quando o histórico ficar grande.
+let _avisoArquivamentoMostrado = false;
+function verificarVolumeAtendimentos(){
+  if(_avisoArquivamentoMostrado) return;
+  try{
+    if(carregarAtendimentos().length > 800){
+      _avisoArquivamentoMostrado = true;
+      showToast('Histórico grande neste aparelho. Considere "Arquivar antigos" para liberar espaço.');
+    }
+  }catch(e){}
 }
 
 function exportarTodosTexto() {
@@ -9575,6 +9664,7 @@ document.querySelectorAll('[onclick*="go("]').forEach(btn => {
       <div class="auth-field"><label>Senha</label><input type="password" id="auth-pass" placeholder="••••••••" autocomplete="current-password"></div>
       <button class="auth-btn" id="auth-login-btn" onclick="authLogin()">Entrar</button>
       <div class="auth-switch">Acesso privado. Solicite uma conta ao administrador.</div>
+      <div style="text-align:center;margin-top:10px"><button type="button" onclick="recuperarSenha()" style="background:none;border:none;color:var(--green);font:inherit;font-size:12px;text-decoration:underline;cursor:pointer">Esqueci minha senha</button></div>
       <div style="text-align:center;margin-top:10px"><button type="button" onclick="diagnosticarConexao()" style="background:none;border:none;color:var(--green);font:inherit;font-size:12px;text-decoration:underline;cursor:pointer">Diagnóstico de conexão</button></div>
       <div id="auth-network-diagnostic" style="display:none;margin-top:12px;padding:10px;border:1px solid var(--bd);border-radius:8px;background:var(--sf2);font-size:11px;line-height:1.55;white-space:pre-wrap"></div>
     </div>
@@ -10018,6 +10108,40 @@ async function authLogin() {
     else if(/network|failed to fetch|timeout|não respondeu|rede/.test(m))msg='Sem resposta do servidor. Verifique a conexão ou o bloqueio da rede da unidade (use o Diagnóstico de conexão).';
     else if(/too many|rate limit/.test(m))msg='Muitas tentativas de login. Aguarde alguns minutos e tente novamente.';
     errDiv.innerText = msg;
+    errDiv.style.display = 'block';
+  }
+}
+
+async function recuperarSenha(){
+  const errDiv = document.getElementById('auth-err-login');
+  let email = (document.getElementById('auth-email').value || '').trim();
+  if(!email){
+    showToast('Digite seu email primeiro para receber o link de redefinição.');
+    return;
+  }
+  if(!email.includes('@')) email = email + '@esf.temp';
+  errDiv.style.display = 'none';
+  if(!_sb) await inicializarSupabase();
+  if(!_sb){
+    errDiv.innerText = 'A rede bloqueou o serviço de redefinição de senha. Abra o Diagnóstico de conexão e solicite à TI a liberação dos endereços indicados.';
+    errDiv.style.display = 'block';
+    return;
+  }
+  try{
+    const {error} = await comLimite(_sb.auth.resetPasswordForEmail(email),12000,'O servidor de redefinição não respondeu. Verifique o bloqueio da rede da unidade.');
+    if(error) throw error;
+    errDiv.innerText = 'Se este email tiver conta, enviamos um link de redefinição.';
+    errDiv.style.display = 'block';
+  }catch(e){
+    const m = (e?.message || '').toLowerCase();
+    if(/network|failed to fetch|timeout|não respondeu|rede/.test(m)){
+      errDiv.innerText = 'Sem resposta do servidor. Verifique a conexão ou o bloqueio da rede da unidade (use o Diagnóstico de conexão).';
+    }else if(/too many|rate limit/.test(m)){
+      errDiv.innerText = 'Muitas solicitações. Aguarde alguns minutos e tente novamente.';
+    }else{
+      // Mensagem neutra: não revela se o email existe.
+      errDiv.innerText = 'Se este email tiver conta, enviamos um link de redefinição.';
+    }
     errDiv.style.display = 'block';
   }
 }
