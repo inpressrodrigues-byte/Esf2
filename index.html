@@ -5755,7 +5755,7 @@ function organizarEtapaPuericultura(){
   ['pu-risco-card','pu-encaminhamentos-card','pu-vac-status-card'].forEach(id=>{const el=document.getElementById(id);if(el)destino.appendChild(el);});
   document.querySelectorAll('#pg-puericultura input[type="radio"][name$="-risco"]').forEach(el=>el.closest('.card')?.remove());
 }
-function vacEsc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function vacEsc(s){return escTR(s);}
 function vacNorm(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();}
 function vacData(s){const m=String(s||'').match(/(\d{2})\/(\d{2})\/(\d{4})/);return m?new Date(+m[3],+m[2]-1,+m[1]):null;}
 function vacDataBR(d){return d&&!isNaN(d)?String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear():'—';}
@@ -6519,9 +6519,10 @@ function contarMedicamentosTexto(texto){
   if(!bruto)return 0;
   return bruto.split(/[,;\n+]| e /i).map(x=>x.trim()).filter(x=>x&&x.length>2&&!/^[-—]$/.test(x)).length;
 }
+function paginaDoModulo(prefix){return prefix==='pna'?'pg-pn-abertura':prefix==='pnc'?'pg-pn-consulta':prefix==='pu'?'pg-puericultura':prefix==='prev'?'pg-preventivo':prefix==='id'?'pg-idoso':prefix==='sm'?'pg-saude-mental':`pg-${MODULOS_CLINICOS?.[prefix]?.page||''}`;}
 function validarCoerenciaSoap(prefix){
   const txt=soapTextoModulo(prefix),avisos=[],add=x=>{if(x&&!avisos.includes(x))avisos.push(x)};
-  const pagina=document.querySelector('.pg.on')||document.getElementById(prefix==='pna'?'pg-pn-abertura':prefix==='pnc'?'pg-pn-consulta':prefix==='pu'?'pg-puericultura':prefix==='prev'?'pg-preventivo':prefix==='id'?'pg-idoso':prefix==='sm'?'pg-saude-mental':`pg-${MODULOS_CLINICOS?.[prefix]?.page||''}`);
+  const pagina=document.querySelector('.pg.on')||document.getElementById(paginaDoModulo(prefix));
   const textoPagina=pagina?Array.from(pagina.querySelectorAll('input,select,textarea')).map(e=>String(e.value||'')).join(' ').toLowerCase():'';
   if(/\b(paciente teste|ana teste|dado fict[ií]cio|registro fict[ií]cio|valida[cç][aã]o do m[oó]dulo|mock|teste-\d+|cpf:\s*12345678909)\b/i.test(`${txt} ${textoPagina}`))add('Aviso: há possível dado de teste/fictício na consulta. Revise antes de copiar para prontuário real.');
   if(/ex:\s|placeholder|nome, dose, frequ[eê]ncia|dado fict[ií]cio preenchido/i.test(`${txt} ${textoPagina}`))add('Aviso: há texto de exemplo ou placeholder preenchido como dado clínico. Revise antes de finalizar.');
@@ -6554,7 +6555,7 @@ function validarCoerenciaSoap(prefix){
   return avisos;
 }
 function textoCamposPagina(prefix){
-  const page=document.getElementById(prefix==='pna'?'pg-pn-abertura':prefix==='pnc'?'pg-pn-consulta':prefix==='pu'?'pg-puericultura':prefix==='prev'?'pg-preventivo':prefix==='id'?'pg-idoso':prefix==='sm'?'pg-saude-mental':`pg-${MODULOS_CLINICOS?.[prefix]?.page||''}`);
+  const page=document.getElementById(paginaDoModulo(prefix));
   if(!page)return'';
   return Array.from(page.querySelectorAll('input,select,textarea')).filter(e=>e.type!=='hidden'&&e.type!=='file').map(e=>{
     const label=e.closest('.f')?.querySelector('label')?.textContent||e.id||e.name||'campo';
@@ -6563,7 +6564,7 @@ function textoCamposPagina(prefix){
   }).filter(Boolean).join(' | ');
 }
 function localizarCamposSuspeitos(prefix,regex){
-  const page=document.getElementById(prefix==='pna'?'pg-pn-abertura':prefix==='pnc'?'pg-pn-consulta':prefix==='pu'?'pg-puericultura':prefix==='prev'?'pg-preventivo':prefix==='id'?'pg-idoso':prefix==='sm'?'pg-saude-mental':`pg-${MODULOS_CLINICOS?.[prefix]?.page||''}`);
+  const page=document.getElementById(paginaDoModulo(prefix));
   if(!page)return'';
   const achados=Array.from(page.querySelectorAll('input,select,textarea')).filter(e=>e.type!=='hidden'&&e.type!=='file').map(e=>{
     const valor=(e.type==='checkbox'||e.type==='radio')?(e.checked?(e.closest('label')?.textContent||e.value):''):e.value;
@@ -7096,7 +7097,7 @@ const PROTOCOLOS_OFICIAIS = [
 ];
 let PROTO = { unit:{nome:'',cidade:''}, diseases:[], exames:[], orientacoes:[], infoboxes:[] };
 function loadProto(){ try{const s=localStorage.getItem('esf_proto'); if(s)PROTO=JSON.parse(s);}catch(e){} }
-function protoEsc(v){return String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function protoEsc(v){return escTR(v);}
 function renderProtoEditor(){
   const fontes=document.getElementById('protocol-sources-list');
   if(fontes)fontes.innerHTML=PROTOCOLOS_OFICIAIS.map(p=>`<div class="card" style="padding:12px 14px;margin-bottom:8px"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start"><div><strong>${protoEsc(p.tema)}</strong><div style="font-size:12px;color:var(--tx2);margin-top:3px">${protoEsc(p.documento)} · ${protoEsc(p.versao)}</div><div style="font-size:12px;color:var(--tx3);margin-top:5px">Uso no sistema: ${protoEsc(p.uso)}</div></div>${p.url?`<a class="btn btn-s btn-sm" href="${p.url}" target="_blank" rel="noopener">Abrir fonte</a>`:''}</div></div>`).join('');
@@ -7962,6 +7963,8 @@ function docCalIVCFTokens(){
   add('ivcf-total','Pontuação total',540,76,'score',String(r.total||0),10);
   return tokens;
 }
+const ERSM_CHECK_Y_P1=[397.8,421.3,444.6,468.0,491.4,514.9,538.2,561.6,585.0,608.5,631.8,655.2,678.6,702.1,725.4,748.8,772.2,795.7,819.0,842.4,865.8,889.3,912.6,936.0,959.4,982.9];
+const ERSM_CHECK_Y_P2=[108.3,145.4,168.8,205.9,229.3,252.8,289.9,327.0,350.4,373.8,397.3,434.4,457.8,494.9,518.2,541.6,565.1,588.5,611.8,635.2,658.7,682.1,705.4,728.8,752.3,775.7];
 function docCalERSMTokens(){
   if(typeof calcERSM==='function')calcERSM();
   const today=new Date().toISOString().slice(0,10);
@@ -7975,8 +7978,8 @@ function docCalERSMTokens(){
     {page:1,id:'ersm-servico',label:'Serviço',x:170,y:607,type:'text',text:txt('sm-servico','SERVICO'),size:8.5},
     {page:1,id:'ersm-data',label:'Data',x:485,y:607,type:'text',text:dataBR,size:8}
   ];
-  const sourceYPage1=[397.8,421.3,444.6,468.0,491.4,514.9,538.2,561.6,585.0,608.5,631.8,655.2,678.6,702.1,725.4,748.8,772.2,795.7,819.0,842.4,865.8,889.3,912.6,936.0,959.4,982.9];
-  const sourceYPage2=[108.3,145.4,168.8,205.9,229.3,252.8,289.9,327.0,350.4,373.8,397.3,434.4,457.8,494.9,518.2,541.6,565.1,588.5,611.8,635.2,658.7,682.1,705.4,728.8,752.3,775.7];
+  const sourceYPage1=ERSM_CHECK_Y_P1;
+  const sourceYPage2=ERSM_CHECK_Y_P2;
   const checks=Array.from(document.querySelectorAll('.sm-item .ersm-chk'));
   sourceYPage1.forEach((y,i)=>tokens.push({page:1,id:`ersm-check-${i}`,label:`Item ERSM ${i+1}`,x:528,y:841.92-y*.75-3,type:'check',text:'X',size:9,dim:!checks[i]?.checked}));
   sourceYPage2.forEach((y,j)=>{const i=j+sourceYPage1.length;tokens.push({page:2,id:`ersm-check-${i}`,label:`Item ERSM ${i+1}`,x:528,y:841.92-y*.75-3,type:'check',text:'X',size:9,dim:!checks[i]?.checked})});
@@ -8054,8 +8057,8 @@ async function gerarPdfERSM() {
   drawTextCal(p1,'ersm-prof', smTexto('sm-prof'), 230, 636, 42, font, 8.5);
   drawTextCal(p1,'ersm-servico', smTexto('sm-servico'), 170, 607, 38, font, 8.5);
   drawRawCal(p1,'ersm-data', dataBR, 485, 607, 8, font);
-  const sourceYPage1 = [397.8,421.3,444.6,468.0,491.4,514.9,538.2,561.6,585.0,608.5,631.8,655.2,678.6,702.1,725.4,748.8,772.2,795.7,819.0,842.4,865.8,889.3,912.6,936.0,959.4,982.9];
-  const sourceYPage2 = [108.3,145.4,168.8,205.9,229.3,252.8,289.9,327.0,350.4,373.8,397.3,434.4,457.8,494.9,518.2,541.6,565.1,588.5,611.8,635.2,658.7,682.1,705.4,728.8,752.3,775.7];
+  const sourceYPage1 = ERSM_CHECK_Y_P1;
+  const sourceYPage2 = ERSM_CHECK_Y_P2;
   const rows = sourceYPage1.map(y => [p1, 841.92 - y * 0.75]).concat(sourceYPage2.map(y => [p2, 841.92 - y * 0.75]));
   const checks = Array.from(document.querySelectorAll('.sm-item .ersm-chk'));
   rows.forEach(([page, y], i) => { if (checks[i]?.checked) { const p=docCalPdfPoint('ersm',`ersm-check-${i}`,'check',528,y-3); page.drawText('X', { x: p.x, y: p.y, size: 9, font: bold, color: blue }); } });
@@ -11633,7 +11636,7 @@ const CENTRAL_PROTOCOLAR_MODULOS={
 };
 const CENTRAL_SOAP_P={pna:'pna-soap-p',pnc:'pnc-p',pu:'pu-p',prev:'prev-p',id:'id-p',sm:'sm-p',ger:'ger-p',acol:'acol-p',hip:'hip-p',fer:'fer-p',puerp:'puerp-p',ist:'ist-p',vd:'vd-p'};
 function textoConsultaCentral(prefix){
-  const cfg=CENTRAL_PROTOCOLAR_MODULOS[prefix],page=cfg&&document.getElementById(prefix==='pna'?'pg-pn-abertura':prefix==='pnc'?'pg-pn-consulta':prefix==='pu'?'pg-puericultura':prefix==='prev'?'pg-preventivo':prefix==='id'?'pg-idoso':prefix==='sm'?'pg-saude-mental':`pg-${MODULOS_CLINICOS?.[prefix]?.page||''}`);
+  const cfg=CENTRAL_PROTOCOLAR_MODULOS[prefix],page=cfg&&document.getElementById(paginaDoModulo(prefix));
   if(!page)return'';
   const soapIds=new Set(Object.values(SOAP_IDS_MODULO).flatMap(x=>Object.values(x)));
   const campos=Array.from(page.querySelectorAll('input,select,textarea')).filter(e=>!soapIds.has(e.id)&&!/^lab-livre-texto-/.test(e.id||'')&&e.type!=='hidden'&&e.type!=='file'&&((e.type==='checkbox'||e.type==='radio')?e.checked:String(e.value||'').trim())).map(e=>`${e.id||e.name}: ${(e.type==='checkbox'||e.type==='radio')?(e.closest('label')?.textContent||e.value):e.value}`);
@@ -11666,7 +11669,7 @@ function anexarCentralAoSoap(prefix){
   const marker='\n\nCONDUTAS PROTOCOLARES ACIONADAS:\n',marcadorAntigo='\n\nCENTRAL PROTOCOLAR TRANSVERSAL:\n',base=String(el.value||'').split(marker)[0].split(marcadorAntigo)[0],novas=ds.filter(x=>!base.includes(fraseProtocolarCurta(x.d.conduta,80).slice(0,45))),texto=novas.slice(0,4).map(x=>`- ${x.titulo}: ${fraseProtocolarCurta(x.d.conduta,230)}`).join('\n');el.value=texto?base+marker+texto:base;
 }
 let centralProtocolTimer;
-document.addEventListener('input',e=>{const pg=e.target.closest?.('.pg');if(!pg)return;clearTimeout(centralProtocolTimer);centralProtocolTimer=setTimeout(()=>{for(const p of Object.keys(CENTRAL_PROTOCOLAR_MODULOS))if(pg.contains(document.getElementById(`central-protocol-${p}`))||pg.id===(p==='pna'?'pg-pn-abertura':p==='pnc'?'pg-pn-consulta':p==='pu'?'pg-puericultura':p==='prev'?'pg-preventivo':p==='id'?'pg-idoso':p==='sm'?'pg-saude-mental':`pg-${MODULOS_CLINICOS?.[p]?.page||''}`))renderCentralProtocolar(p)},120)});
+document.addEventListener('input',e=>{const pg=e.target.closest?.('.pg');if(!pg)return;clearTimeout(centralProtocolTimer);centralProtocolTimer=setTimeout(()=>{for(const p of Object.keys(CENTRAL_PROTOCOLAR_MODULOS))if(pg.contains(document.getElementById(`central-protocol-${p}`))||pg.id===paginaDoModulo(p))renderCentralProtocolar(p)},120)});
 document.addEventListener('change',e=>e.target.closest?.('.pg')&&setTimeout(()=>Object.keys(CENTRAL_PROTOCOLAR_MODULOS).forEach(renderCentralProtocolar),0));
 document.addEventListener('click',e=>{const b=e.target.closest?.('button');if(!b||!/gerar.*(soap|evolu|evolução)/i.test(`${b.textContent} ${b.getAttribute('onclick')||''}`))return;setTimeout(()=>Object.keys(CENTRAL_PROTOCOLAR_MODULOS).forEach(anexarCentralAoSoap),250)});
 document.addEventListener('click',e=>{const b=e.target.closest?.('button');if(!b||!/gerar.*(soap|evolu|evolução)/i.test(`${b.textContent} ${b.getAttribute('onclick')||''}`))return;setTimeout(()=>{const p=prefixoPaginaAtual();if(p&&!devePularFinalizadorSoapAutomatico(p))finalizarSoapModulo(p)},520)});
