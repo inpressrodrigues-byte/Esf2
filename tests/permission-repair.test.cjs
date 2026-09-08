@@ -8,10 +8,10 @@ test.after(async()=>{await db.close();});
 async function setup({confirmed=true,profile=true,permissions={usar_ia_soap:false,ver_admin:false,unidade_escopo:'Unidade fictícia'},columnType='jsonb'}={}){
  await db.exec(`drop table if exists public.perfis; drop schema if exists auth cascade;
  create schema auth; create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz);
- create table public.perfis(user_id uuid,permissoes ${columnType});`);
+ create table public.perfis(user_id uuid,email text not null default '',permissoes ${columnType} default '{"ver_admin":false,"ver_historico":true,"usar_modo_teste":false,"gerar_documentos":true,"editar_protocolos":false}');`);
  await db.query('insert into auth.users values ($1,$2,$3),($4,$5,now())',[owner,'inpress.rodrigues@gmail.com',confirmed?'2026-01-01T00:00:00Z':null,other,'outra-conta@example.test']);
- await db.query('insert into public.perfis values ($1,$2)',[other,JSON.stringify({usar_ia_soap:false,ver_admin:false})]);
- if(profile)await db.query('insert into public.perfis values ($1,$2)',[owner,permissions===null?null:JSON.stringify(permissions)]);
+ await db.query('insert into public.perfis (user_id,permissoes) values ($1,$2)',[other,JSON.stringify({usar_ia_soap:false,ver_admin:false})]);
+ if(profile)await db.query('insert into public.perfis (user_id,permissoes) values ($1,$2)',[owner,permissions===null?null:JSON.stringify(permissions)]);
 }
 const profiles=async()=>JSON.stringify((await db.query('select user_id,permissoes from public.perfis order by user_id')).rows);
 async function rejectedWithoutChanges(){const before=await profiles();await assert.rejects(db.exec(sql));await db.exec('rollback');assert.equal(await profiles(),before);}
@@ -24,8 +24,15 @@ test('Reparo PostgreSQL: autoriza só IA do proprietário e é idempotente',asyn
 test('Reparo PostgreSQL: suporta coluna JSON e permissões SQL NULL',async()=>{
  for(const columnType of ['json','jsonb']){await setup({permissions:null,columnType});await db.exec(sql);assert.deepEqual((await db.query('select permissoes from public.perfis where user_id=$1',[owner])).rows[0].permissoes,{usar_ia_soap:true});}
 });
-test('Reparo PostgreSQL: perfil ausente ou duplicado não permite alteração parcial',async()=>{
- await setup({profile:false});await rejectedWithoutChanges();await setup();await db.query('insert into public.perfis values ($1,$2)',[owner,'{}']);await rejectedWithoutChanges();
+test('Reparo PostgreSQL: cria somente o perfil ausente da conta confirmada, sem administração',async()=>{
+ await setup({profile:false});await db.exec(sql);
+ const result=(await db.query('select user_id,email,permissoes from public.perfis where user_id=$1',[owner])).rows;
+ assert.equal(result.length,1);assert.equal(result[0].email,'inpress.rodrigues@gmail.com');
+ assert.deepEqual(result[0].permissoes,{usar_ia_soap:true,ver_admin:false,ver_historico:true,usar_modo_teste:false,gerar_documentos:true,editar_protocolos:false});
+ await db.exec(sql);assert.equal((await db.query('select count(*) from public.perfis')).rows[0].count,2);
+});
+test('Reparo PostgreSQL: perfil duplicado não permite alteração parcial',async()=>{
+ await setup();await db.query('insert into public.perfis (user_id,permissoes) values ($1,$2)',[owner,'{}']);await rejectedWithoutChanges();
 });
 test('Reparo PostgreSQL: conta não confirmada ou duplicada é recusada',async()=>{
  await setup({confirmed:false});await rejectedWithoutChanges();await setup();await db.query('update auth.users set email=$1 where id=$2',['INPRESS.RODRIGUES@gmail.com',other]);await rejectedWithoutChanges();
