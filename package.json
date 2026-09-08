@@ -1,0 +1,10 @@
+{
+  "name": "esf2-api-hotfix",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/ai-transport.test.cjs tests/gemini-api.test.cjs",
+    "test:browser": "node tests/api-browser.test.cjs"
+  },
+  "devDependencies": {"playwright": "1.62.1"}
+}
