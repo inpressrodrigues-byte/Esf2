@@ -1,0 +1,539 @@
+{
+  "schema": 1,
+  "checkedAt": "2026-09-07",
+  "portal": "https://www.toledo.pr.gov.br/portais/saude/gabinete-da-secretaria-de-saude/protocolos-da-secretaria-da-saude",
+  "sources": [
+    {
+      "id": "protocolo_01_-_uso_de_mascaras_0",
+      "title": "Protocolo uso de Máscaras",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2022-08/protocolo_01_-_uso_de_mascaras_0.pdf",
+      "sha256": "8fadb23c8841b16eeffff759b0b552cda4e6010dea5f45a011e09138a3f06822",
+      "pages": 6,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "protocolo_02_-_uso_epi_covid_0",
+      "title": "Protocolo Uso de EPI Covid-19",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2022-08/protocolo_02_-_uso_epi_covid_0.pdf",
+      "sha256": "27799fc35235f62a97373dff7cb8c3a49f2a54eabf400e68e5297aeb543daf5e",
+      "pages": 14,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "protocolo_03_-_uso_epi_sem_covid",
+      "title": "Protocolo Uso de EPI sem Covid",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2022-08/protocolo_03_-_uso_epi_sem_covid.pdf",
+      "sha256": "6a78a712f0305b78dad29cd9bed6a88c42e0b38caad181a7cb206da577e7118a",
+      "pages": 8,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "protocolo_04_-_epi_odontologia",
+      "title": "Protocolo EPI Odontológia",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2022-08/protocolo_04_-_epi_odontologia.pdf",
+      "sha256": "70b8dc357315fdc038c99663fcc6e78385a5f6051ed2658b52367835d0e4a70f",
+      "pages": 23,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "protocolo_ist_2020_final_dezembro",
+      "title": "Protocolo IST 2020 Final dezembro",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2022-08/protocolo_ist_2020_final_dezembro.pdf",
+      "sha256": "4143db9a0d06870ec00ddcde8cba83e177d8c834558a7baad1dabcaa9003dd53",
+      "pages": 53,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "fluxograma_diabetes_na_gestacao_1-1",
+      "title": "Fluxograma Diabetes na Gestação",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2022-08/fluxograma_diabetes_na_gestacao_1-1.pdf",
+      "sha256": "a8a7dea285c9ad646a246c0f85f67a1c19e96ee21b0f8c1a9f90c26731bd4833",
+      "pages": 3,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "fluxograma_hipertensao",
+      "title": "Fluxograma Hipertensão",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2022-08/fluxograma_hipertensao.pdf",
+      "sha256": "73da9a93084cb7d3d6b950e6acfc35b76a2fe6d8fc5792bed82522b183912913",
+      "pages": 2,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "protocolo_pre-natal_alteracao_2021_versao_final-2_pdf",
+      "title": "Protocolo Pré-natal Alteração 2021, Versão final",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2022-08/protocolo_pre-natal_alteracao_2021_versao_final-2_pdf.pdf",
+      "sha256": "a9d419a60ce5de424a9ce1bbdca717173fefa4998396ebf080e6a6c11742706c",
+      "pages": 75,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "pop_de_dispensacao_marco_2022_assinado",
+      "title": "Pop de dispensação Março 2022",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2022-08/pop_de_dispensacao_marco_2022_assinado.pdf",
+      "sha256": "3973a0b5821f838664f0b35c84b771dd206a682327317d6b8378cf4c462e6230",
+      "pages": 17,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "protocolo_endocrino_atualizado",
+      "title": "protocolo endocrino atualizado",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2023-04/protocolo_endocrino_atualizado.pdf",
+      "sha256": "4d98e4f69205a62376e7976056bab29f85a51b8c11057f18a9440d4987651b96",
+      "pages": 16,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "protocolo_de_fraldas_2023_versao_final",
+      "title": "protocolo de fraldas 2023 versao final",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2023-04/protocolo_de_fraldas_2023_versao_final.pdf",
+      "sha256": "07f928a5718745b3ec377c5324d91351eb110361541927e5e50593988e3d418e",
+      "pages": 15,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "fluxo_de_encaminhamentos_agend_de_consultas_exames",
+      "title": "fluxo de encaminhamentos agend de consultas exames",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2026-01/fluxo_de_encaminhamentos_agend_de_consultas_exames.pdf",
+      "sha256": "c8563cee4d8d9fe5cac62aeb30661cad35a242906427d886dba4fb0b80a1d44a",
+      "pages": 8,
+      "reviewStatus": "inventariado — validação clínica por regra necessária",
+      "aliases": [
+        "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2023-11/fluxo_de_encaminhamentos_agend_de_consultas_exames.pdf",
+        "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2024-11/fluxo_de_encaminhamentos_agend_de_consultas_exames.pdf"
+      ]
+    },
+    {
+      "id": "farmacia_cidade_pop_ambulatorio_materno_infantil_2021",
+      "title": "farmacia cidade pop ambulatorio materno infantil 2021",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2023-11/farmacia_cidade_pop_ambulatorio_materno_infantil_2021.pdf",
+      "sha256": "a19a1d33258b0e8ed84647c45633aa013adfd53f8a070553ba24b069dcda2953",
+      "pages": 53,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "farmacia_cidade_pop_cezar_parque_2021",
+      "title": "farmacia cidade pop cezar parque 2021",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2023-11/farmacia_cidade_pop_cezar_parque_2021.pdf",
+      "sha256": "dac68cc83caf12571996d70eed5b2bd108784b20b3db13a9ac6ce5febfda1ecd",
+      "pages": 48,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "farmacia_cidade_pop_cosmos_2021",
+      "title": "farmacia cidade pop cosmos 2021",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2023-11/farmacia_cidade_pop_cosmos_2021.pdf",
+      "sha256": "65a60b5cbe0b5dac81cfbb06a4252d86e2f08487daafd09507fcc7f62c49e62d",
+      "pages": 48,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "farmacia_cidade_pop_esf_europa_2021",
+      "title": "farmacia cidade pop esf europa 2021",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2023-11/farmacia_cidade_pop_esf_europa_2021.pdf",
+      "sha256": "81aa288a56bbc11a6025595a783e7e4b844ec336d0df2c9880760094eb3f1708",
+      "pages": 48,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "farmacia_cidade_pop_esf_industrial_2021",
+      "title": "farmacia cidade pop esf industrial 2021",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2023-11/farmacia_cidade_pop_esf_industrial_2021.pdf",
+      "sha256": "2e262edb9b7f3a881c45eff976b491aac703bed586597d16ed6338a80b251daf",
+      "pages": 48,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "farmacia_cidade_pop_esf_jardim_concordia_2021",
+      "title": "farmacia cidade pop esf jardim concordia 2021",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2023-11/farmacia_cidade_pop_esf_jardim_concordia_2021.pdf",
+      "sha256": "643255d19181b0ec2fe65ead073e27e5e482a212b74f20806086c5b52dd100b0",
+      "pages": 48,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "farmacia_cidade_pop_esf_jardim_porto_alegre_2021",
+      "title": "farmacia cidade pop esf jardim porto alegre 2021",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2023-11/farmacia_cidade_pop_esf_jardim_porto_alegre_2021.pdf",
+      "sha256": "42e9ee62a8ea349d1a98afdade76b1582aeaabf49cabfcb0cc5d990aba4c59b4",
+      "pages": 48,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "farmacia_cidade_pop_esf_jardim_sao_francisco_2021",
+      "title": "farmacia cidade pop esf jardim sao francisco 2021",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2023-11/farmacia_cidade_pop_esf_jardim_sao_francisco_2021.pdf",
+      "sha256": "52c9190bc1f468ca6405aec65a19cb6d1ac4b69072bdf6987fd3b07fa4c0ee25",
+      "pages": 52,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "farmacia_cidade_pop_esf_santa_clara_2021",
+      "title": "farmacia cidade pop esf santa clara 2021",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2023-11/farmacia_cidade_pop_esf_santa_clara_2021.pdf",
+      "sha256": "55165645035691d490ffe56dd3f0b8de5216e5a90b1fc984fd663b1d2b91d7f7",
+      "pages": 48,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "farmacia_cidade_pop_pancera_2021",
+      "title": "farmacia cidade pop pancera 2021",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2023-11/farmacia_cidade_pop_pancera_2021.pdf",
+      "sha256": "d8c84ccd303514116078f7fb0788077736659e9c93fb2d73cb1bf37930cd2be8",
+      "pages": 48,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "farmacia_cidade_pop_panorama_2021",
+      "title": "farmacia cidade pop panorama 2021",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2023-11/farmacia_cidade_pop_panorama_2021.pdf",
+      "sha256": "fd78d0b5d2d7b5f5f4b243e815e866b7c6b977cbea6a425743e8690b2dec5b8a",
+      "pages": 48,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "farmacia_interior_pop_boa_vista_2021",
+      "title": "farmacia interior pop boa vista 2021",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2023-11/farmacia_interior_pop_boa_vista_2021.pdf",
+      "sha256": "3e65e816c3f43e2fbc5e47e7ccbde07ce279409fb56f5f8f6b30ab2b00e35cb0",
+      "pages": 48,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "farmacia_interior_pop_concordia_do_oeste_2021",
+      "title": "farmacia interior pop concordia do oeste 2021",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2023-11/farmacia_interior_pop_concordia_do_oeste_2021.pdf",
+      "sha256": "3ec81c7bd5f943ca56dde265ecd220ad4b97d01e9b1d4cbcb63e633eb8a19f7a",
+      "pages": 48,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "farmacia_interior_pop_dez_de_maio_2021",
+      "title": "farmacia interior pop dez de maio 2021",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2023-11/farmacia_interior_pop_dez_de_maio_2021.pdf",
+      "sha256": "0d89d8c61c3ee7a8463acb24fc03a1c07aba4778196984a4f250eb6fef7044e5",
+      "pages": 48,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "farmacia_interior_pop_dois_imaos_2021",
+      "title": "farmacia interior pop dois imaos 2021",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2023-11/farmacia_interior_pop_dois_imaos_2021.pdf",
+      "sha256": "f62d3b80fe336ef59a718bd5088c59c56c2115bf2b5545013dff6295d07799d4",
+      "pages": 48,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "farmacia_interior_pop_novo_sarandi_2021",
+      "title": "farmacia interior pop novo sarandi 2021",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2023-11/farmacia_interior_pop_novo_sarandi_2021.pdf",
+      "sha256": "b1179641085dbb582cd0971e34a0caed0befe61797ee3d8d04b8552eab9a3802",
+      "pages": 52,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "farmacia_interior_pop_novo_sobradinho_2021",
+      "title": "farmacia interior pop novo sobradinho 2021",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2023-11/farmacia_interior_pop_novo_sobradinho_2021.pdf",
+      "sha256": "e7722e987afe61ffc9d89a58431b37bf09b3afd5ef9e4068e1f35914ea383665",
+      "pages": 48,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "farmacia_interior_pop_sao_luiz_do_oeste_2021",
+      "title": "farmacia interior pop sao luiz do oeste 2021",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2023-11/farmacia_interior_pop_sao_luiz_do_oeste_2021.pdf",
+      "sha256": "8fe4799a17fb5fed01397bc5dad64ae1b0d97cac11ce049a01053b4d8c9c9a7b",
+      "pages": 48,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "farmacia_interior_pop_vila_ipiranga_2021",
+      "title": "farmacia interior pop vila ipiranga 2021",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2023-11/farmacia_interior_pop_vila_ipiranga_2021.pdf",
+      "sha256": "1ddc9e36d220fc8978d0b3a74b371b57b3ef1f5a277fac2e7dee70a5e7f9b8e1",
+      "pages": 48,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "farmacia_interior_pop_vila_nova_2021",
+      "title": "farmacia interior pop vila nova 2021",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2023-11/farmacia_interior_pop_vila_nova_2021.pdf",
+      "sha256": "709b2421673174e1be035c045e3ef23215b91ab583297ce6b5390fddec319535",
+      "pages": 48,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "pop_12_programa_de_desratizacao_e_desinsetizacao",
+      "title": "pop 12 programa de desratizacao e desinsetizacao",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2023-11/pop_12_programa_de_desratizacao_e_desinsetizacao.pdf",
+      "sha256": "63751200035361519d88c422bef4135b36faeb2ab9d1bbbb7249f2e40d1f293c",
+      "pages": 2,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "pop_11_limpeza_rev_2023",
+      "title": "pop 11 limpeza rev 2023",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2023-11/pop_11_limpeza_rev_2023.pdf",
+      "sha256": "e5874ec512946f4df5b47140c02094cb33925f0ad0814acbf67838e09944217c",
+      "pages": 3,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "pop_09_controle_de_validade_e_descarte_dos_materiais_e_medicamentos_vencidos",
+      "title": "pop 09 controle de validade e descarte dos materiais e medicamentos vencidos",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2023-11/pop_09_controle_de_validade_e_descarte_dos_materiais_e_medicamentos_vencidos.pdf",
+      "sha256": "2b5da91d8c2fc6aefc698048a673ab6c993c84f27a8e2a34f6314a2689b3d30b",
+      "pages": 3,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "pop_01_recebimento_e_distribuicao_de_alimentos_para_necessidades_alimentares_especiais",
+      "title": "pop 01 recebimento e distribuicao de alimentos para necessidades alimentares especiais",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2023-11/pop_01_recebimento_e_distribuicao_de_alimentos_para_necessidades_alimentares_especiais.pdf",
+      "sha256": "7adc8f882a6e4e58c350b9853294129a92205cee178d37d75d24ad13fed06317",
+      "pages": 4,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "pop_02_recebimento_de_material_e_medicamentos",
+      "title": "pop 02 recebimento de material e medicamentos",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2023-11/pop_02_recebimento_de_material_e_medicamentos.pdf",
+      "sha256": "2c08365015edf562f2fd55787468e7becb5309a0d49cce8eefa2c98bfeec0348",
+      "pages": 3,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "errata_protocolo_regional_gestante_e_puerpera_20rs_1",
+      "title": "errata protocolo regional gestante e puerpera 20rs 1",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2024-05/errata_protocolo_regional_gestante_e_puerpera_20rs_1.pdf",
+      "sha256": "7b1ef2b4540746908d4c696b0837a202ce4a2daf96c105e9d4deabed028f11f5",
+      "pages": 16,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "fluxo_cesarea",
+      "title": "fluxo cesarea",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2024-05/fluxo_cesarea.pdf",
+      "sha256": "2a51b1a8b58c4af9bed799e64e5fc44bb86c3ae5dbfa4d79a5edf286e29ad750",
+      "pages": 1,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "fluxograma_ferro_2024",
+      "title": "fluxograma ferro 2024",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2024-05/fluxograma_ferro_2024.pdf",
+      "sha256": "0d3feebb89f7a89d29f5e1782f3f675b7a4f5ba94f899dac713483e71159d421",
+      "pages": 1,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "fluxograma_hipertireoidismo_2024",
+      "title": "fluxograma hipertireoidismo 2024",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2024-05/fluxograma_hipertireoidismo_2024.pdf",
+      "sha256": "4435f3973da8320d43181a29b2411dcf088b4517f427fe22085561ec42dbc170",
+      "pages": 1,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "fluxogrma_hipo_2024",
+      "title": "fluxogrma hipo 2024",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2024-05/fluxogrma_hipo_2024.pdf",
+      "sha256": "751bc59c4bf0806acbceb1c83c605bf4e190b9d723e2f40ee4db2ac7734ce00c",
+      "pages": 1,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "laqueadura_e_vasectomia_abril_2024",
+      "title": "laqueadura e vasectomia abril 2024",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2024-05/laqueadura_e_vasectomia_abril_2024.pdf",
+      "sha256": "7766f8bea36a5ba762988f2a6c11b5ed98e2c781d56cd39bd209b22d1cd7b43a",
+      "pages": 2,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "plano_de_parto_cesarea",
+      "title": "plano de parto cesarea",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2024-05/plano_de_parto_cesarea.pdf",
+      "sha256": "ba56a6bc08fa100177ff567d12ec69ef07306c4f59555aa7ff08f9b2197c82bf",
+      "pages": 1,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "tcle_abril_de_2024",
+      "title": "tcle abril de 2024",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2024-05/tcle_abril_de_2024.pdf",
+      "sha256": "04dcee0b1af27a30e2cb9883fe5a3bd66dc682ad91ff573268677d2662e1de7b",
+      "pages": 1,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "termo_da_laqueadura_abril_de_24",
+      "title": "termo da laqueadura abril de 24",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2024-05/termo_da_laqueadura_abril_de_24.pdf",
+      "sha256": "b967b5e6b1d971f0448a8fc7c1f3ab8551bb68a4b2852a61e8426bd621d1d934",
+      "pages": 2,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "protocolo_fluxo_encaminhamento_pediatria_assinado",
+      "title": "protocolo fluxo encaminhamento pediatria assinado",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2024-10/protocolo_fluxo_encaminhamento_pediatria_assinado.pdf",
+      "sha256": "f613260706727ada78c28dccff881cade30b959a37c8d38c1def4c965468df5b",
+      "pages": 38,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "agendamento_telefonico_de_consultas",
+      "title": "agendamento telefonico de consultas",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2024-11/agendamento_telefonico_de_consultas.pdf",
+      "sha256": "26a4b47899acd4470daa28fb11cb0b5e2f53ec325aa9eaa69039d92fb49d097c",
+      "pages": 2,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "regulamento_agendamento_telefonico",
+      "title": "regulamento agendamento telefonico",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2024-11/regulamento_agendamento_telefonico.pdf",
+      "sha256": "eeec5fda1bb15827cd7c00fdea505974d938be43e341dc553cab8be0979c29fd",
+      "pages": 2,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "lista_de_procedimentos_operacional_padrao_aps_agosto2025",
+      "title": "lista de procedimentos operacional padrao aps agosto2025",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2025-08/lista_de_procedimentos_operacional_padrao_aps_agosto2025.pdf",
+      "sha256": "dc80063b1581ca011cb41d4dda7daaae0a524052762a5e81d5b77e327dde5816",
+      "pages": 4,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "fluxo_noripurum_2025",
+      "title": "fluxo noripurum 2025",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2025-10/fluxo_noripurum_2025.pdf",
+      "sha256": "9ff1c269616e1f98aa313f5858e49a88bf4c4750a7f88fb86176da0c8a6c361c",
+      "pages": 13,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "fluxo_reavaliacao_teledermato",
+      "title": "fluxo reavaliacao teledermato",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2026-01/fluxo_reavaliacao_teledermato.pdf",
+      "sha256": "8763b001d63006047872bf15ae88cdf88c5b88892e9d84400fddcedbf2fb1a7c",
+      "pages": 2,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "protocolo_teledermato_assinado",
+      "title": "protocolo teledermato assinado",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2026-01/protocolo_teledermato_assinado.pdf",
+      "sha256": "44d63ca9bf25c2ba39f4dbbe8b325fa41c672285cf4551bee0a0453f66e82254",
+      "pages": 13,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "protocolo_oxigenoterapia_2022",
+      "title": "protocolo oxigenoterapia 2022",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2026-01/protocolo_oxigenoterapia_2022.pdf",
+      "sha256": "2ee7f5852620780fdcfadc5fd65da05eba5dc076558db0153c24984d9f5daf0c",
+      "pages": 32,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "fluxograma_sm_cer_2_2025",
+      "title": "fluxograma sm cer 2 2025",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2026-01/fluxograma_sm_cer_2_2025.pdf",
+      "sha256": "fdc0f9eeec88ec264c485459d55f5f55e8735bdf48576489fc469543d458ca4f",
+      "pages": 2,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "protocolo_de_internamentos_de_pacientes_do_departamento_de_saude_mental_de_toledo-pr_2020",
+      "title": "protocolo de internamentos de pacientes do departamento de saude mental de toledo-pr 2020",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2026-01/protocolo_de_internamentos_de_pacientes_do_departamento_de_saude_mental_de_toledo-pr_2020.pdf",
+      "sha256": "e53273238f2171459f9f8c77298345ef481642216dd60f2d8282dac8d698da03",
+      "pages": 28,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "protocolo_municipal_de_endocrinologia_1atualizacao_06112023",
+      "title": "protocolo municipal de endocrinologia 1atualizacao 06112023",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2026-01/protocolo_municipal_de_endocrinologia_1atualizacao_06112023.pdf",
+      "sha256": "55a1b7b2f0c5c52f5155432b53422134c793a95966f04a847dbfe618f1bae677",
+      "pages": 20,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "protocolo_municipal_de_cardiologia_1versao_06112023",
+      "title": "protocolo municipal de cardiologia 1versao 06112023",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2026-01/protocolo_municipal_de_cardiologia_1versao_06112023.pdf",
+      "sha256": "d75c434592d91f17948d63c3c330e42019f1440f4d069342ebc96d6292ae7218",
+      "pages": 28,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "tele_ecg_passo_2_como_se_cadastrar_na_plataforma_nacional_de_telediagnostico",
+      "title": "tele ecg passo 2 como se cadastrar na plataforma nacional de telediagnostico",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2026-01/tele_ecg_passo_2_como_se_cadastrar_na_plataforma_nacional_de_telediagnostico.pdf",
+      "sha256": "509cbf75120081b564cc328ddfd865ee38e9821a72fd93ab5ef592cb99ff7bba",
+      "pages": 4,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "tele_ecg_passo_1_como_se_cadastrar_na_plataforma_sabia",
+      "title": "tele ecg passo 1 como se cadastrar na plataforma sabia",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2026-01/tele_ecg_passo_1_como_se_cadastrar_na_plataforma_sabia.pdf",
+      "sha256": "c347311cdec6c2505f8678e6f23fc4ef66fd098a4254dd47701d578ae02a076c",
+      "pages": 4,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "protocolo_de_registros_saude_mental_versao_preliminar",
+      "title": "protocolo de registros saude mental versao preliminar",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2026-01/protocolo_de_registros_saude_mental_versao_preliminar.pdf",
+      "sha256": "a8232f548e7a667b483d16efa07628bae74e95c937b4be0612a95e92dc2d689f",
+      "pages": 23,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "protocolo_atendimento_migrantes_e_refugiados",
+      "title": "protocolo atendimento migrantes e refugiados",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2026-02/protocolo_atendimento_migrantes_e_refugiados.pdf",
+      "sha256": "23fad7223390ba411b67298d18d40c5f62868759e446163352e9e197859fe4f1",
+      "pages": 21,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "protocolo_implante_subdermico",
+      "title": "protocolo implante subdermico",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2026-04/protocolo_implante_subdermico.pdf",
+      "sha256": "241f7f2b3f8c2c1a3b881cb0db5aa7183c9e6891a5c1ce9bca60cfe79806727a",
+      "pages": 33,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "protocolo_avaliacao_e_manejo_da_demanda_espontanea_aps_2026",
+      "title": "protocolo avaliacao e manejo da demanda espontanea aps 2026",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2026-06/protocolo_avaliacao_e_manejo_da_demanda_espontanea_aps_2026.pdf",
+      "sha256": "d06ec23b2046f18a11ad6f3fdce26fadf1448c7b2e56feaefd4039c8624289f9",
+      "pages": 121,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "protocolo_enfermagem_lme_assinado",
+      "title": "protocolo enfermagem lme assinado",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2026-07/protocolo_enfermagem_lme_assinado.pdf",
+      "sha256": "4a764acb4c7b809c5e028c102e74a1ab0d3f964cff8283f526f8110527ffbf21",
+      "pages": 19,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    },
+    {
+      "id": "diu_fluxo_assinado",
+      "title": "diu fluxo assinado",
+      "url": "https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2026-08/diu_fluxo_assinado.pdf",
+      "sha256": "7621dee7d42c28c4ce0b4ba7d694202359cbca61406861f56078aba15ab09e91",
+      "pages": 4,
+      "reviewStatus": "inventariado — validação clínica por regra necessária"
+    }
+  ]
+}
