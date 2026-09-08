@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght=400;500;600&family=DM+Mono:wght=400;500&display=swap" rel="stylesheet">
 <script defer src="vendor/pdf-lib.min.js"></script>
 <script defer src="assets/modelos.js"></script>
+<script src="assets/ai-transport.js"></script>
 <script>
 const _SB_URL = 'https://mcmletzjgykhwknshacg.supabase.co';
 const _SB_KEY = 'sb_publishable_E6SrzpJ09LIiIq1PJJAP8A_sq9_98Lb';
@@ -8648,7 +8649,7 @@ function lerFormAISoap(){
   const cfg={
     enabled:!!document.getElementById('ai-soap-enabled')?.checked,
     endpoint:String(document.getElementById('ai-soap-endpoint')?.value||'').trim(),
-    model:String(document.getElementById('ai-soap-model')?.value||'').trim()||'gpt-4o-mini',
+    model:String(document.getElementById('ai-soap-model')?.value||'').trim()||'gemini-2.5-flash',
     apiKey:String(document.getElementById('ai-soap-key')?.value||'').trim(),
     temperature:String(document.getElementById('ai-soap-temperature')?.value||'0.2'),
     extra:String(document.getElementById('ai-soap-extra')?.value||'').trim()
@@ -8656,20 +8657,7 @@ function lerFormAISoap(){
   return normalizarConfigAISoap(cfg);
 }
 function endpointSupabaseAISoap(cfg){return /\.supabase\.co\/functions\/v1\//i.test(String(cfg?.endpoint||''))}
-function explicarFalhaAISoap(e,cfg){
-  const msg=String(e?.message||e||'').trim();
-  if(/failed to fetch|networkerror|load failed|abort/i.test(msg)&&endpointSupabaseAISoap(cfg)){
-    return [
-      'Falha no teste: o navegador não conseguiu conversar com a Edge Function.',
-      'Verifique a URL do endpoint clever-processor, CORS/OPTIONS da função ou a conexão da rede.',
-      'O front-end envia apenas Content-Type e o corpo { tipoConsulta, dadosConsulta }, sem Authorization, sem apikey e sem chave de IA.',
-      'O SOAP local continua funcionando normalmente.'
-    ].join('\n');
-  }
-  if(/api respondeu 401|jwt|unauthorized/i.test(msg)&&endpointSupabaseAISoap(cfg))return 'Falha no teste: a função recusou autenticação. O front-end não envia token; confira se a Edge Function clever-processor está pública ou sem exigência de JWT.';
-  if(/api respondeu 404|not found/i.test(msg)&&endpointSupabaseAISoap(cfg))return 'Falha no teste: função não encontrada. Confira se a URL termina exatamente com /functions/v1/clever-processor e se a Edge Function foi implantada.';
-  return `Falha no teste: ${msg||'não foi possível chamar a API.'}`;
-}
+function explicarFalhaAISoap(e,cfg){return ESFAITransport.explain(e);}
 function salvarConfigAISoap(){
   if(!temPermissao('ver_admin'))return showToast('Somente o administrador configura a IA SOAP.');
   const cfg=lerFormAISoap();
@@ -8886,119 +8874,54 @@ async function gerarSoapPorIA(){
     if(!dadosConsulta)throw new Error('Não foi possível montar dadosConsulta para IA.');
     dadosConsulta.soapLocal=soapLocal;
     if(cfg.instrucaoExtra)dadosConsulta.instrucaoExtra=cfg.instrucaoExtra;
-    const resposta=await fetch(cfg.endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tipoConsulta,dadosConsulta})});
-    let data=null;
-    try{data=await resposta.json()}catch(e){console.error('Resposta não JSON da IA SOAP:',e);throw new Error('A IA SOAP não retornou JSON válido.')}
-    console.log('Resposta IA SOAP:',data);
-    if(!resposta.ok)throw new Error(data?.erro||data?.error||`Erro HTTP ${resposta.status} ao chamar IA SOAP.`);
-    if(data?.data)data=data.data;
-    if(!data||typeof data.soap!=='string'||!data.soap.trim())throw new Error('IA SOAP respondeu, mas sem campo soap.');
+    const data=await chamarIASoap(cfg,{tipoAcao:'gerar_soap',tipoConsulta,dadosConsulta});
     if(!aplicarTextoCompletoAISoap(prefix,data.soap,data.pendencias))throw new Error('Não foi possível aplicar o SOAP retornado.');
     pularFinalizadorSoapAutomatico(prefix,2500);
     if(data.bloqueado)mostrarMensagemIA('IA SOAP retornou bloqueio/pendências.');
     else mostrarMensagemIA('SOAP lapidado com IA aplicado.');
   }catch(e){
-    console.error('Erro ao aplicar IA SOAP:',e);
+
     const st=document.getElementById('ai-soap-status');if(st)st.textContent=explicarFalhaAISoap(e,cfg);
-    showToast('IA SOAP não respondeu. O SOAP local foi mantido. Veja o console.');
+    showToast(explicarFalhaAISoap(e,cfg));
   }finally{
     if(btn){btn.disabled=false;btn.textContent='IA SOAP'}
   }
 }
-function modeloEdgeFunctionAISoap(){
-  return `// Supabase Edge Function: gerar-soap
-// Configure o segredo OPENAI_API_KEY no Supabase, não no HTML.
-// Exemplo: supabase secrets set OPENAI_API_KEY=sua_chave
-import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info, x-roteiro-esf",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
-
-serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
-  }
-
-  try {
-    const openaiKey = Deno.env.get("OPENAI_API_KEY");
-    if (!openaiKey) {
-      return new Response(JSON.stringify({ error: "OPENAI_API_KEY ausente" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const body = await req.json();
-    const payload = {
-      model: body.model || "gpt-4o-mini",
-      temperature: body.temperature ?? 0.2,
-      response_format: { type: "json_object" },
-      messages: body.messages || [
-        { role: "system", content: "Retorne apenas JSON." },
-        { role: "user", content: JSON.stringify(body) },
-      ],
-    };
-
-    const resposta = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": \`Bearer \${openaiKey}\`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
-
-    const texto = await resposta.text();
-    return new Response(texto, {
-      status: resposta.status,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  } catch (e) {
-    return new Response(JSON.stringify({ error: e.message || String(e) }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
-});`;
+async function cabecalhosIASegura(){
+  if(window.MODO_OFFLINE||!_sb||!CURRENT_AUTH_USER_ID)throw new Error('Entre novamente para usar a IA.');
+  const {data,error}=await _sb.auth.getSession();
+  if(error||!data?.session?.access_token||data.session.user?.id!==CURRENT_AUTH_USER_ID)throw new Error('Sessão expirada. Entre novamente.');
+  return {'Content-Type':'application/json','Authorization':'Bearer '+data.session.access_token,apikey:_SB_KEY};
 }
-async function copiarModeloEdgeFunctionAISoap(){
-  const txt=modeloEdgeFunctionAISoap();
-  await copiarTextoSeguro(txt,'Modelo da Edge Function copiado.');
-  const st=document.getElementById('ai-soap-status');
-  if(st)st.textContent='Modelo copiado. Cole no Supabase Edge Function gerar-soap e configure o segredo OPENAI_API_KEY no Supabase.';
+function modeloEdgeFunctionAISoap(){return 'Use supabase/functions/clever-processor para Gemini. A função corrigida exige sessão e permissão de IA, limite de uso e GEMINI_API_KEY no servidor. Consulte supabase/README.md. Não use o modelo OpenAI para esta configuração Gemini.';}
+async function copiarModeloEdgeFunctionAISoap(){await copiarTextoSeguro(modeloEdgeFunctionAISoap(),'Instruções da função Gemini copiadas.');}
+async function chamarIASoap(cfg,payload){
+  const endpoint=new URL(cfg.endpoint),base=new URL(_SB_URL);
+  if(endpoint.origin!==base.origin||endpoint.username||endpoint.password||!endpoint.pathname.startsWith('/functions/v1/'))throw new Error('Use uma Edge Function HTTPS do mesmo projeto Supabase do programa.');
+  const start=performance.now(),controller=new AbortController();let timer;
+  const body={tipoAcao:payload.tipoAcao,tipoConsulta:payload.tipoConsulta,dadosConsulta:{soapLocal:payload.dadosConsulta?.soapLocal}};
+  try{
+    const {response,data}=await Promise.race([
+      (async()=>{const headers=await cabecalhosIASegura();const response=await fetch(endpoint.href,{method:'POST',headers,body:JSON.stringify(body),signal:controller.signal});return {response,data:await ESFAITransport.readResponse(response)};})(),
+      new Promise((_,reject)=>timer=setTimeout(()=>{controller.abort();reject(new DOMException('Tempo de resposta excedido.','TimeoutError'));},45000))
+    ]);
+    window.ULTIMO_DIAGNOSTICO_IA={hora:new Date().toISOString(),status:response.status,tempoMs:Math.round(performance.now()-start),modelo:data.modelo||'',requestId:data.requestId};
+    return data;
+  }catch(e){window.ULTIMO_DIAGNOSTICO_IA={hora:new Date().toISOString(),status:e.status||0,codigo:e.code||e.name,requestId:e.requestId||'',tempoMs:Math.round(performance.now()-start)};throw e;}finally{clearTimeout(timer);}
 }
 async function testarConfigAISoap(){
   const cfg=lerFormAISoap(),st=document.getElementById('ai-soap-status');
-  if(!cfg.endpoint){if(st)st.textContent='Informe o endpoint da API antes de testar.';return}
-  if(st)st.textContent='Testando a API...';
+  if(!cfg.endpoint){if(st)st.textContent='Informe o endereço da função antes de testar.';return;}
+  if(st)st.textContent='Testando sessão, função e geração na Gemini com dados fictícios...';
   try{
-    // Espelha o envelope REAL enviado por gerarSoapPorIA ({tipoAcao,tipoConsulta,dadosConsulta}
-    // centrado em soapLocal). Um teste com formato divergente do fluxo real dava falso "ok".
-    const payloadTeste={
-      tipoAcao:'gerar_soap',
-      tipoConsulta:'preventivo',
-      dadosConsulta:{
-        descricaoConsulta:'Teste de conexão IA SOAP',
-        soapLocal:'S: paciente comparece para rastreamento citopatológico.\nO: colo sem alterações à inspeção.\nA: preventivo de rotina.\nP: manter rastreamento conforme protocolo municipal.',
-        origem:'teste_conexao',
-        objetivoIA:'Teste de conexão: apenas confirmar resposta da IA SOAP, sem inventar dados.'
-      }
-    };
-    const r=await fetchComTimeout(cfg.endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payloadTeste)},30000);
-    const texto=await r.text();
-    if(!r.ok)throw new Error(`API respondeu ${r.status}: ${texto.slice(0,240)}`);
-    let json;try{json=JSON.parse(texto)}catch(e){throw new Error('Resposta não veio em JSON válido.')}
-    const soap=json?.data?.soap||json?.soap;
-    if(!soap){console.log('Resposta recebida da IA SOAP:',json);throw new Error('Resposta sem campo soap/data.soap.');}
-    if(st)st.textContent='Conexão com IA SOAP funcionando.';
-    showToast('Conexão com IA SOAP funcionando.');
-  }catch(e){
-    if(st)st.textContent=explicarFalhaAISoap(e,cfg);
-  }
+    const data=await chamarIASoap(cfg,{tipoAcao:'testar_conexao',tipoConsulta:'consulta_enfermagem',dadosConsulta:{descricaoConsulta:'Teste técnico com dados inteiramente fictícios',soapLocal:'S: Caso fictício para teste técnico, sem pessoa real.\nO: Não avaliado; teste de conexão.\nA: Registro fictício.\nP: Apenas verificar a conexão, sem atendimento ou conduta clínica.',origem:'teste_conexao',objetivoIA:'Retornar o texto de teste sem acrescentar informação clínica.'}});
+    if(data.bloqueado)throw new Error('A função respondeu com bloqueio. '+(data.pendencias||[]).join(' '));
+    const seconds=(window.ULTIMO_DIAGNOSTICO_IA.tempoMs/1000).toFixed(1);
+    if(st)st.textContent=`Teste de geração concluído em ${seconds} s${data.modelo?' — '+data.modelo:''}. Nenhum prontuário foi alterado.`;
+    showToast('Teste da IA concluído com dados fictícios.');
+  }catch(e){if(st)st.textContent=explicarFalhaAISoap(e,cfg);}
 }
+
 function textoSoapAtual(incluirPendencias=false){const prefix=prefixoPaginaAtual(),ids=SOAP_IDS_MODULO[prefix];if(!ids)return'';const txt=[ids.s,ids.o,ids.a,ids.p].map(id=>document.getElementById(id)?.value.trim()).filter(Boolean).join('\n\n');const pend=incluirPendencias?[...gerarPendenciasSoap(prefix),...(AI_SOAP_PENDENCIAS[prefix]||[])]:[];return txt+(pend.length?`\n\nPENDÊNCIAS PARA REVISAR ANTES DE SALVAR:\n- ${[...new Set(pend)].join('\n- ')}`:'')}
 function textoSoapComSae(){const prefix=prefixoPaginaAtual();return textoSoapAtual(false)+resumoPlanoCuidados(prefix)}
 async function copiarTextoSeguro(txt,msg){if(!txt)return showToast('Gere ou preencha a evolução antes de copiar.');try{await navigator.clipboard.writeText(txt);showToast(msg)}catch(e){const t=document.createElement('textarea');t.value=txt;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();showToast(msg)}}
@@ -9893,13 +9816,27 @@ function reabrirAtendimento(id){
 }
 async function carregarPermissoesUsuario(user){
   const admin=user?.email==='inpress.rodrigues@gmail.com';
-  if(admin){PERMISSOES_ATUAIS={...PERMISSOES_PADRAO,ver_historico:true,usar_modo_teste:true,usar_ia_soap:true,gerar_documentos:true,editar_protocolos:true,reportar_erro:true,ver_reportes:true,ver_admin:true,nivel_acesso:'gerente_municipal',municipio_escopo:'Toledo'};aplicarPermissoesInterface();_cacharSessaoOffline(user);return;}
-  PERMISSOES_ATUAIS={...PERMISSOES_PADRAO};
-  if(_sb&&user?.id){
-    const {data}=await _sb.from('perfis').select('nome,cargo,unidade,permissoes').eq('user_id',user.id).maybeSingle();
-    if(data?.permissoes)PERMISSOES_ATUAIS={...PERMISSOES_PADRAO,...data.permissoes};
-    if(data)CURRENT_USER_PROFILE={...(CURRENT_USER_PROFILE||{}),nome:data.nome||CURRENT_USER_PROFILE?.nome||'',cargo:data.cargo||CURRENT_USER_PROFILE?.cargo||'',unidade:data.unidade||CURRENT_USER_PROFILE?.unidade||'',nivel_acesso:PERMISSOES_ATUAIS.nivel_acesso,municipio:PERMISSOES_ATUAIS.municipio_escopo||'Toledo'};
+  // Preserva as demais funções do painel legado. A IA segue a permissão efetiva do servidor, inclusive para o proprietário.
+  const base=admin?{...PERMISSOES_PADRAO,ver_historico:true,usar_modo_teste:true,gerar_documentos:true,editar_protocolos:true,reportar_erro:true,ver_reportes:true,ver_admin:true,nivel_acesso:'gerente_municipal',municipio_escopo:'Toledo'}:{...PERMISSOES_PADRAO};
+  const leitura=window.__leituraPermissoesIA=(window.__leituraPermissoesIA||0)+1;
+  PERMISSOES_ATUAIS={...base,usar_ia_soap:false};
+  aplicarPermissoesInterface();
+  try{
+    if(_sb&&user?.id){
+      const {data,error}=await comLimite(_sb.from('perfis').select('nome,cargo,unidade,permissoes').eq('user_id',user.id).maybeSingle(),5000);
+      if(leitura!==window.__leituraPermissoesIA||user.id!==CURRENT_AUTH_USER_ID)return;
+      if(error)throw error;
+      const p=data?.permissoes;
+      const permissoes=p&&typeof p==='object'&&!Array.isArray(p)?p:{};
+      PERMISSOES_ATUAIS={...(admin?base:{...base,...permissoes}),usar_ia_soap:permissoes.usar_ia_soap===true||permissoes.ver_admin===true};
+      if(data)CURRENT_USER_PROFILE={...(CURRENT_USER_PROFILE||{}),nome:data.nome||CURRENT_USER_PROFILE?.nome||'',cargo:data.cargo||CURRENT_USER_PROFILE?.cargo||'',unidade:data.unidade||CURRENT_USER_PROFILE?.unidade||'',nivel_acesso:PERMISSOES_ATUAIS.nivel_acesso,municipio:PERMISSOES_ATUAIS.municipio_escopo||'Toledo'};
+    }
+  }catch(e){
+    if(leitura!==window.__leituraPermissoesIA||user?.id!==CURRENT_AUTH_USER_ID)return;
+    PERMISSOES_ATUAIS={...base,usar_ia_soap:false};
+    showToast('Não foi possível conferir a permissão de IA. Tente entrar novamente.');
   }
+  if(leitura!==window.__leituraPermissoesIA||user?.id!==CURRENT_AUTH_USER_ID)return;
   aplicarPermissoesInterface();
   _cacharSessaoOffline(user);
 }
@@ -9959,9 +9896,9 @@ function verificarAcesso(session) {
     authScreen.classList.remove('visible');
     const user = session.user;
     const meta = user.user_metadata || {};
-    carregarPermissoesUsuario(user);
     CURRENT_AUTH_USER_ID=user.id;
     CURRENT_USER_PROFILE={nome:meta.nome||user.email||'',cargo:meta.cargo||'',conselho:meta.conselho||'',unidade:meta.unidade||''};
+    carregarPermissoesUsuario(user);
     localStorage.setItem(chaveUsuarioAtual(),JSON.stringify(CURRENT_USER_PROFILE));
     registrarAuditoria('Login','Acesso autenticado');
     iniciarSessaoSegura();
@@ -12455,9 +12392,10 @@ async function gerarPacoteDiabetesGestacionalPN(){
     const div=document.createElement('div');div.id='ia-soap-compare';div.className='ia-compare-backdrop';
     div.innerHTML=`<div class="ia-compare-modal"><h3 style="margin:0 0 6px">Comparar SOAP local x SOAP IA</h3><div class="alert alert-i" style="margin-bottom:12px">A IA não substituiu automaticamente. Revise e aplique somente se estiver correto.</div><div class="ia-compare-grid"><div><strong>SOAP local</strong><textarea readonly>${escTR(local)}</textarea></div><div><strong>SOAP IA</strong><textarea id="ia-soap-text-review">${escTR(ia)}</textarea></div></div><div class="ia-compare-actions"><button class="btn btn-s" onclick="document.getElementById('ia-soap-compare').remove()">Manter local</button><button class="btn btn-s" onclick="copiarTextoSeguro(document.getElementById('ia-soap-text-review').value,'SOAP IA copiado.')">Copiar SOAP IA</button><button class="btn btn-p" onclick="aplicarSOAPIARevisado('${prefix}')">Aplicar SOAP IA revisado</button></div></div>`;
     document.body.appendChild(div);
-    window.__ultimoSoapIA={prefix,ia,pendencias};
+    window.__ultimoSoapIA={prefix,ia,pendencias,ownerId:CURRENT_AUTH_USER_ID};
   }
   window.aplicarSOAPIARevisado=function(prefix){
+    if(window.__ultimoSoapIA?.ownerId!==CURRENT_AUTH_USER_ID)return showToast('A sessão mudou. Gere novamente após entrar.');
     const txt=document.getElementById('ia-soap-text-review')?.value||window.__ultimoSoapIA?.ia||'';
     if(!txt.trim())return showToast('SOAP IA vazio.');
     aplicarTextoCompletoAISoap?.(prefix,txt,window.__ultimoSoapIA?.pendencias||[]);
@@ -12478,44 +12416,23 @@ async function gerarPacoteDiabetesGestacionalPN(){
       mostrarMensagemIA?.('Gerando SOAP com IA...');
       const tipoConsulta=tipoConsultaAISoap?.(prefix)||'consulta';
       const dadosConsulta=montarDadosConsultaParaIA(tipoConsulta);
-      const resposta=await fetchComTimeout(cfg.endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tipoAcao:'gerar_soap',tipoConsulta,dadosConsulta})},45000);
-      let data;try{data=await resposta.json()}catch(e){throw new Error('A IA SOAP não retornou JSON válido.')}
-      console.log('Resposta IA SOAP:',data);
-      if(!resposta.ok)throw new Error(data?.erro||data?.error||`Erro HTTP ${resposta.status}.`);
-      if(data?.data)data=data.data;
-      if(!data?.soap||typeof data.soap!=='string')throw new Error('IA SOAP respondeu, mas sem campo data.soap.');
+      const dono=CURRENT_AUTH_USER_ID;
+      const data=await chamarIASoap(cfg,{tipoAcao:'gerar_soap',tipoConsulta,dadosConsulta});
+      if(dono!==CURRENT_AUTH_USER_ID)throw new Error('A sessão mudou. Gere novamente após entrar.');
+      if(data.bloqueado)throw new Error('A IA indicou bloqueio. '+(data.pendencias||[]).join(' '));
       mostrarComparadorIASoap(prefix,soapLocal,data.soap,data.pendencias||[]);
       mostrarMensagemIA?.(data.bloqueado?'IA SOAP retornou bloqueio/pendências para revisão.':'SOAP IA gerado. Revise antes de aplicar.');
     }catch(e){
-      console.error('Erro ao aplicar IA SOAP:',e);
-      mostrarMensagemIA?.('IA SOAP não respondeu. O SOAP local foi mantido. Veja o console.');
+      mostrarMensagemIA?.(explicarFalhaAISoap(e,cfg));
     }finally{if(btn){btn.disabled=false;btn.textContent='IA SOAP'}}
   };
 
   window.auditarSiteComIA=async function(){
     if(!temPermissao('ver_admin'))return showToast('Somente admin.');
-    const cfg=lerConfigAISoap();
-    const relatorio={
-      data:new Date().toISOString(),
-      endpointConfigurado:!!cfg.endpoint,
-      endpoint:cfg.endpoint,
-      iaAtiva:!!cfg.enabled,
-      chaveNoFrontend:false,
-      soapLocalExiste:!!textoSoapAtual(false).trim(),
-      paginaAtual:document.querySelector('.pg.on')?.id||'',
-      localStorage:ESF_LOCAL_STORAGE_CATALOG,
-      validacoes:validarEntradaPreSoap(prefixoPaginaAtual()).slice(0,20),
-      testesLocais:testarSistemaCompleto(false)
-    };
-    const out=document.getElementById('ai-site-audit-result')||criarPainelAuditoriaIA();
-    out.textContent='Auditando com IA...';
-    try{
-      const r=await fetch(cfg.endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tipoAcao:'auditar_site',relatorio})});
-      const data=await r.json();
-      console.log('Auditoria IA:',data);
-      out.innerHTML=`<h4>Resultado da Auditoria IA</h4><textarea id="ai-site-audit-text" style="width:100%;min-height:220px">${escTR(data.auditoria||JSON.stringify(data,null,2))}</textarea><div class="brow"><button class="btn btn-s" onclick="copiarTextoSeguro(document.getElementById('ai-site-audit-text').value,'Auditoria copiada para o Codex.')">Copiar auditoria para Codex</button></div>`;
-    }catch(e){console.error(e);out.textContent='Falha na auditoria IA: '+(e.message||e);}
+    testarSistemaCompleto(true);
+    showToast('Testes locais concluídos. Use Testar conexão para verificar a Gemini.');
   };
+
   function criarPainelAuditoriaIA(){
     const sec=document.getElementById('admin-sec-ia-soap')?.querySelector('.admin-card')||document.getElementById('admin-sec-ia-soap');
     const box=document.createElement('div');box.id='ai-site-audit-result';box.className='ai-soap-status';sec?.appendChild(box);return box;
@@ -12938,7 +12855,6 @@ async function gerarPacoteDiabetesGestacionalPN(){
 </script>
 </body>
 </html>
-
 
 
 
