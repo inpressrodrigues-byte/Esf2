@@ -10,8 +10,8 @@ Base: `e094e6b41f8ce7b9bd0cc98597a36d147e790a8a`. Branch: `fix/auditoria-integra
 
 | Verificação | Resultado |
 |---|---|
-| Regras, segurança do servidor preparado, PDF SINAN e integridade dos scripts | 20/20 testes aprovados |
-| Fluxos no navegador | 29/29 grupos aprovados |
+| Regras, segurança do servidor preparado, PDF SINAN e integridade dos scripts | 34/34 testes aprovados |
+| Fluxos no navegador | 30/30 grupos aprovados |
 | Telas abertas | 24; sem IDs duplicados e sem controles visíveis sem nome acessível |
 | Demanda municipal | 33 temas, 35 tabelas, 140 seleções de critérios testadas |
 | Layout móvel | 390 e 768 px sem rolagem horizontal da página; menu e ações acessíveis |
@@ -19,7 +19,7 @@ Base: `e094e6b41f8ce7b9bd0cc98597a36d147e790a8a`. Branch: `fix/auditoria-integra
 | Fontes oficiais | 66/66 PDFs conferidos ao vivo; nenhum arquivo diferente ou indisponível |
 | Ficha de sífilis em gestante | PDF real de 2 páginas, preenchimento fictício e inspeção visual |
 
-Testes executados no Windows, com Node e Edge sem interface visível. O navegador usa dados fictícios, simula os serviços e bloqueia conexões externas. Os 29 grupos contêm múltiplas verificações; não são uma medida percentual de cobertura do código. O fluxo de CI adicionado ao GitHub só poderá ser considerado aprovado após sua execução.
+Testes executados no Windows, com Node e Edge sem interface visível. O navegador usa dados fictícios, simula os serviços e bloqueia conexões externas. Os 30 grupos contêm múltiplas verificações; não são uma medida percentual de cobertura do código. O fluxo de CI adicionado ao GitHub só poderá ser considerado aprovado após sua execução.
 
 ## Rastreabilidade dos 30 achados
 
@@ -71,8 +71,8 @@ O código do servidor preparado está em `supabase/`; suas instruções de insta
 
 ## Pendências que impedem a liberação em produção
 
-1. **Ambiente publicado:** não foi informado o endereço do programa em uso. Falta testar login, permissões, gravação/leitura, sincronização e recuperação de sessão nesse ambiente, com contas e pacientes fictícios.
-2. **Supabase existente:** não estão disponíveis o código da função publicada, o esquema completo e as políticas reais de acesso às tabelas. Testes locais simulam os serviços; não demonstram isolamento no banco. O SQL de leitura e a nova função de IA foram preparados, sem execução da migração nem implantação.
+1. **Ambiente publicado:** o endereço foi identificado como `https://esf2.vercel.app`; foram testadas chamadas públicas da API com exemplos fictícios. Falta testar login, permissões, gravação/leitura, sincronização e recuperação de sessão nesse ambiente, com contas e pacientes fictícios.
+2. **Supabase existente:** o mantenedor forneceu o código da função Gemini; o esquema completo e as políticas reais de acesso às tabelas continuam sem validação. Testes locais simulam os serviços; não demonstram isolamento no banco. O SQL de leitura e a nova função de IA foram preparados, sem execução da migração nem implantação.
 3. **Homologação clínica:** a equipe responsável precisa aprovar cada regra automatizada e decidir os limites sobrepostos/lacunas dos documentos. Inventariar 66 PDFs e testar regressões não certifica 100% das 1.667 páginas, todas as condutas ou todas as combinações clínicas.
 4. **Migração e uso real:** dados locais antigos, sem vínculo ao usuário, são preservados e não importados automaticamente para uma conta. Planejar a migração autorizada e testar formulários extensos com profissionais, dispositivos e navegadores do serviço.
 
@@ -85,3 +85,7 @@ O [portal oficial fornecido](https://www.toledo.pr.gov.br/portais/saude/gabinete
 O programa contém regras implementadas em código e acesso às referências. Ele **não extrai nem homologa automaticamente todas as condutas dos PDFs**. O verificador identifica mudança da fonte; uma alteração precisa ser revisada, codificada e testada antes de entrar no atendimento. “Inventariado” não significa “vigente” ou “validado clinicamente”.
 
 Referências técnicas: [mitigação oficial PDF.js](https://github.com/mozilla/pdf.js/security/advisories/GHSA-wgrm-67xf-hhpq), [autenticação Supabase](https://supabase.com/docs/guides/functions/auth), [validação do usuário](https://supabase.com/docs/reference/javascript/auth-getuser), [API de IA](https://developers.openai.com/api/reference/resources/chat), [tratamento de dados de IA](https://platform.openai.com/docs/models/default-usage-policies-by-endpoint).
+
+## Atualização da API
+
+A análise do erro publicado e a função Gemini corrigida estão em [DIAGNOSTICO-API-2026-09.md](DIAGNOSTICO-API-2026-09.md). A URL foi identificada e o código da função foi fornecido após a primeira rodada da auditoria. Testes de produção autenticados e implantação permanecem pendentes.

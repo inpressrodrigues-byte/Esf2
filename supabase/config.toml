@@ -1,2 +1,5 @@
 [functions.gerar-soap]
 verify_jwt = true
+
+[functions.clever-processor]
+verify_jwt = true

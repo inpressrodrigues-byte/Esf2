@@ -1,33 +1,11 @@
-# Integração de IA para homologação
+# Função Gemini para homologação
 
-Esta função foi adicionada ao repositório; **não é a função já publicada**. O código
-e as políticas do Supabase existente não foram disponibilizados para esta auditoria.
-Os testes do handler usam serviços simulados, sem pacientes reais e sem cobrança de IA.
+A integração do ESF publicado usa **clever-processor / Gemini 2.5 Flash**. O código informado pelo mantenedor foi analisado e recebeu uma implementação com sessão, permissão, cota, prazos e erros identificáveis.
 
-O servidor valida o usuário, exige seu ID na lista administrativa, aceita somente
-SOAP, limita o corpo, consulta uma cota atômica de 30 solicitações/hora por usuário,
-fixa as instruções e o modelo no servidor e não registra o conteúdo em logs.
-Falhas na autenticação, autorização ou cota impedem o uso do provedor.
+Siga [o diagnóstico e a instalação](../DIAGNOSTICO-API-2026-09.md). A função corrigida e a migração **não foram implantadas**. O cliente corrigido deve ser homologado junto com o servidor.
 
-Antes de instalar em produção:
+Arquivos de execução: `functions/clever-processor/index.ts`, `handler.mjs`, `prompt.mjs`; cota: `migrations/202609070001_ia_quota.sql`. Para gerar um arquivo único para o editor do painel, execute `node scripts/build-gemini-function.cjs`, a partir da raiz do projeto.
 
-1. Homologar a migração de cota e a função em um projeto de teste. A migração não altera
-   as tabelas de pacientes/atendimentos. Conferir suas políticas com o SQL de leitura.
-2. Configurar segredos `OPENAI_API_KEY`, `ESF_OPENAI_MODEL` (modelo Chat Completions
-   autorizado na conta), `ESF_AI_USER_IDS` (UUIDs separados por vírgula) e
-   `ESF_ALLOWED_ORIGINS` (origens HTTPS exatas separadas por vírgula). Nunca colocar
-   esses segredos no HTML. Supabase fornece URL e chave pública no servidor.
-3. Manter a verificação de JWT e apontar o cliente para a função homologada.
-4. Testar sessão válida/expirada, usuário sem autorização, limite de uso, indisponibilidade
-   do provedor, revisão da resposta e isolamento entre dois usuários reais de teste.
-5. Aprovar retenção, acesso e tratamento dos dados com o responsável pelo serviço.
+O diretório `functions/gerar-soap` conserva a proposta alternativa anterior para OpenAI. A configuração Gemini descrita aqui usa `clever-processor` e `GEMINI_API_KEY`.
 
-`store:false` desativa o armazenamento opcional da resposta; não constitui garantia
-de retenção zero. A remoção de identificadores conhecidos no navegador também não
-garante anonimização de texto livre. Revisar o texto antes de enviar.
-
-Referências consultadas em 07/09/2026:
-[autenticação Supabase](https://supabase.com/docs/guides/functions/auth),
-[validação de usuário](https://supabase.com/docs/reference/javascript/auth-getuser),
-[Chat Completions](https://developers.openai.com/api/reference/resources/chat),
-[controles de dados](https://platform.openai.com/docs/models/default-usage-policies-by-endpoint).
+O SQL `auditoria-somente-leitura.sql` consulta políticas e permissões sem ler pacientes. Sua execução e a auditoria das políticas reais continuam pendentes. Remover identificadores conhecidos no cliente não garante anonimização de texto livre; a prévia exige conferência profissional.

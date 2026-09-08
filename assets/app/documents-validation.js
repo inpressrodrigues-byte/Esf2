@@ -727,18 +727,12 @@ async function gerarPacoteDiabetesGestacionalPN(){
       if(revisado===null)return;
       if(uid!==CURRENT_AUTH_USER_ID)throw new Error('Sessão alterada durante a revisão.');
       const dadosConsulta={soapLocal:revisado};
-      const resposta=await fetchComTimeout(cfg.endpoint,{method:'POST',headers:await cabecalhosIASegura(),body:JSON.stringify({tipoAcao:'gerar_soap',tipoConsulta,dadosConsulta})},45000);
-      let data;try{data=await resposta.json()}catch(e){throw new Error('A IA SOAP não retornou JSON válido.')}
-
-      if(!resposta.ok)throw new Error(data?.erro||data?.error||`Erro HTTP ${resposta.status}.`);
+      const data=await chamarIASoap(cfg,{tipoAcao:'gerar_soap',tipoConsulta,dadosConsulta});
       if(uid!==CURRENT_AUTH_USER_ID)throw new Error('Sessão alterada durante a solicitação.');
-      if(data?.data)data=data.data;
-      if(!data?.soap||typeof data.soap!=='string')throw new Error('IA SOAP respondeu, mas sem campo data.soap.');
       mostrarComparadorIASoap(prefix,soapLocal,data.soap,data.pendencias||[],!!data.bloqueado);
       mostrarMensagemIA?.(data.bloqueado?'IA SOAP retornou bloqueio/pendências para revisão.':'SOAP IA gerado. Revise antes de aplicar.');
     }catch(e){
-      console.error('Erro ao aplicar IA SOAP:',e);
-      mostrarMensagemIA?.('IA SOAP não respondeu. O SOAP local foi mantido. Veja o console.');
+      mostrarMensagemIA?.(explicarFalhaAISoap(e,cfg));
     }finally{if(btn){btn.disabled=false;btn.textContent='IA SOAP'}}
   };
 
