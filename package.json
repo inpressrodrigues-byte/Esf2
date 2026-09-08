@@ -1,0 +1,13 @@
+{
+  "name": "esf-toledo",
+  "version": "0.1.0-auditoria.20260907",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/clinical-core.test.cjs tests/ai-handler.test.cjs tests/sinan-pdf.test.cjs tests/source-integrity.test.cjs",
+    "test:browser": "node tests/browser.test.cjs",
+    "check:protocols": "node scripts/check-protocols.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.62.1"
+  }
+}

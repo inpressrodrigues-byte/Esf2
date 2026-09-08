@@ -1,0 +1,2 @@
+[functions.gerar-soap]
+verify_jwt = true
