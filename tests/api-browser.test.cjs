@@ -25,6 +25,28 @@ async function main(){try{
  });
  await check('HTTP 200 com erro é falha, sem sucesso falso',async()=>{await mock({erro:'Controle não instalado'});await page.evaluate(()=>testarConfigAISoap());assert.match(await page.locator('#ai-soap-status').textContent(),/Controle não instalado/);});
  await check('401, 403, 429 e 504 têm mensagens distintas',async()=>{for(const [status,match]of [[401,/Sessão/],[403,/não autorizou/],[429,/Limite/],[504,/tempo/]]){await mock({erro:'Falha fictícia'},status);await page.evaluate(()=>testarConfigAISoap());assert.match(await page.locator('#ai-soap-status').textContent(),match);}});
+ await check('403 identifica permissão de perfil e mantém código e identificador no diagnóstico',async()=>{
+  await mock({erro:'Sem permissão',codigo:'IA_NOT_ALLOWED',requestId:'synthetic-403'},403);await page.evaluate(()=>testarConfigAISoap());
+  const status=await page.locator('#ai-soap-status').textContent();assert.match(status,/perfil não tem permissão/);assert.doesNotMatch(status,/endereço/);assert.match(status,/synthetic-403/);
+  const diagnostic=await page.evaluate(()=>ULTIMO_DIAGNOSTICO_IA);assert.equal(diagnostic.codigo,'IA_NOT_ALLOWED');assert.equal(diagnostic.requestId,'synthetic-403');
+ });
+ await check('Proprietário usa permissão real do perfil, inclusive recusa e falha de leitura',async()=>{
+  const r=await page.evaluate(async()=>{
+   const out=[];for(const result of [{data:null},{data:{permissoes:{usar_ia_soap:false}}},{data:{permissoes:{usar_ia_soap:'true'}}},{data:{permissoes:{usar_ia_soap:true}}},{data:{permissoes:{ver_admin:true}}},{error:{message:'Falha fictícia'}}]){
+    _sb.from=()=>({select:()=>({eq:()=>({maybeSingle:async()=>result})})});
+    await carregarPermissoesUsuario({id:CURRENT_AUTH_USER_ID,email:'inpress.rodrigues@gmail.com'});
+    out.push({ia:temPermissao('usar_ia_soap'),admin:temPermissao('ver_admin')});
+   }return out;
+  });assert.deepEqual(r.map(x=>x.ia),[false,false,false,true,true,false]);assert.ok(r.every(x=>x.admin));
+ });
+ await check('Resposta de permissão da sessão anterior não libera IA para outra conta',async()=>{
+  const r=await page.evaluate(async()=>{
+   let resolve;const pending=new Promise(r=>resolve=r);_sb.from=()=>({select:()=>({eq:()=>({maybeSingle:()=>pending})})});
+   const read=carregarPermissoesUsuario({id:CURRENT_AUTH_USER_ID,email:'conta@example.test'});CURRENT_AUTH_USER_ID='other-user';
+   resolve({data:{permissoes:{usar_ia_soap:true}}});await read;const allowed=temPermissao('usar_ia_soap');
+   CURRENT_AUTH_USER_ID='synthetic-user';PERMISSOES_ATUAIS={...PERMISSOES_PADRAO,ver_admin:true,usar_ia_soap:true};return allowed;
+  });assert.equal(r,false);
+ });
  await check('Sessão ausente, offline ou de outro usuário não envia requisição',async()=>{
   await mock(success);const errors=await page.evaluate(async()=>{const cfg={endpoint:AI_SOAP_ENDPOINT_PADRAO},out=[];for(const setup of [()=>{window.MODO_OFFLINE=true;},()=>{window.MODO_OFFLINE=false;_sb.auth.getSession=async()=>({data:{session:null}});},()=>{_sb.auth.getSession=async()=>({data:{session:{access_token:'synthetic',user:{id:'other'}}}});}]){setup();try{await chamarIASoap(cfg,{tipoAcao:'testar_conexao'});}catch(e){out.push(e.message);}}_sb.auth.getSession=async()=>makeSession();return{errors:out,calls:sent.length};});assert.equal(errors.errors.length,3);assert.equal(errors.calls,0);
  });

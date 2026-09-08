@@ -3,8 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "test": "node --test tests/ai-transport.test.cjs tests/gemini-api.test.cjs",
+    "test": "node --test tests/ai-transport.test.cjs tests/gemini-api.test.cjs tests/permission-repair.test.cjs",
     "test:browser": "node tests/api-browser.test.cjs"
   },
-  "devDependencies": {"playwright": "1.62.1"}
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.8",
+    "playwright": "1.62.1"
+  }
 }

@@ -8907,7 +8907,7 @@ async function chamarIASoap(cfg,payload){
     ]);
     window.ULTIMO_DIAGNOSTICO_IA={hora:new Date().toISOString(),status:response.status,tempoMs:Math.round(performance.now()-start),modelo:data.modelo||'',requestId:data.requestId};
     return data;
-  }catch(e){window.ULTIMO_DIAGNOSTICO_IA={hora:new Date().toISOString(),status:e.status||0,codigo:e.code||e.name,tempoMs:Math.round(performance.now()-start)};throw e;}finally{clearTimeout(timer);}
+  }catch(e){window.ULTIMO_DIAGNOSTICO_IA={hora:new Date().toISOString(),status:e.status||0,codigo:e.code||e.name,requestId:e.requestId||'',tempoMs:Math.round(performance.now()-start)};throw e;}finally{clearTimeout(timer);}
 }
 async function testarConfigAISoap(){
   const cfg=lerFormAISoap(),st=document.getElementById('ai-soap-status');
@@ -9816,13 +9816,27 @@ function reabrirAtendimento(id){
 }
 async function carregarPermissoesUsuario(user){
   const admin=user?.email==='inpress.rodrigues@gmail.com';
-  if(admin){PERMISSOES_ATUAIS={...PERMISSOES_PADRAO,ver_historico:true,usar_modo_teste:true,usar_ia_soap:true,gerar_documentos:true,editar_protocolos:true,reportar_erro:true,ver_reportes:true,ver_admin:true,nivel_acesso:'gerente_municipal',municipio_escopo:'Toledo'};aplicarPermissoesInterface();_cacharSessaoOffline(user);return;}
-  PERMISSOES_ATUAIS={...PERMISSOES_PADRAO};
-  if(_sb&&user?.id){
-    const {data}=await _sb.from('perfis').select('nome,cargo,unidade,permissoes').eq('user_id',user.id).maybeSingle();
-    if(data?.permissoes)PERMISSOES_ATUAIS={...PERMISSOES_PADRAO,...data.permissoes};
-    if(data)CURRENT_USER_PROFILE={...(CURRENT_USER_PROFILE||{}),nome:data.nome||CURRENT_USER_PROFILE?.nome||'',cargo:data.cargo||CURRENT_USER_PROFILE?.cargo||'',unidade:data.unidade||CURRENT_USER_PROFILE?.unidade||'',nivel_acesso:PERMISSOES_ATUAIS.nivel_acesso,municipio:PERMISSOES_ATUAIS.municipio_escopo||'Toledo'};
+  // Preserva as demais funções do painel legado. A IA segue a permissão efetiva do servidor, inclusive para o proprietário.
+  const base=admin?{...PERMISSOES_PADRAO,ver_historico:true,usar_modo_teste:true,gerar_documentos:true,editar_protocolos:true,reportar_erro:true,ver_reportes:true,ver_admin:true,nivel_acesso:'gerente_municipal',municipio_escopo:'Toledo'}:{...PERMISSOES_PADRAO};
+  const leitura=window.__leituraPermissoesIA=(window.__leituraPermissoesIA||0)+1;
+  PERMISSOES_ATUAIS={...base,usar_ia_soap:false};
+  aplicarPermissoesInterface();
+  try{
+    if(_sb&&user?.id){
+      const {data,error}=await comLimite(_sb.from('perfis').select('nome,cargo,unidade,permissoes').eq('user_id',user.id).maybeSingle(),5000);
+      if(leitura!==window.__leituraPermissoesIA||user.id!==CURRENT_AUTH_USER_ID)return;
+      if(error)throw error;
+      const p=data?.permissoes;
+      const permissoes=p&&typeof p==='object'&&!Array.isArray(p)?p:{};
+      PERMISSOES_ATUAIS={...(admin?base:{...base,...permissoes}),usar_ia_soap:permissoes.usar_ia_soap===true||permissoes.ver_admin===true};
+      if(data)CURRENT_USER_PROFILE={...(CURRENT_USER_PROFILE||{}),nome:data.nome||CURRENT_USER_PROFILE?.nome||'',cargo:data.cargo||CURRENT_USER_PROFILE?.cargo||'',unidade:data.unidade||CURRENT_USER_PROFILE?.unidade||'',nivel_acesso:PERMISSOES_ATUAIS.nivel_acesso,municipio:PERMISSOES_ATUAIS.municipio_escopo||'Toledo'};
+    }
+  }catch(e){
+    if(leitura!==window.__leituraPermissoesIA||user?.id!==CURRENT_AUTH_USER_ID)return;
+    PERMISSOES_ATUAIS={...base,usar_ia_soap:false};
+    showToast('Não foi possível conferir a permissão de IA. Tente entrar novamente.');
   }
+  if(leitura!==window.__leituraPermissoesIA||user?.id!==CURRENT_AUTH_USER_ID)return;
   aplicarPermissoesInterface();
   _cacharSessaoOffline(user);
 }
@@ -9882,9 +9896,9 @@ function verificarAcesso(session) {
     authScreen.classList.remove('visible');
     const user = session.user;
     const meta = user.user_metadata || {};
-    carregarPermissoesUsuario(user);
     CURRENT_AUTH_USER_ID=user.id;
     CURRENT_USER_PROFILE={nome:meta.nome||user.email||'',cargo:meta.cargo||'',conselho:meta.conselho||'',unidade:meta.unidade||''};
+    carregarPermissoesUsuario(user);
     localStorage.setItem(chaveUsuarioAtual(),JSON.stringify(CURRENT_USER_PROFILE));
     registrarAuditoria('Login','Acesso autenticado');
     iniciarSessaoSegura();
@@ -12841,7 +12855,6 @@ async function gerarPacoteDiabetesGestacionalPN(){
 </script>
 </body>
 </html>
-
 
 
 

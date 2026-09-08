@@ -11,7 +11,9 @@
   const detail=e?.requestId?' Identificador: '+e.requestId+'.':'';
   if(e?.name==='AbortError'||e?.name==='TimeoutError'||/GEMINI_TIMEOUT|AUTH_TIMEOUT|QUOTA_TIMEOUT/.test(e?.code||''))return 'Tempo de resposta excedido. A função ou a Gemini demorou além do limite; o SOAP local foi preservado. Tente novamente. Não é confirmação de chave inválida nem de erro de CORS.'+detail;
   if(e?.status===401)return 'Sessão recusada ou expirada. Saia e entre novamente no programa. A função deve receber a sessão autenticada; mantenha a autenticação habilitada.'+detail;
-  if(e?.status===403)return 'O servidor não autorizou este usuário ou endereço do site. Confira a permissão de IA no Supabase.'+detail;
+  if(e?.status===403&&e?.code==='IA_NOT_ALLOWED')return 'Sua sessão foi reconhecida, mas seu perfil não tem permissão de IA no servidor. Um administrador precisa habilitar IA SOAP no seu perfil do Supabase. O SOAP local foi preservado.'+detail;
+  if(e?.status===403&&e?.code==='ORIGIN_NOT_ALLOWED')return 'Este endereço do site não está autorizado no servidor. Confira o endereço permitido na configuração da função. O SOAP local foi preservado.'+detail;
+  if(e?.status===403)return 'O servidor não autorizou a solicitação. A resposta não identificou se a recusa foi do usuário ou do endereço do site. O SOAP local foi preservado.'+detail;
   if(e?.status===404)return 'A função configurada não foi encontrada. Confira o endereço e a implantação no Supabase.'+detail;
   if(e?.status===429)return 'Limite de uso ou cota atingido. Aguarde e confira a cota no Supabase/Gemini.'+detail;
   if(e?.status===504)return 'A função excedeu o tempo de resposta. O SOAP local foi preservado.'+detail;

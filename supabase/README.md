@@ -14,4 +14,6 @@ Em 08/09/2026 UTC, a função de versão 2 já estava publicada no projeto. A co
 
 Esta atualização corrige somente a integração da API. As alterações de protocolos, regras clínicas, documentos e aparência da auditoria ampla estão no PR #2 e não fazem parte desta publicação.
 
-Validação antes da publicação: 14 testes de servidor/transporte e 10 grupos de navegador com dados fictícios e serviços simulados. O teste autenticado no serviço real deve ser registrado após a publicação do cliente compatível. Não houve acesso a prontuários para estes testes.
+Validação local atual: 21 testes de servidor/transporte/PostgreSQL e 13 grupos de navegador, com dados fictícios e provedor simulado. O teste autenticado real deve passar na versão de homologação antes de atualizar produção. Não houve acesso a prontuários para estes testes.
+
+O retorno 403 relatado na homologação levou à identificação de uma divergência: o painel concedia IA ao proprietário somente pelo e-mail, enquanto o servidor consultava as permissões do perfil. O cliente agora consulta a permissão de IA real também para o proprietário. O reparo pontual e suas condições estão em [repairs/README.md](repairs/README.md). O reparo ainda precisa ser aplicado no banco remoto; os testes locais não comprovam sua execução em produção.
