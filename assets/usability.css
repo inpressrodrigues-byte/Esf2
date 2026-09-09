@@ -1,0 +1,130 @@
+/* Compact interface shared by every module; clinical alert colors retain their meaning. */
+body.ux-compact{--sidebar-w:206px;--sidebar-width:var(--sidebar-w);--ux-actions-height:62px;--r:6px;--rl:9px;font-size:14px;line-height:1.5}
+body.ux-compact.sidebar-collapsed{--sidebar-w:62px}
+.ux-compact [hidden]{display:none!important}
+.ux-compact .wrap{max-width:1260px;padding:22px 24px 70px}
+.ux-compact .bar{background:#194f32;box-shadow:none;gap:8px}
+.ux-compact .bar-logo{font-size:13px;min-width:0;padding-right:30px;height:auto;min-height:40px}
+.ux-compact .bar-logo .pill{display:none}
+.ux-compact .bar-nav{gap:2px}
+.ux-compact .nb{font-size:12px;min-height:36px;padding:8px 9px;border-radius:5px;border-color:transparent!important;color:#f1f5ee!important}
+.ux-compact .nb.on{background:#356447;border-color:transparent}
+.ux-compact .nb svg{width:15px;height:15px;flex-shrink:0}
+.ux-compact.sidebar-collapsed .nb{font-size:0}
+.ux-compact.sidebar-collapsed .nb svg{width:20px;height:20px}
+.ux-compact .sidebar-toggle{width:28px;height:30px;right:8px;top:12px;border-radius:5px}
+.ux-nav-heading{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#c6dbcc;padding:16px 9px 7px}
+.sidebar-collapsed .ux-nav-heading{height:12px;margin-top:5px;padding:0;border-top:1px solid #43694e;font-size:0}
+.ux-compact .card{padding:18px;border-radius:8px!important;box-shadow:none!important;backdrop-filter:none!important;background:var(--sf)!important;margin-bottom:14px}
+.ux-compact .ct{font-size:12px;margin-bottom:12px;letter-spacing:.02em}
+.ux-compact .sh{margin-bottom:14px}
+.ux-compact .sh-t{font-size:22px;line-height:1.25}
+.ux-compact .sh-s{font-size:12px}
+.ux-compact .sh-ic{width:36px;height:36px;font-size:19px;border-radius:6px}
+.ux-compact .g2,.ux-compact .g3,.ux-compact .g4,.ux-compact .module-form-grid{gap:12px}
+.ux-compact .f{margin-bottom:10px}
+.ux-compact .f>label,.ux-compact .user-input-row>label{font-size:12px;line-height:1.4;margin-bottom:5px;text-transform:none;letter-spacing:0}
+.ux-compact .f input,.ux-compact .f select,.ux-compact .f textarea{border-radius:5px!important;padding:8px 10px;font-size:13px;min-height:36px;box-shadow:none}
+.ux-compact .f textarea{min-height:68px;line-height:1.5}
+.ux-compact .btn,.ux-compact .save-atend-btn{border-radius:5px!important;font-size:12px;padding:7px 11px;min-height:34px;box-shadow:none!important}
+.ux-compact .tabs{gap:3px;border-bottom:1px solid var(--bd);background:transparent!important;border-radius:0!important;box-shadow:none!important;padding:0;margin:0 0 16px;overflow:visible;flex-wrap:wrap}
+.ux-compact .tab{font-family:var(--font);font-size:12px;font-weight:500;line-height:1.35;padding:10px 11px;color:var(--tx2);background:transparent!important;border:0;border-bottom:2px solid transparent;border-radius:0!important;cursor:pointer;white-space:normal}
+.ux-compact .tab.on{color:var(--green);border-bottom-color:var(--green);box-shadow:none!important}
+.ux-compact :is(button,input,select,textarea,summary,[role=button]):focus-visible{outline:2px solid var(--green);outline-offset:3px}
+.ux-compact .pb{border-radius:6px!important;box-shadow:none!important;margin-bottom:10px}
+.ux-compact .pb-head{padding:10px 12px}
+.ux-compact .pb-body{padding:12px}
+.ux-compact .alert{display:block;border-radius:5px!important;padding:10px 12px;font-size:12px;line-height:1.5;box-shadow:none!important}
+.ux-compact .clinical-guide{border-radius:5px;background:var(--sf);margin-bottom:12px}
+.ux-compact .clinical-guide-head{padding:8px 10px;background:var(--sf2)}
+.ux-compact .clinical-guide-head strong{font-size:12px}
+.ux-compact .clinical-guide-head span{font-size:11px;max-width:380px}
+.ux-compact .clinical-group{padding:10px 0}
+.ux-compact .clinical-group-title{font-size:12px;text-transform:none;letter-spacing:0;margin-bottom:7px}
+.ux-compact .clinical-options{gap:6px}
+.ux-compact .clinical-chip{border-radius:5px!important;padding:6px 9px;min-height:32px;font-size:12px;line-height:1.35;box-shadow:none}
+.ux-compact .clinical-chip:not(.selected){background:var(--sf)!important;border-color:var(--bd)!important;color:var(--tx2)!important}
+.ux-compact .clinical-chip.selected{font-weight:600}
+.ux-compact .clinical-chip[data-level=critical].selected{border-width:2px}
+.ux-compact .cklist{gap:7px}
+.ux-compact .cki{font-size:12px;padding:8px;border-radius:5px!important}
+.ux-compact .soft-check{border-radius:5px;font-size:12px;box-shadow:none;transform:none;min-height:34px}
+.ux-compact .soft-check input{position:static;opacity:1;pointer-events:auto;width:auto;height:auto}
+.ux-compact .soft-check::before{display:none}
+.ux-compact .priority-panel{border-radius:6px;padding:12px}
+.ux-compact .home-op,.ux-compact .dash-card,.ux-compact .home-card{box-shadow:none!important;backdrop-filter:none!important;border-radius:8px!important}
+.ux-guide-instruction,.ux-help{font-size:12px;color:var(--tx2);line-height:1.5}
+.ux-patient-strip{display:flex;align-items:center;justify-content:space-between;gap:12px;border-block:1px solid var(--bd);padding:8px 0;margin-bottom:14px}
+.ux-patient-name{font-size:13px;overflow-wrap:anywhere}
+.ux-link{font:500 12px var(--font);border:0;background:transparent;color:var(--green);cursor:pointer;padding:5px 0;text-decoration:underline;text-underline-offset:3px;min-height:32px;flex-shrink:0}
+.ux-stage-label,.ux-mobile-header,.ux-menu-backdrop{display:none}
+.ux-risk-title{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ux-risk-state{margin-left:auto;font-size:11px;font-weight:400;text-transform:none;color:var(--tx2);letter-spacing:0}
+.ux-risk-instruction{font-size:12px;color:var(--tx2);margin-bottom:10px}
+.ux-risk-result{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--bd);margin-bottom:0}
+.ux-risk-tag{padding:5px 9px;border-radius:4px;font-size:13px;font-weight:600;white-space:nowrap}
+.ux-risk-alto{background:var(--rbg);color:var(--rose)}
+.ux-risk-inter{background:var(--abg);color:var(--amber)}
+.ux-risk-habitual{background:var(--gbg);color:var(--green)}
+.ux-risk-nao-classificado{background:var(--sf2);color:var(--tx2)}
+.ux-origin-heading{font-size:12px;color:var(--tx2);padding:14px 0 6px}
+.ux-criterion{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:8px 0;font-size:13px}
+.ux-origin{display:block;margin-top:3px;font-size:11px;color:var(--tx2)}
+.ux-risk-additional{border-block:1px solid var(--bd);margin:12px 0;padding:8px 0}
+.ux-risk-additional>summary{font-size:13px;cursor:pointer;padding:5px 0}
+.ux-risk-additional p{margin:8px 0}
+.ux-risk-options{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.ux-risk-options .cklist{display:contents}
+.ux-risk-confirm{display:flex;gap:9px;align-items:flex-start;font-size:13px;cursor:pointer;margin:14px 0}
+.ux-risk-confirm input{margin-top:3px}
+.ux-exam-field{max-width:330px}
+.ux-exam-fields{margin-top:8px}
+.ux-compact .ux-duplicate-action{display:none!important}
+.ux-compact #autosave-indicator{display:none!important}
+.ux-compact.quick-actions-visible .wrap{padding-bottom:calc(var(--ux-actions-height) + 60px)}
+.ux-compact #quick-actions{left:var(--sidebar-w);right:0;bottom:0;gap:9px;padding:11px 22px;border-radius:0;background:var(--sf);border:0;border-top:1px solid var(--bd);box-shadow:none;backdrop-filter:none;overflow:visible;flex-wrap:wrap;z-index:260}
+.ux-save-state{font-size:12px;color:var(--tx2);flex:1;min-width:140px}
+.ux-compact #quick-actions .quick-action-btn,.ux-action-menu>summary{font:500 12px/1.4 var(--font);padding:8px 12px;min-height:35px;border-radius:5px;white-space:normal;cursor:pointer}
+.ux-action-menu{position:relative}
+.ux-action-menu>summary{border:1px solid var(--bd);list-style:none;white-space:nowrap;background:var(--sf)}
+.ux-action-menu>summary::-webkit-details-marker{display:none}
+.ux-action-menu>summary::after{content:' ▾'}
+.ux-action-popover{position:absolute;right:0;bottom:calc(100% + 8px);width:280px;max-width:calc(100vw - 28px);padding:14px;border:1px solid var(--bd2);border-radius:7px;background:var(--sf);box-shadow:0 8px 26px #172a2026;display:grid;gap:9px;max-height:70vh;overflow-y:auto}
+.ux-action-popover label{font-size:12px;color:var(--tx2)}
+.ux-action-popover select{width:100%;font:400 13px var(--font);border:1px solid var(--bd);border-radius:5px;padding:8px;background:var(--sf);color:var(--tx)}
+.ux-action-popover .quick-completion{min-width:0;max-width:none;flex:auto;margin:5px 0;padding-top:10px;border-top:1px solid var(--bd)}
+.ux-action-popover .quick-completion small{white-space:normal;font-size:11px}
+.ux-action-popover .quick-progress{display:none}
+.ux-action-popover .ux-clear{color:var(--rose);border-color:var(--rmid)}
+.ux-compact .clinical-safety-bar{position:static;margin-top:18px;padding:8px 16px;text-align:left;box-shadow:none;border-radius:5px}
+.ux-draft-prompt{display:flex;gap:10px;align-items:center;flex-wrap:wrap;border:1px solid var(--bd);padding:12px;background:var(--sf);border-radius:6px;margin-bottom:14px;font-size:12px}
+.ux-draft-prompt>span{flex:1;min-width:160px}
+@media(max-width:1000px){.ux-compact #quick-actions{padding-inline:14px}.ux-save-state{flex-basis:100%}.ux-compact #ux-primary{margin-left:auto}}
+@media(max-width:760px){
+  body.ux-compact,body.ux-compact.sidebar-collapsed,body.ux-compact:not(.sidebar-collapsed){--sidebar-w:0px;padding-left:0}
+  .ux-compact .bar{width:238px;z-index:310;transition:transform .18s ease}
+  .ux-compact.sidebar-collapsed .bar{transform:translateX(-100%);visibility:hidden}
+  .ux-compact:not(.sidebar-collapsed)::after{display:none}
+  .ux-compact .bar .bar-logo{min-width:190px}
+  .ux-compact .bar .nb{font-size:12px;text-align:left}
+  .ux-compact .ux-mobile-header{display:flex;align-items:center;gap:14px;background:var(--sf);border-bottom:1px solid var(--bd);padding:8px 12px;font-size:13px}
+  .ux-mobile-menu{padding:7px 10px;border:1px solid var(--bd);border-radius:5px;background:var(--sf);color:var(--tx);font:500 13px var(--font)}
+  .ux-compact .ux-menu-backdrop:not([hidden]){display:block;position:fixed;inset:0;z-index:300;border:0;background:#17251c66}
+  .ux-compact .wrap{padding:16px 12px 70px}
+  .ux-compact .sh-t{font-size:20px}
+  .ux-compact .card{padding:14px}
+  .ux-compact .tabs{display:none}
+  .ux-compact .ux-stage-label{display:block;font-size:12px;color:var(--tx2);margin-bottom:14px}
+  .ux-stage-select{display:block;width:100%;margin-top:5px;padding:9px 11px;border:1px solid var(--bd);border-radius:5px;background:var(--sf);color:var(--tx);font:400 14px var(--font)}
+  .ux-compact #quick-actions{left:0;right:0;padding:9px 12px;gap:7px}
+  .ux-risk-options{grid-template-columns:1fr}
+  .ux-risk-result{align-items:flex-start;flex-wrap:wrap}
+  .ux-compact .clinical-chip{font-size:12px}
+  .ux-compact .clinical-guide-head span{max-width:none}
+  .ux-compact .g4{grid-template-columns:1fr 1fr}
+  .ux-compact .ux-action-popover{position:fixed;left:12px;right:12px;bottom:calc(var(--ux-actions-height) + 7px);width:auto;max-width:none;max-height:calc(100dvh - var(--ux-actions-height) - 80px)}
+}
+@media(max-width:420px){.ux-compact .g2,.ux-compact .g3,.ux-compact .g4,.ux-compact .module-form-grid,.ux-compact .ux-exam-fields{grid-template-columns:1fr}.ux-compact .span2,.ux-compact .span3{grid-column:auto}.ux-compact .ux-risk-state{margin-left:0;flex-basis:100%}.ux-compact .ux-patient-strip{align-items:flex-start}}
+@media(pointer:coarse){.ux-compact .btn,.ux-compact .quick-action-btn,.ux-compact summary,.ux-compact .clinical-chip,.ux-compact .cki,.ux-compact .ux-link,.ux-mobile-menu{min-height:44px}.ux-compact .f input,.ux-compact .f select,.ux-compact .f textarea,.ux-compact select{font-size:16px}}
+@media(prefers-reduced-motion:reduce){body.ux-compact,.ux-compact .bar{transition:none!important}}
+@media print{.ux-patient-strip,.ux-mobile-header,.ux-stage-label,.ux-draft-prompt,.ux-menu-backdrop,.ux-risk-confirm{display:none!important}.ux-compact .wrap{padding:0}.ux-compact .pg:not(.on){display:none!important}}

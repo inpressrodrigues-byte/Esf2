@@ -3,7 +3,7 @@ const {chromium}=process.env.ESF_PLAYWRIGHT_PATH?require(process.env.ESF_PLAYWRI
 const root=path.resolve(__dirname,'..'),results=[],errors=[];
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 for(const [i,m] of [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].entries())if(m[1].trim())new vm.Script(m[1],{filename:'inline-'+i});
-const server=http.createServer((req,res)=>{const file=path.resolve(root,'.'+(req.url==='/'?'/index.html':req.url.split('?')[0]));if(!file.startsWith(root+path.sep))return res.writeHead(403).end();try{res.setHeader('Content-Type',file.endsWith('.js')?'text/javascript':'text/html');res.end(fs.readFileSync(file));}catch{res.writeHead(404).end();}});
+const server=http.createServer((req,res)=>{const file=path.resolve(root,'.'+(req.url==='/'?'/index.html':req.url.split('?')[0]));if(!file.startsWith(root+path.sep))return res.writeHead(403).end();try{res.setHeader('Content-Type',file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':'text/html');res.end(fs.readFileSync(file));}catch{res.writeHead(404).end();}});
 const success={apiVersion:2,requestId:'synthetic-request',data:{soap:'DESCRIÇÃO DA CONSULTA\nTeste fictício\nS: Registro fictício.\nO: Não avaliado.\nA: Teste técnico.\nP: Revisar.',modelo:'gemini-2.5-flash',modoTeste:true,bloqueado:false}};
 let browser;
 async function main(){try{
