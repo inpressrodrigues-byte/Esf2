@@ -11,6 +11,9 @@
   const normal = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   const make = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text) e.textContent = text; return e; };
   let ready = false, savingDraft = false, lastRisk = null, riskSignature = '', resizeObserver;
+  let navOwner = null, navCompact = false, navPreferences = {favorites:[],closed:[]};
+  const navGroups = new Map(), navButtons = new Map();
+  const navKey = () => `esf_prumo_navigation_v1:${owner() || 'visitante'}`;
 
   function controlValue(e) { return ['checkbox','radio'].includes(e.type) ? {checked:e.checked,value:e.value} : e.value; }
   function collectValues(page) {
@@ -174,6 +177,10 @@
   }
   function updateNavigation() {
     const collapsed = document.body.classList.contains('sidebar-collapsed');
+    const compact=collapsed&&innerWidth>760;
+    if(compact)navGroups.forEach(group=>group.open=true);
+    else if(navCompact)navGroups.forEach((group,name)=>group.open=!navPreferences.closed.includes(name));
+    navCompact=compact;
     document.querySelectorAll('.sidebar-toggle,.ux-mobile-menu').forEach(b => b.setAttribute('aria-expanded',String(!collapsed)));
     const backdrop = byId('ux-menu-backdrop'); if (backdrop) backdrop.hidden = collapsed || innerWidth > 760;
   }
@@ -186,24 +193,71 @@
       ['Gestão e apoio',['indicadores','territorio','relatorios','editor','auditoria-clinica','reportes']]
     ];
     const buttons = [...nav.querySelectorAll('.nb')];
-    groups.forEach(([title,ids]) => {
-      const heading = make('div','ux-nav-heading',title); nav.append(heading);
-      ids.forEach(id => { const b = buttons.find(b => b.getAttribute('onclick')?.includes(`'${id}'`)); if (!b) return; b.dataset.uxPage = id; b.setAttribute('aria-label',b.textContent.trim()); b.title = b.textContent.trim(); nav.append(b); });
+    const favorites = make('section','ux-nav-favorites'); favorites.id='ux-nav-favorites';
+    favorites.append(make('div','ux-nav-heading','Favoritos'),make('div','ux-favorite-list'));nav.append(favorites);
+    groups.forEach(([title,ids],index) => {
+      const group=make('details','ux-nav-group'),heading=make('summary','ux-nav-heading',title),list=make('div','ux-nav-list');
+      group.id=`ux-nav-group-${index}`;group.open=true;group.append(heading,list);nav.append(group);navGroups.set(title,group);
+      group.addEventListener('toggle',()=>{
+        if(navOwner!==owner()||(document.body.classList.contains('sidebar-collapsed')&&innerWidth>760))return;
+        navPreferences.closed=[...navGroups.entries()].filter(([,g])=>!g.open).map(([name])=>name);saveNavPreferences();
+      });
+      ids.forEach(id => { const b = buttons.find(b => b.getAttribute('onclick')?.includes(`'${id}'`)); if (!b) return; b.dataset.uxPage = id;b.dataset.uxGroup=title; b.setAttribute('aria-label',b.textContent.trim()); b.title = b.textContent.trim(); list.append(b);navButtons.set(id,b); });
+    });
+    document.querySelectorAll('.pg>.sh').forEach(head=>{
+      const button=make('button','ux-favorite-toggle','☆ Favoritar');button.type='button';button.setAttribute('aria-pressed','false');
+      button.onclick=()=>{loadNavPreferences();const id=head.parentElement.id.slice(3);navPreferences.favorites=navPreferences.favorites.includes(id)?navPreferences.favorites.filter(x=>x!==id):[...navPreferences.favorites,id];saveNavPreferences();renderFavorites();};head.append(button);
     });
     const mobile = make('div','ux-mobile-header');
     const menu = make('button','ux-mobile-menu','☰ Menu'); menu.type='button'; menu.setAttribute('aria-controls','ux-navigation'); menu.onclick=()=>alternarMenuLateral();
-    mobile.append(menu,make('span','', 'ESF Enfermagem')); document.body.prepend(mobile);
+    mobile.append(menu,make('span','ux-mobile-brand', 'PRUMO APS')); document.body.prepend(mobile);
     const backdrop = make('button','ux-menu-backdrop'); backdrop.id='ux-menu-backdrop'; backdrop.type='button'; backdrop.setAttribute('aria-label','Fechar menu'); backdrop.hidden=true; backdrop.onclick=()=>alternarMenuLateral(true); document.body.append(backdrop);
     const toggle = document.querySelector('.sidebar-toggle'); toggle?.setAttribute('aria-label','Recolher ou expandir menu'); toggle?.setAttribute('aria-controls','ux-navigation');
     const profile = byId('user-chip-btn'); if (profile) { profile.setAttribute('role','button'); profile.tabIndex=0; profile.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();profile.click();}}); }
     document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMenus();if(innerWidth<=760)alternarMenuLateral(true);}});
     window.addEventListener('resize',()=>{updateNavigation(); updateActions();}); updateNavigation();
   }
+  function saveNavPreferences(){try{localStorage.setItem(navKey(),JSON.stringify(navPreferences));}catch(_){}}
+  function loadNavPreferences(){
+    if(navOwner===owner())return;
+    navOwner=owner();let value;try{value=JSON.parse(localStorage.getItem(navKey())||'null');}catch(_){}
+    navPreferences={favorites:Array.isArray(value?.favorites)?value.favorites.filter(x=>navButtons.has(x)):['pn-abertura'],closed:Array.isArray(value?.closed)?value.closed.filter(x=>navGroups.has(x)):[]};
+    navGroups.forEach((group,name)=>group.open=!navPreferences.closed.includes(name));
+  }
+  function renderFavorites(){
+    loadNavPreferences();const favoriteList=document.querySelector('.ux-favorite-list');if(!favoriteList)return;
+    navButtons.forEach((button,id)=>{const target=navPreferences.favorites.includes(id)?favoriteList:navGroups.get(button.dataset.uxGroup)?.querySelector('.ux-nav-list');if(target&&button.parentElement!==target)target.append(button);});
+    byId('ux-nav-favorites').hidden=![...favoriteList.children].some(b=>!b.classList.contains('modulo-desativado')&&b.style.display!=='none');
+    document.querySelectorAll('.ux-favorite-toggle').forEach(button=>{const id=button.closest('.pg').id.slice(3),selected=navPreferences.favorites.includes(id),text=selected?'★ Favorito':'☆ Favoritar';if(button.textContent!==text)button.textContent=text;button.setAttribute('aria-pressed',String(selected));button.setAttribute('aria-label',`${selected?'Remover dos':'Adicionar aos'} favoritos: ${button.closest('.sh').querySelector('.sh-t')?.textContent||id}`);});
+    updateNavigation();
+  }
+  function setupAdminTests(){
+    const tabs=document.querySelector('.admin-tabs'),body=document.querySelector('.admin-body');if(!tabs||!body)return;
+    const tab=make('button','admin-tab','Testes');tab.id='ux-admin-test-tab';tab.type='button';tab.onclick=()=>{refreshAdminTests();adminTab(tab,'testes');};tabs.append(tab);
+    const section=make('div','admin-section');section.id='admin-sec-testes';
+    const card=make('div','admin-card'),title=make('div','admin-card-title','Cenários de teste'),help=make('p','ux-help','Preenche dados fictícios para conferir o funcionamento. Use um atendimento vazio.');
+    const label=make('label','ux-admin-test-label','Atendimento'),select=make('select');select.id='ux-admin-test-module';label.htmlFor=select.id;label.append(select);
+    const run=make('button','btn btn-p','Preencher cenário de teste');run.type='button';run.id='ux-admin-run-test';run.onclick=()=>{
+      if(!exigirPermissao('usar_modo_teste')||!exigirPermissao('ver_admin'))return;
+      const page=byId(select.value),original=page?.querySelector('.sh .admin-test-btn');if(!original)return;
+      if(!confirm('Preencher este atendimento com dados fictícios? Os campos atuais podem ser substituídos.'))return;
+      go(page.id.slice(3));if(!page.classList.contains('on'))return;fecharAdmin();original.click();
+    };
+    card.append(title,help,label,run);section.append(card);body.append(section);refreshAdminTests();
+  }
+  function refreshAdminTests(){
+    const tab=byId('ux-admin-test-tab'),select=byId('ux-admin-test-module');if(!tab||!select)return;
+    const allowed=temPermissao('usar_modo_teste')&&temPermissao('ver_admin');tab.hidden=!allowed;byId('ux-admin-run-test').disabled=!allowed;
+    if(!allowed&&byId('admin-sec-testes').classList.contains('active'))adminTab(null,'atendimentos');
+    const options=[...document.querySelectorAll('.pg>.sh>.admin-test-btn')].filter(b=>!b.closest('.pg').classList.contains('modulo-desativado')).map(b=>({id:b.closest('.pg').id,label:b.closest('.sh').querySelector('.sh-t')?.textContent||b.closest('.pg').id}));
+    const signature=JSON.stringify(options);if(select.dataset.options===signature)return;const current=select.value;select.replaceChildren();options.forEach(({id,label})=>{const option=make('option','',label);option.value=id;select.append(option);});if(options.some(x=>x.id===current))select.value=current;select.dataset.options=signature;
+  }
   function setupPatient(page) {
     if (!prefix(page)) return;
     const strip = make('div','ux-patient-strip'), name = make('span','ux-patient-name'), action = make('button','ux-link','Identificar paciente');
+    const icon=make('span','ux-patient-icon');icon.setAttribute('aria-hidden','true');icon.innerHTML=ic('user');
     name.setAttribute('aria-live','polite'); action.type='button'; action.onclick=()=>reveal(`${prefix(page)}-nome`);
-    strip.append(name,action); page.querySelector('.sh')?.after(strip);
+    strip.append(icon,name,action); page.querySelector('.sh')?.after(strip);
     const tabs = page.querySelector('.tabs');
     if (tabs) {
       const label = make('label','ux-stage-label','Etapa do atendimento'); const select = make('select','ux-stage-select');
@@ -234,9 +288,12 @@
   }
   function setupRisk() {
     const card=byId('pna-risco-automatico')?.closest('.card');if(!card)return;
-    card.classList.add('ux-risk-card');card.querySelector('.ct')?.classList.add('ux-risk-title');
+    card.classList.add('ux-risk-card');const heading=card.querySelector('.ct');heading?.classList.add('ux-risk-title');
+    if(heading){heading.replaceChildren(make('span','','Risco gestacional'),make('span','ux-calculated','Calculado pelo sistema'));}
     const instruction=card.querySelector(':scope>.alert');if(instruction){instruction.className='ux-risk-instruction';instruction.textContent='Você informa e revisa os dados; o sistema calcula o risco. Campos em branco ainda precisam de avaliação.';}
-    const status=make('span','ux-risk-state');status.id='ux-risk-state';status.setAttribute('role','status');card.querySelector('.ct')?.append(status);
+    const status=make('strong','ux-risk-state');status.id='ux-risk-state';status.setAttribute('role','status');
+    const overview=make('div','ux-risk-overview'),completeness=make('div','ux-risk-completeness');completeness.append(status,make('span','ux-help','Campos em branco não são avaliados. Confira a completude do atendimento.'));
+    const result=byId('pna-risco-automatico');result.before(overview);overview.append(result,completeness);
     const details=make('details','ux-risk-additional'),summary=make('summary','','Conferir condições adicionais'),description=make('p','ux-help','Marque somente condições avaliadas que ainda não constam na anamnese.');
     details.append(summary,description);
     const lists=make('div','ux-risk-options');
@@ -249,7 +306,11 @@
     const radios=card.querySelector('input[name="risco-pna"]')?.closest('.rpills');
     if(radios){radios.hidden=true;radios.previousElementSibling?.remove();radios.querySelectorAll('input').forEach(e=>e.disabled=true);}
     const label=make('label','ux-risk-confirm'),check=make('input');check.type='checkbox';check.id='ux-risk-reviewed';
-    label.append(check,make('span','','Conferi os dados utilizados na classificação.'));details.after(label);
+    const copy=make('span','','Conferi os dados utilizados na classificação.');copy.append(make('small','ux-help','Esta conferência não preenche nem valida campos que ficaram em branco.'));label.append(check,copy);
+    const review=make('div','ux-risk-review'),reviewHead=make('div','ux-risk-review-heading'),reviewStatus=make('span','ux-review-status');reviewStatus.id='ux-risk-review-status';reviewStatus.setAttribute('role','status');reviewHead.append(make('strong','','Conferência do profissional'),reviewStatus);review.append(reviewHead,label);details.after(review);
+    const references=make('details','ux-risk-references');references.append(make('summary','','Consultar protocolo de referência'));references.id='ux-risk-references';
+    const originalSource=byId('pna-risco-conduta')?.nextElementSibling;if(originalSource?.textContent.trim().startsWith('Fonte:'))references.append(originalSource);card.append(references);
+    const documentCard=byId('pna-dmg-doc-status')?.closest('.card');if(documentCard){const documents=make('details','ux-documents'),summary=make('summary','','Documentos para diabetes gestacional');documentCard.before(documents);documents.append(summary,documentCard);documentCard.querySelector('.ct')?.remove();}
     syncRiskDuplicates(true);
   }
   function criterionOrigin(motive) {
@@ -266,13 +327,16 @@
     const signature=JSON.stringify({level:risk.nivel,criteria:risk.criterios});
     if(riskSignature&&riskSignature!==signature)review.checked=false;riskSignature=signature;
     const empty=risk.nivel==='nao-classificado';if(empty)review.checked=false;review.disabled=empty;
-    byId('ux-risk-state').textContent=empty?'Ainda não avaliado':review.checked?'Dados revisados':'Avaliação parcial · revisar';
+    byId('ux-risk-state').textContent=empty?'Ainda não avaliado':'Completude a conferir';
+    byId('ux-risk-review-status').textContent=review.checked?'Dados revisados':'Pendente';byId('ux-risk-review-status').dataset.reviewed=String(review.checked);
     result.className='ux-risk-result';result.style.cssText='';
     const tag=make('strong',`ux-risk-tag ux-risk-${risk.nivel}`,empty?'Não classificado':risk.label);
-    result.replaceChildren(tag,make('span','ux-help',empty?'Preencha os dados para iniciar a avaliação.':'Resultado com os dados informados. Reavalie sempre que houver novas informações.'));
+    result.replaceChildren(tag,make('span','ux-help',empty?'Preencha os dados para iniciar a avaliação.':'Resultado com os dados informados.'));
+    // Keep clinical guidance visible; consolidate only its repeated bibliography.
+    const conduta=byId('pna-risco-conduta');[...(conduta?.children||[])].filter(e=>e.textContent.trim().startsWith('Fonte:')).forEach(e=>{const references=byId('ux-risk-references');if(references&&!references.querySelector('[data-current-source]')){const source=make('p','ux-help');source.dataset.currentSource='1';source.textContent=e.textContent;references.append(source);}e.remove();});
     reasons.replaceChildren();
     if(risk.criterios.length){
-      reasons.append(make('div','ux-origin-heading','Critérios considerados'));
+      reasons.append(make('div','ux-origin-heading','O que definiu este resultado'));
       risk.criterios.forEach(c=>{
         const row=make('div','ux-criterion'),text=make('div','',c.motivo),source=criterionOrigin(c.motivo);
         const pane=source?.closest('.tp'),tabButton=pane&&document.querySelector(`[aria-controls="${pane.id}"]`);
@@ -365,17 +429,18 @@
   function onNavigate(page) {
     if(!ready||!page)return;
     document.querySelectorAll('.bar-nav .nb[data-ux-page]').forEach(b=>{const on=`pg-${b.dataset.uxPage}`===page.id;b.classList.toggle('on',on);if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
-    updatePatient(page);updateTabs(page);refreshChips(page);
+    renderFavorites();const current=navButtons.get(page.id.slice(3));const group=current?.closest('.ux-nav-group');if(group)group.open=true;
+    updatePatient(page);updateTabs(page);refreshChips(page);refreshAdminTests();
   }
   function setup() {
-    document.body.classList.add('ux-compact');
+    document.body.classList.add('ux-compact','ux-prumo');
     document.querySelectorAll('.pg').forEach(page=>{
       const controls=[...page.querySelectorAll('input,select,textarea')];legacy.set(page.id,controls);
       controls.forEach((e,i)=>{if(!e.id&&!['file','password'].includes(e.type))e.id=`ux-field-${page.id}-${i}`;});
       page.querySelectorAll('.clinical-chip,.complaint-chip,.alert-chip,.quick-care').forEach((e,i)=>e.dataset.uxKey=`${page.id}:${i}`);
       initial.set(page.id,collectValues(page));
     });
-    prepareTabs();setupNavigation();setupRisk();setupExam();document.querySelectorAll('.pg').forEach(setupPatient);setupActions();labelFields();
+    prepareTabs();setupNavigation();setupRisk();setupExam();document.querySelectorAll('.pg').forEach(setupPatient);setupActions();setupAdminTests();labelFields();
     document.querySelectorAll('.pb-head').forEach(head=>{if(head.tagName==='BUTTON')return;head.setAttribute('role','button');head.tabIndex=0;head.setAttribute('aria-expanded',String(head.closest('.pb').classList.contains('open')));head.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();head.click();}});head.addEventListener('click',()=>head.setAttribute('aria-expanded',String(head.closest('.pb').classList.contains('open'))));});
     document.addEventListener('input',onFieldEvent,true);document.addEventListener('change',onFieldEvent,true);
     document.addEventListener('click',event=>{
@@ -395,6 +460,6 @@
     clearTimeout(autoDraftTimer);autoDraftTimer=setTimeout(()=>saveDraft(page),1200);
   }
   window.ESFUsability={capture,restore,beforeRestore,clearGuide,saveDraft,offerDraft,beforeNavigate,onNavigate,onSaved,updateSaveState,updateNavigation,updateTabs,updateActions,renderRisk,clearConsultation,
-    legacyControls:p=>legacy.get('pg-'+moduloPorPrefixo(p)?.page),reveal,refresh:()=>{document.querySelectorAll('.pg').forEach(refreshChips);labelFields();onNavigate(pageNow());}};
+    legacyControls:p=>legacy.get('pg-'+moduloPorPrefixo(p)?.page),reveal,refresh:()=>{if(!ready)return;document.querySelectorAll('.pg').forEach(refreshChips);labelFields();onNavigate(pageNow());},refreshNavigation:()=>{if(!ready)return;renderFavorites();refreshAdminTests();}};
   document.addEventListener('DOMContentLoaded',setup);
 })();
