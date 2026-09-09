@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -897,6 +897,8 @@ body.sidebar-collapsed .dev-nav{display:none}
 .pni-filter{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0}.pni-filter button{border:1px solid var(--bd);background:var(--sf);color:var(--tx2);padding:8px 12px;border-radius:6px;cursor:pointer;font-weight:700}.pni-filter button.on{background:#176337;color:#fff;border-color:#176337}.pni-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.pni-stage{border:1px solid var(--bd);border-left:4px solid #26915a;background:var(--sf);padding:12px;border-radius:6px}.pni-stage h4{margin:0 0 8px;color:#176337}.pni-vaccine{padding:8px 0;border-top:1px solid var(--bd);display:grid;grid-template-columns:minmax(130px,.7fr) 1.3fr;gap:10px}.pni-vaccine:first-of-type{border-top:0}.pni-vaccine strong{color:var(--tx)}.pni-vaccine span{color:var(--tx2);line-height:1.45}.pni-group-banner{display:flex;gap:10px;align-items:center;padding:12px;border:1px solid #9fcdb2;border-left:5px solid #176337;background:#edf8f1;border-radius:6px;margin:10px 0}.pni-group-banner strong{font-size:16px;color:#12522e}.pni-source{margin-top:12px;font-size:12px;color:var(--tx3)}@media(max-width:760px){.pni-grid{grid-template-columns:1fr}.pni-vaccine{grid-template-columns:1fr;gap:3px}}
 
 </style>
+<link rel="stylesheet" href="assets/usability.css">
+<script defer src="assets/usability.js"></script>
 </head>
 <body>
 
@@ -4578,6 +4580,7 @@ async function fetchComTimeout(url,opcoes={},timeoutMs=10000){
 function alternarMenuLateral(forcar){
   const recolher=typeof forcar==='boolean'?forcar:!document.body.classList.contains('sidebar-collapsed');
   document.body.classList.toggle('sidebar-collapsed',recolher);
+  window.ESFUsability?.updateNavigation();
   try{localStorage.setItem('esf_sidebar_recolhida',recolher?'1':'0')}catch(e){}
 }
 function atualizarResumoDashboard(){
@@ -4648,10 +4651,12 @@ function go(id,btn){
   if(['busca-ativa','indicadores','territorio','relatorios'].includes(id)&&!exigirPermissao('ver_historico','Seu perfil não possui permissão para visualizar dados de gestão assistencial.'))return;
   if(id==='editor'&&!exigirPermissao('editar_protocolos','Seu perfil não possui permissão para editar protocolos.'))return;
   if(id==='reportes'&&!exigirPermissao('reportar_erro','Seu perfil não possui permissão para enviar relatos.'))return;
+  window.ESFUsability?.beforeNavigate();
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
   const pagina=document.getElementById('pg-'+id); if(!pagina)return;
   pagina.classList.add('on');
+  window.ESFUsability?.onNavigate(pagina);
   if(typeof restaurarRascunhoAutomatico==='function')setTimeout(()=>restaurarRascunhoAutomatico('pg-'+id),30);
   if(btn)btn.classList.add('on');
   if(id==='inicio')atualizarResumoDashboard();
@@ -4681,6 +4686,7 @@ function tab(btn,tp){
   parent.querySelectorAll('.tp').forEach(t=>t.classList.remove('on'));
   btn.classList.add('on');
   target.classList.add('on');
+  window.ESFUsability?.updateTabs(parent);
   
   // Re-render chart ao entrar na tab Antropometria
   if (tp === 'pu-3') {
@@ -5242,7 +5248,9 @@ function avaliarProtocolosPna(){
     if(res){res.textContent='Preencha os dados da gestante para calcular o risco.';res.style.background='var(--sf2)';res.style.borderColor='var(--bd)';res.style.color='var(--tx)';}
     if(motivos)motivos.innerHTML='';if(conduta)conduta.innerHTML='';
     document.querySelectorAll('input[name="risco-pna"]').forEach(el=>el.checked=false);
-    return {nivel:'nao-classificado',label:'NÃO CLASSIFICADO',criterios:[],conduta:''};
+    window.ultimoRiscoPna={nivel:'nao-classificado',label:'NÃO CLASSIFICADO',criterios:[],conduta:''};
+    window.ESFUsability?.renderRisk(window.ultimoRiscoPna);
+    return window.ultimoRiscoPna;
   }
   const nivel=criterios.some(x=>x.nivel==='alto')?'alto':criterios.some(x=>x.nivel==='inter')?'inter':'habitual';
   const labels={habitual:'RISCO HABITUAL',inter:'RISCO INTERMEDIÁRIO',alto:'ALTO RISCO'};
@@ -5267,6 +5275,7 @@ function avaliarProtocolosPna(){
   }
   checkPnaQueixas();avaliarMovimentosFetaisPna();avaliarVacinacaoPna();
   window.ultimoRiscoPna={nivel,label:labels[nivel],criterios,conduta:conduta?.innerText||''};
+  window.ESFUsability?.renderRisk(window.ultimoRiscoPna);
   return window.ultimoRiscoPna;
 }
 document.addEventListener('change',e=>{if(e.target.closest?.('#pg-pn-abertura'))avaliarProtocolosPna();});
@@ -6019,7 +6028,7 @@ const CLINICAL_PRESETS={
   ]}
 };
 function clinicalPane(module,kind,groups,on){
-  return `<div class="clinical-pane ${on?'on':''}" data-kind="${kind}"><div class="brow" style="margin:0 0 6px"><button type="button" class="btn btn-s btn-sm" onclick="selecionarResultadosEsperados('${module}','${kind}')">Selecionar resultados esperados</button><button type="button" class="btn btn-s btn-sm" onclick="limparResultadosClinicos('${module}','${kind}')">Limpar</button></div>${groups.map((g,gi)=>`<div class="clinical-group" data-group="${gi}"><div class="clinical-group-title">${g.title}</div><div class="clinical-options">${g.items.map(i=>`<button type="button" class="clinical-chip" data-level="${i.level}" data-text="${i.text}" data-conduta="${i.conduta||''}" onclick="toggleClinicalChip(this)">${i.text}</button>`).join('')}</div></div>`).join('')}</div>`;
+  return `<div class="clinical-pane ${on?'on':''}" data-kind="${kind}"><div class="brow" style="margin:0 0 6px"><span class="ux-guide-instruction">Sem seleção = não avaliado</span><button type="button" class="btn btn-s btn-sm" onclick="limparResultadosClinicos('${module}','${kind}')">Limpar</button></div>${groups.map((g,gi)=>`<div class="clinical-group" data-group="${gi}"><div class="clinical-group-title">${g.title}</div><div class="clinical-options">${g.items.map(i=>`<button type="button" class="clinical-chip" data-level="${i.level}" data-text="${i.text}" data-conduta="${i.conduta||''}" onclick="toggleClinicalChip(this)">${i.text}</button>`).join('')}</div></div>`).join('')}</div>`;
 }
 function renderClinicalGuides(){
   Object.entries(CLINICAL_PRESETS).forEach(([module,cfg])=>{
@@ -6046,8 +6055,8 @@ function renderClinicalGuides(){
   });
 }
 function toggleClinicalChip(btn){const group=btn.closest('.clinical-group'),normal=btn.dataset.level==='normal',was=btn.classList.contains('selected');if(!was){if(normal)group.querySelectorAll('.clinical-chip:not([data-level="normal"])').forEach(x=>x.classList.remove('selected'));else group.querySelectorAll('.clinical-chip[data-level="normal"]').forEach(x=>x.classList.remove('selected'));}btn.classList.toggle('selected',!was);const module=btn.closest('.clinical-guide').dataset.module;atualizarAlertaClinico(module);if(module==='pna'){checkPnaQueixas();avaliarProtocolosPna();}if(typeof MODULOS_CLINICOS!=='undefined'&&MODULOS_CLINICOS[module])avaliarPrioridadeModulo(module);}
-function selecionarResultadosEsperados(module,kind){document.querySelectorAll(`.clinical-guide[data-module="${module}"] .clinical-pane[data-kind="${kind}"] .clinical-group`).forEach(group=>{group.querySelectorAll('.clinical-chip').forEach(x=>x.classList.remove('selected'));group.querySelectorAll('.clinical-chip[data-level="normal"]').forEach(x=>x.classList.add('selected'));});atualizarAlertaClinico(module);if(module==='pna')checkPnaQueixas();if(typeof MODULOS_CLINICOS!=='undefined'&&MODULOS_CLINICOS[module])avaliarPrioridadeModulo(module);}
-function limparResultadosClinicos(module,kind){document.querySelectorAll(`.clinical-guide[data-module="${module}"] .clinical-pane[data-kind="${kind}"] .clinical-chip`).forEach(x=>x.classList.remove('selected'));atualizarAlertaClinico(module);if(module==='pna')checkPnaQueixas();if(typeof MODULOS_CLINICOS!=='undefined'&&MODULOS_CLINICOS[module])avaliarPrioridadeModulo(module);}
+function selecionarResultadosEsperados(module,kind){if(window.ESFUsability){showToast('Selecione somente os achados que você avaliou, em cada grupo.');return;}document.querySelectorAll(`.clinical-guide[data-module="${module}"] .clinical-pane[data-kind="${kind}"] .clinical-group`).forEach(group=>{group.querySelectorAll('.clinical-chip').forEach(x=>x.classList.remove('selected'));group.querySelectorAll('.clinical-chip[data-level="normal"]').forEach(x=>x.classList.add('selected'));});atualizarAlertaClinico(module);if(module==='pna')checkPnaQueixas();if(typeof MODULOS_CLINICOS!=='undefined'&&MODULOS_CLINICOS[module])avaliarPrioridadeModulo(module);}
+function limparResultadosClinicos(module,kind){window.ESFUsability?.clearGuide(module,kind);document.querySelectorAll(`.clinical-guide[data-module="${module}"] .clinical-pane[data-kind="${kind}"] .clinical-chip`).forEach(x=>x.classList.remove('selected'));atualizarAlertaClinico(module);if(module==='pna')checkPnaQueixas();if(typeof MODULOS_CLINICOS!=='undefined'&&MODULOS_CLINICOS[module])avaliarPrioridadeModulo(module);}
 const MODULOS_EM_DESENVOLVIMENTO=new Set(['ger','acol','hip','fer','puerp']);
 const MODULOS_COM_PROTOCOLO_ATIVO=new Set(['ist',...MODULOS_EM_DESENVOLVIMENTO]);
 const FONTES_PROTOCOLARES_MODULOS={
@@ -6129,7 +6138,7 @@ function condutaProtocoladaModulo(p,contexto=''){
 function condutaSistemaProtocolada(p,contexto,condutaOriginal=''){return MODULOS_COM_PROTOCOLO_ATIVO.has(p)?condutaProtocoladaModulo(p,[contexto,condutaOriginal].join(' ')).texto:condutaOriginal}
 function coletarGuiaClinico(module){
   const guides=Array.from(document.querySelectorAll(`.clinical-guide[data-module="${module}"]`)),result={anamnese:'',exame:'',alertas:'',condutas:''};if(!guides.length)return result;
-  const collect=kind=>guides.flatMap(guide=>Array.from(guide.querySelectorAll(`.clinical-pane[data-kind="${kind}"] .clinical-group`))).map(g=>{const items=Array.from(g.querySelectorAll('.clinical-chip.selected')).map(x=>x.dataset.text);return items.length?`${g.querySelector('.clinical-group-title').textContent}: ${items.join('; ')}.`:'';}).filter(Boolean).join('\n');
+  const collect=kind=>guides.flatMap(guide=>Array.from(guide.querySelectorAll(`.clinical-pane[data-kind="${kind}"] .clinical-group`))).map(g=>{const items=Array.from(g.querySelectorAll('.clinical-chip.selected:not([data-ux-derived])')).map(x=>x.dataset.text);return items.length?`${g.querySelector('.clinical-group-title').textContent}: ${items.join('; ')}.`:'';}).filter(Boolean).join('\n');
   result.anamnese=collect('anamnesis');result.exame=collect('exam');const selected=guides.flatMap(guide=>Array.from(guide.querySelectorAll('.clinical-chip.selected')));
   result.alertas=selected.filter(x=>x.dataset.level!=='normal').map(x=>`${x.dataset.level==='critical'?'ALERTA':'Atencao'}: ${x.dataset.text}.`).join('\n');result.condutas=[...new Set(selected.filter(x=>x.dataset.level!=='normal').map(x=>condutaSistemaProtocolada(module,x.dataset.text,x.dataset.conduta||condutaClinicaPadrao(x.dataset.text,x.dataset.level,module))).filter(Boolean))].join('\n');return result;
 }
@@ -8570,12 +8579,13 @@ function resumoPlanoCuidados(p){const campos=[['Problemas identificados',`${p}-p
 
 const AUTO_DRAFT_KEY='esf_rascunho_automatico_v1';let autoDraftTimer;
 function salvarRascunhoAutomatico(){
+  if(window.ESFUsability)return window.ESFUsability.saveDraft();
   const pg=document.querySelector('.pg.on');if(!pg||['pg-inicio','pg-pacientes','pg-historico','pg-busca-ativa','pg-indicadores','pg-territorio','pg-relatorios'].includes(pg.id))return;
   const dados={};pg.querySelectorAll('input,select,textarea').forEach(e=>{if(e.id&&e.type!=='file'&&e.type!=='password')dados[e.id]=e.type==='checkbox'||e.type==='radio'?{checked:e.checked,value:e.value}:e.value});localStorage.setItem(`${AUTO_DRAFT_KEY}:${pg.id}`,JSON.stringify({salvo:new Date().toISOString(),dados}));const i=document.getElementById('autosave-indicator');if(i){i.textContent='Rascunho salvo automaticamente';i.style.opacity='1';setTimeout(()=>i.style.opacity='.45',1800)}
 }
-function restaurarRascunhoAutomatico(pgId){const pg=document.getElementById(pgId);if(!pg||pg.dataset.draftChecked)return;pg.dataset.draftChecked='1';const temValor=Array.from(pg.querySelectorAll('input,select,textarea')).some(e=>e.type!=='hidden'&&e.type!=='checkbox'&&e.type!=='radio'&&String(e.value||'').trim());if(temValor)return;try{const r=JSON.parse(localStorage.getItem(`${AUTO_DRAFT_KEY}:${pgId}`)||'null');if(!r?.dados)return;Object.entries(r.dados).forEach(([id,v])=>{const e=document.getElementById(id);if(!e)return;if(typeof v==='object'&&v&&'checked'in v)e.checked=!!v.checked;else e.value=v??''});showToast('Rascunho automático restaurado.')}catch(e){}}
+function restaurarRascunhoAutomatico(pgId){if(window.ESFUsability)return window.ESFUsability.offerDraft(pgId);const pg=document.getElementById(pgId);if(!pg||pg.dataset.draftChecked)return;pg.dataset.draftChecked='1';const temValor=Array.from(pg.querySelectorAll('input,select,textarea')).some(e=>e.type!=='hidden'&&e.type!=='checkbox'&&e.type!=='radio'&&String(e.value||'').trim());if(temValor)return;try{const r=JSON.parse(localStorage.getItem(`${AUTO_DRAFT_KEY}:${pgId}`)||'null');if(!r?.dados)return;Object.entries(r.dados).forEach(([id,v])=>{const e=document.getElementById(id);if(!e)return;if(typeof v==='object'&&v&&'checked'in v)e.checked=!!v.checked;else e.value=v??''});showToast('Rascunho automático restaurado.')}catch(e){}}
 function validarCPFReal(cpf){cpf=normalizarCPF(cpf);if(cpf.length!==11||/^(\d)\1+$/.test(cpf))return false;let s=0;for(let i=0;i<9;i++)s+=Number(cpf[i])*(10-i);let d=(s*10)%11;if(d===10)d=0;if(d!==Number(cpf[9]))return false;s=0;for(let i=0;i<10;i++)s+=Number(cpf[i])*(11-i);d=(s*10)%11;if(d===10)d=0;return d===Number(cpf[10])}
-document.addEventListener('input',e=>{clearTimeout(autoDraftTimer);autoDraftTimer=setTimeout(salvarRascunhoAutomatico,1200);if(e.target.matches?.('.telefone-mask')||/-(tel|telefone)$/.test(e.target.id||'')){const n=e.target.value.replace(/\D/g,'').slice(0,11);e.target.value=n.length>10?n.replace(/(\d{2})(\d{5})(\d{4})/,'($1) $2-$3'):n.replace(/(\d{2})(\d{4})(\d{0,4})/,'($1) $2-$3')}if(/-cns$/.test(e.target.id||''))e.target.value=e.target.value.replace(/\D/g,'').slice(0,15)})
+document.addEventListener('input',e=>{clearTimeout(autoDraftTimer);autoDraftTimer=setTimeout(()=>window.ESFUsability?window.ESFUsability.saveDraft(e.target.closest?.('.pg')):salvarRascunhoAutomatico(),1200);if(e.target.matches?.('.telefone-mask')||/-(tel|telefone)$/.test(e.target.id||'')){const n=e.target.value.replace(/\D/g,'').slice(0,11);e.target.value=n.length>10?n.replace(/(\d{2})(\d{5})(\d{4})/,'($1) $2-$3'):n.replace(/(\d{2})(\d{4})(\d{0,4})/,'($1) $2-$3')}if(/-cns$/.test(e.target.id||''))e.target.value=e.target.value.replace(/\D/g,'').slice(0,15)})
 document.addEventListener('blur',e=>{if(e.target.matches?.('.paciente-cpf')&&normalizarCPF(e.target.value).length===11&&!validarCPFReal(e.target.value)){e.target.style.borderColor='#b32848';showToast('CPF parece inválido. Confira os números antes de salvar.')}else if(e.target.matches?.('.paciente-cpf'))e.target.style.borderColor='';if(/-cns$/.test(e.target.id||'')&&e.target.value&&e.target.value.replace(/\D/g,'').length!==15){e.target.style.borderColor='#b32848';showToast('O CNS deve possuir 15 números. Confira antes de salvar.')}else if(/-cns$/.test(e.target.id||''))e.target.style.borderColor=''},true);
 document.addEventListener('DOMContentLoaded',()=>{montarIVCF20();montarPlanosCuidados();filtrosGestao();const mes=new Date().toISOString().slice(0,7);['ind-mes','rel-mes'].forEach(id=>{const e=document.getElementById(id);if(e&&!e.value)e.value=mes});['pna','pnc','pu','prev','id','sm','ger','acol','hip','fer','puerp','ist'].forEach(p=>[`${p}-nome`,`${p}-cpf`].forEach(id=>{const e=document.getElementById(id);if(e){e.required=true;e.closest('.f')?.classList.add('required-mark')}}));const i=document.createElement('div');i.id='autosave-indicator';i.textContent='Salvamento automático ativo';i.style.cssText='position:fixed;right:12px;bottom:10px;z-index:240;background:var(--sf);border:1px solid var(--bd);padding:5px 9px;border-radius:5px;font-size:10px;color:var(--tx2);opacity:.45';document.body.appendChild(i);document.getElementById('id-nasc')?.addEventListener('change',sincronizarIdadeIVCF)});
 
@@ -8604,7 +8614,7 @@ function prefixoPaginaAtual(){return QUICK_PAGE_PREFIX[document.querySelector('.
 function atualizarIndicadorPreenchimento(){
   const p=prefixoPaginaAtual(),page=document.querySelector('.pg.on'),itens=CAMPOS_ESSENCIAIS[p]||[],faltam=itens.filter(([,ids])=>!campoPreenchido(ids,page)).map(x=>x[0]),pct=itens.length?Math.round((itens.length-faltam.length)*100/itens.length):0;
   const titulo=document.getElementById('quick-completion-title'),det=document.getElementById('quick-completion-detail'),bar=document.getElementById('quick-progress-fill');
-  if(titulo)titulo.textContent=`Consulta ${pct}% preenchida`;if(det)det.textContent=faltam.length?`Faltando: ${faltam.join(', ')}`:'Campos essenciais preenchidos';if(bar)bar.style.width=`${pct}%`;
+  if(titulo)titulo.textContent=`${itens.length-faltam.length} de ${itens.length} itens de apoio preenchidos`;if(det)det.textContent=faltam.length?`Faltando: ${faltam.join(', ')}`:'Campos essenciais preenchidos';if(bar)bar.style.width=`${pct}%`;
 }
 function botaoAcaoPagina(rx){const pg=document.querySelector('.pg.on');return Array.from(pg?.querySelectorAll('button')||[]).find(b=>rx.test(`${b.textContent} ${b.getAttribute('onclick')||''}`)&&!b.closest('#quick-actions'))}
 function quickGerarSoap(){const b=botaoAcaoPagina(/gerar.*(soap|evolu)/i);b?b.click():showToast('Este módulo ainda não possui gerador SOAP conectado.')}
@@ -8935,10 +8945,10 @@ function quickCopiarEvolucao(){if(!podeCopiarSoapAtual())return;return copiarTex
 function quickCopiarSoapPendencias(){if(!podeCopiarSoapAtual())return;return copiarTextoSeguro(textoSoapAtual(true),'SOAP e pendências foram copiados.')}
 function quickCopiarSoapSae(){if(!podeCopiarSoapAtual())return;return copiarTextoSeguro(textoSoapComSae(),'SOAP e SAE foram copiados.')}
 function quickSalvar(){const b=botaoAcaoPagina(/salvar atendimento/i);b?b.click():showToast('Este módulo ainda não possui salvamento conectado.')}
-function quickLimpar(){const pg=document.querySelector('.pg.on');if(!pg||!confirm('Limpar os campos clínicos desta consulta? Os dados básicos do paciente serão mantidos.'))return;pg.querySelectorAll('input,select,textarea').forEach(e=>{if(/-(nome|cpf|cns|nasc|telefone|cep|logradouro|numero|bairro|municipio|uf)$/.test(e.id)||['button','submit','file','hidden'].includes(e.type))return;if(e.type==='checkbox'||e.type==='radio')e.checked=false;else e.value=''});atualizarIndicadorPreenchimento();showToast('Campos clínicos limpos.')}
+function quickLimpar(){if(window.ESFUsability)return window.ESFUsability.clearConsultation();const pg=document.querySelector('.pg.on');if(!pg||!confirm('Limpar os campos clínicos desta consulta? Os dados básicos do paciente serão mantidos.'))return;pg.querySelectorAll('input,select,textarea').forEach(e=>{if(/-(nome|cpf|cns|nasc|telefone|cep|logradouro|numero|bairro|municipio|uf)$/.test(e.id)||['button','submit','file','hidden'].includes(e.type))return;if(e.type==='checkbox'||e.type==='radio')e.checked=false;else e.value=''});atualizarIndicadorPreenchimento();showToast('Campos clínicos limpos.')}
 function atualizarBarraAcoesRapidas(){
   const bar=document.getElementById('quick-actions'),p=prefixoPaginaAtual(),on=!!p&&moduloAtivo(document.querySelector('.pg.on')?.id.replace(/^pg-/,''));
-  bar?.classList.toggle('on',on);document.body.classList.toggle('quick-actions-visible',on);const auto=document.getElementById('autosave-indicator');if(auto)auto.style.bottom=on?'76px':'10px';if(on)atualizarIndicadorPreenchimento();
+  bar?.classList.toggle('on',on);document.body.classList.toggle('quick-actions-visible',on);const auto=document.getElementById('autosave-indicator');if(auto)auto.style.bottom=on?'76px':'10px';if(on)atualizarIndicadorPreenchimento();window.ESFUsability?.updateActions();
 }
 document.addEventListener('DOMContentLoaded',()=>{const bar=document.createElement('div');bar.id='quick-actions';bar.className='quick-actions';bar.innerHTML=`<div class="quick-completion"><strong id="quick-completion-title">Consulta 0% preenchida</strong><small id="quick-completion-detail">Preencha os campos essenciais</small><div class="quick-progress"><span id="quick-progress-fill"></span></div></div><select id="quick-soap-mode" class="soap-mode-select" title="Tipo de evolução" onchange="definirModoSoap(this.value)"><option value="curto">SOAP curto</option><option value="completo">SOAP completo</option><option value="sae">SOAP + SAE</option></select><button class="quick-action-btn primary" onclick="quickGerarSoap()">Gerar SOAP</button><button class="quick-action-btn ai" onclick="gerarSoapPorIA()">IA SOAP</button><button class="quick-action-btn" onclick="quickCopiarEvolucao()">Copiar somente SOAP</button><button class="quick-action-btn" onclick="quickCopiarSoapPendencias()">Copiar SOAP + pendências</button><button class="quick-action-btn" onclick="quickCopiarSoapSae()">Copiar SOAP + SAE</button><button class="quick-action-btn" onclick="quickSalvar()">Salvar atendimento</button><button class="quick-action-btn" onclick="quickLimpar()">Limpar campos</button><button class="quick-action-btn" onclick="go('pacientes')">Selecionar paciente</button>`;document.body.appendChild(bar);definirModoSoap(localStorage.getItem('esf_modo_soap')||'completo');atualizarBarraAcoesRapidas();carregarModulosAtivos();setTimeout(()=>{if(typeof aplicarPermissoesInterface==='function')aplicarPermissoesInterface()},350)});
 document.addEventListener('DOMContentLoaded',()=>{const observer=new MutationObserver(ms=>{if(ms.some(m=>Array.from(m.addedNodes).some(n=>n.nodeType===1&&!n.closest?.('#admin-screen'))))aplicarModulosAtivos()});observer.observe(document.body,{childList:true,subtree:true});setTimeout(aplicarModulosAtivos,500)});
@@ -9014,7 +9024,7 @@ async function sincronizarAtendimentosPendentes(){
     }
   }catch(e){
     console.warn('[ESF] Sincronizacao pendente:',e?.message||e);
-  }finally{syncRunning=false;}
+  }finally{syncRunning=false;window.ESFUsability?.updateSaveState();}
 }
 
 async function baixarAtendimentosNuvem(){
@@ -9070,11 +9080,14 @@ function coletarDadosModulo(prefix){
     if(el.type==='checkbox'||el.type==='radio')dados[key]={checked:el.checked,value:el.value};
     else dados[key]=el.value;
   });
+  if(window.ESFUsability)dados.__interface=window.ESFUsability.capture(pagina);
   return dados;
 }
 function restaurarDadosModulo(prefix,dados){
-  const pagina=document.getElementById('pg-'+moduloPorPrefixo(prefix)?.page), controles=pagina?.querySelectorAll('input,select,textarea')||[];
+  const pagina=document.getElementById('pg-'+moduloPorPrefixo(prefix)?.page), controles=window.ESFUsability?.legacyControls(prefix)||pagina?.querySelectorAll('input,select,textarea')||[];
+  window.ESFUsability?.beforeRestore(pagina);
   Object.entries(dados||{}).forEach(([id,v])=>{const el=id.startsWith('@')?controles[Number(id.slice(1))]:document.getElementById(id);if(!el)return;if(typeof v==='object'&&v!==null&&'checked'in v){el.checked=!!v.checked;}else el.value=v??'';});
+  window.ESFUsability?.restore(pagina,dados?.__interface);
   if(prefix==='pna'){idadeGest();calcIG('pna');avaliarProtocolosPna();atualizarTestesRapidosPna();}
   if(prefix==='pnc'){calcAge('pnc-nasc','pnc-idade');calcIG('pnc');checkPncQueixas();checkPncVitais();}
   if(prefix==='pu'){idadeCrianca();updateAntropometria();checkMCHATIdade();avaliarDNPMAutomatico();}
@@ -9146,7 +9159,7 @@ async function salvarAtendimentoModulo(tipo){
   const lista = carregarAtendimentos();
   const cfg=MODULOS_ATENDIMENTO[tipo];
   salvarCadastroPaciente(cfg.prefix);
-  const editando=!!ATENDIMENTO_EM_EDICAO;
+  const editando=!!ATENDIMENTO_EM_EDICAO, idSalvo=lista.some(x=>x.id===ATENDIMENTO_EM_EDICAO&&x.tipo===tipo)?ATENDIMENTO_EM_EDICAO:a.id;
   if(ATENDIMENTO_EM_EDICAO){
     const idx=lista.findIndex(x=>x.id===ATENDIMENTO_EM_EDICAO);
     if(idx>=0&&lista[idx].tipo===tipo){lista[idx]={...lista[idx],...a,id:lista[idx].id,data:lista[idx].data,editadoEm:new Date().toISOString(),synced:false};}
@@ -9155,7 +9168,8 @@ async function salvarAtendimentoModulo(tipo){
   }else lista.unshift(a);
   salvarAtendimentos(lista);
   registrarAuditoria(editando?'Atendimento editado':'Atendimento salvo',`${tipo} · ${a.id}`);
-  showToast('✓ Atendimento e cadastro do paciente salvos!');
+  window.ESFUsability?.onSaved(prefixSalvar,idSalvo);
+  showToast('Atendimento salvo no histórico deste dispositivo.');
   setTimeout(renderHistorico, 300);
 }
 function salvarAtendimento_pna(){salvarAtendimentoModulo('Abertura PN')}
