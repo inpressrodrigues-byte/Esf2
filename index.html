@@ -10103,11 +10103,15 @@ async function recuperarSenha(){
 }
 
 const APARENCIA_KEY='esf_aparencia_v1';
-const APARENCIA_PADRAO={primary:'#235b3c',accent:'#235b3c',bg:'#f4f6f4',surface:'#ffffff',font:'Inter',corner:6,opacity:100,blur:0,radius:10,shadow:0};
+const APARENCIA_PADRAO={paletteVersion:2,primary:'#235b3c',accent:'#235b3c',bg:'#f4f6f4',surface:'#ffffff',font:'Inter',corner:6,opacity:100,blur:0,radius:10,shadow:0};
 function migrarAparenciaPrumo(cfg){
   const antigo={primary:'#175930',accent:'#3a1d68',bg:'#f1f0eb',surface:'#ffffff',font:'DM Sans',corner:8,opacity:64,blur:20,radius:18,shadow:12};
   if(!cfg||Object.keys(antigo).every(key=>cfg[key]===undefined||cfg[key]===antigo[key]))return {...APARENCIA_PADRAO};
-  return {...APARENCIA_PADRAO,...cfg};
+  const result={...APARENCIA_PADRAO,...cfg};
+  // Older local and cloud themes predate the shared navigation palette.
+  // Retain surface, typography and layout; explicit new color choices stay editable.
+  if(cfg.paletteVersion!==2){result.primary=corEscura(result.surface)?'#b3ddbe':'#235b3c';result.accent=result.primary;result.paletteVersion=2;}
+  return result;
 }
 let APARENCIA_ATUAL={...APARENCIA_PADRAO};
 function hexRgb(hex){const h=(hex||'#ffffff').replace('#','');return {r:parseInt(h.slice(0,2),16),g:parseInt(h.slice(2,4),16),b:parseInt(h.slice(4,6),16)}}
@@ -10124,6 +10128,8 @@ function aplicarAparencia(cfg){
   root.setProperty('--tx',tx);root.setProperty('--tx2',tx2);root.setProperty('--font',font);root.setProperty('--r',`${a.corner}px`);root.setProperty('--rl',`${Number(a.corner)+5}px`);
   root.setProperty('--tx3',tx2);root.setProperty('--bd2',misturarCor(a.surface,corEscura(a.surface)?'#ffffff':'#45594b',.35));
   root.setProperty('--prumo-primary-ink',corEscura(a.primary)?'#ffffff':'#173322');document.body.dataset.surface=corEscura(a.surface)?'dark':'light';
+  const nav=misturarCor(a.primary,'#0c2119',corEscura(a.primary) ? 0.5 : 0.86);
+  root.setProperty('--theme-nav',nav);root.setProperty('--theme-nav-active',misturarCor(nav,'#ffffff',.12));
   root.setProperty('--theme-control-radius',`${a.corner}px`);root.setProperty('--theme-glass-radius',`${a.radius}px`);root.setProperty('--theme-dashboard-radius',`${Number(a.radius)+4}px`);
   root.setProperty('--theme-glass-blur',`${a.blur}px`);root.setProperty('--theme-glass-bg',`linear-gradient(145deg,${corRgba(a.surface,a.opacity/100)},${corRgba(a.surface,Math.max(.18,a.opacity/100-.28))})`);
   root.setProperty('--theme-glass-hover',`linear-gradient(145deg,${corRgba(a.surface,Math.min(.98,a.opacity/100+.14))},${corRgba(misturarCor(a.surface,a.primary,.12),Math.max(.3,a.opacity/100-.12))})`);
@@ -10133,7 +10139,7 @@ function aplicarAparencia(cfg){
 }
 function lerAparenciaAdmin(){
   const val=id=>document.getElementById(id)?.value;
-  return {primary:val('theme-primary')||APARENCIA_ATUAL.primary,accent:val('theme-accent')||APARENCIA_ATUAL.accent,bg:val('theme-bg')||APARENCIA_ATUAL.bg,surface:val('theme-surface')||APARENCIA_ATUAL.surface,font:val('theme-font')||APARENCIA_ATUAL.font,corner:Number(val('theme-corner-style')||APARENCIA_ATUAL.corner),opacity:Number(val('theme-opacity')||APARENCIA_ATUAL.opacity),blur:Number(val('theme-blur')||APARENCIA_ATUAL.blur),radius:Number(val('theme-radius')||APARENCIA_ATUAL.radius),shadow:Number(val('theme-shadow')||APARENCIA_ATUAL.shadow)};
+  return {paletteVersion:2,primary:val('theme-primary')||APARENCIA_ATUAL.primary,accent:val('theme-accent')||APARENCIA_ATUAL.accent,bg:val('theme-bg')||APARENCIA_ATUAL.bg,surface:val('theme-surface')||APARENCIA_ATUAL.surface,font:val('theme-font')||APARENCIA_ATUAL.font,corner:Number(val('theme-corner-style')||APARENCIA_ATUAL.corner),opacity:Number(val('theme-opacity')||APARENCIA_ATUAL.opacity),blur:Number(val('theme-blur')||APARENCIA_ATUAL.blur),radius:Number(val('theme-radius')||APARENCIA_ATUAL.radius),shadow:Number(val('theme-shadow')||APARENCIA_ATUAL.shadow)};
 }
 function preencherControlesAparencia(a=APARENCIA_ATUAL){
   const set=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v};Object.entries({primary:a.primary,accent:a.accent,bg:a.bg,surface:a.surface,font:a.font,'corner-style':a.corner,opacity:a.opacity,blur:a.blur,radius:a.radius,shadow:a.shadow}).forEach(([k,v])=>set(`theme-${k}`,v));atualizarSaidasAparencia(a);
@@ -10141,13 +10147,13 @@ function preencherControlesAparencia(a=APARENCIA_ATUAL){
 function atualizarSaidasAparencia(a){[['opacity','%'],['blur','px'],['radius','px'],['shadow','%']].forEach(([k,s])=>{const el=document.getElementById(`theme-${k}-out`);if(el)el.textContent=`${a[k]}${s}`})}
 function atualizarAparenciaAdmin(){const a=lerAparenciaAdmin();aplicarAparencia(a);atualizarSaidasAparencia(a)}
 async function salvarAparenciaAdmin(){const a=lerAparenciaAdmin();aplicarAparencia(a);localStorage.setItem(APARENCIA_KEY,JSON.stringify(a));if(_sb){const {error}=await _sb.from('configuracoes_sistema').upsert({chave:'aparencia',valor:a,updated_at:new Date().toISOString()},{onConflict:'chave'});showToast(error?'Aparência salva neste dispositivo. Execute o SQL seguro para compartilhar com todos.':'Aparência salva para todos os usuários.');return}showToast('Aparência salva neste dispositivo.')}
-async function carregarAparenciaNuvem(){if(!_sb)return;const {data}=await _sb.from('configuracoes_sistema').select('valor').eq('chave','aparencia').maybeSingle();if(data?.valor){APARENCIA_ATUAL={...APARENCIA_PADRAO,...data.valor};localStorage.setItem(APARENCIA_KEY,JSON.stringify(APARENCIA_ATUAL));aplicarAparencia(APARENCIA_ATUAL);preencherControlesAparencia(APARENCIA_ATUAL)}}
+async function carregarAparenciaNuvem(){if(!_sb)return;const {data}=await _sb.from('configuracoes_sistema').select('valor').eq('chave','aparencia').maybeSingle();if(data?.valor){APARENCIA_ATUAL=migrarAparenciaPrumo(data.valor);localStorage.setItem(APARENCIA_KEY,JSON.stringify(APARENCIA_ATUAL));aplicarAparencia(APARENCIA_ATUAL);preencherControlesAparencia(APARENCIA_ATUAL)}}
 async function restaurarAparenciaPadrao(){APARENCIA_ATUAL={...APARENCIA_PADRAO};preencherControlesAparencia();aplicarAparencia(APARENCIA_ATUAL);localStorage.removeItem(APARENCIA_KEY);if(_sb)await _sb.from('configuracoes_sistema').upsert({chave:'aparencia',valor:APARENCIA_ATUAL,updated_at:new Date().toISOString()},{onConflict:'chave'});showToast('Aparência padrão restaurada.')}
 function aplicarPresetAparencia(nome){
   const presets={prumo:{...APARENCIA_PADRAO},escuro:{...APARENCIA_PADRAO,primary:'#b3ddbe',accent:'#b3ddbe',bg:'#141e19',surface:'#1e2a23'},clinico:{...APARENCIA_PADRAO,accent:'#193b6a'},contraste:{...APARENCIA_PADRAO,primary:'#0b4725',accent:'#193b6a',bg:'#e8ebe8'}};
   APARENCIA_ATUAL={...(presets[nome]||APARENCIA_PADRAO)};preencherControlesAparencia();aplicarAparencia(APARENCIA_ATUAL);
 }
-document.addEventListener('DOMContentLoaded',()=>{try{APARENCIA_ATUAL={...APARENCIA_PADRAO,...JSON.parse(localStorage.getItem(APARENCIA_KEY)||'{}')}}catch(e){}aplicarAparencia(APARENCIA_ATUAL);preencherControlesAparencia(APARENCIA_ATUAL)});
+document.addEventListener('DOMContentLoaded',()=>{try{APARENCIA_ATUAL=migrarAparenciaPrumo(JSON.parse(localStorage.getItem(APARENCIA_KEY)||'null'))}catch(e){}aplicarAparencia(APARENCIA_ATUAL);preencherControlesAparencia(APARENCIA_ATUAL)});
 
 // Lógica Admin
 async function usuarioAdminAtual() { return !!_sb&&temPermissao('ver_admin'); }
