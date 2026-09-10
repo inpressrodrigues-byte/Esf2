@@ -130,13 +130,28 @@ body.ux-prumo{--sidebar-w:224px;--prumo-nav:#163d2a;--prumo-nav-active:#2b503a;-
 .ux-prumo #pg-inicio .update-tag,.ux-prumo #pg-inicio .update-log-pill{background:var(--prumo-tint);color:var(--green);border-color:var(--bd);border-radius:5px}
 .ux-prumo .vd-step summary,.ux-prumo .vd-type-card{background:var(--sf);color:var(--tx);border-color:var(--bd)}
 .ux-prumo .vd-type-card:has(input:checked){background:var(--prumo-tint);color:var(--green)}
-.ux-prumo .auth-card{background:var(--sf);border:1px solid var(--bd);border-radius:12px;box-shadow:none;padding:32px}
-.ux-prumo .auth-logo{display:flex;align-items:center;gap:12px;color:var(--green);margin-bottom:30px}
-.ux-prumo .auth-title{font-size:26px;letter-spacing:-.02em}
-.ux-prumo .auth-field label{font-size:14px}
-.ux-prumo .auth-field input{font-size:16px;min-height:46px;border-radius:6px;background:var(--sf);color:var(--tx)}
-.ux-prumo .auth-btn{border-radius:6px;font-size:15px;min-height:45px}
-.ux-prumo .auth-sub,.ux-prumo .auth-switch{font-size:13px}
+/* Keep the supplied photograph decorative; only this layer is blurred. */
+.ux-prumo #auth-screen{isolation:isolate;overflow-y:auto;overflow-x:hidden;padding:32px 20px;background:#344641;color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+.ux-prumo #auth-screen::before,.ux-prumo #auth-screen::after{content:"";position:fixed;pointer-events:none;z-index:-1}
+.ux-prumo #auth-screen::before{inset:-18px;background:url("login-toledo.png") center 55%/cover no-repeat;filter:blur(6px)}
+.ux-prumo #auth-screen::after{inset:0;background:linear-gradient(130deg,rgba(17,31,29,.2),rgba(17,31,29,.42))}
+.ux-prumo .auth-card{flex-shrink:0;width:100%;max-width:420px;margin:auto;background:var(--sf);background:color-mix(in srgb,var(--sf) 97%,transparent);border:1px solid color-mix(in srgb,var(--sf) 75%,transparent);border-radius:20px;box-shadow:0 20px 70px rgba(12,26,21,.22);padding:32px}
+.ux-prumo .auth-logo{display:flex;align-items:center;gap:12px;color:var(--green);margin-bottom:24px}
+.ux-prumo .auth-title{font-size:27px;font-weight:600;line-height:1.25;letter-spacing:-.025em;margin-bottom:8px}
+.ux-prumo .auth-field{gap:8px;margin-bottom:14px}
+.ux-prumo .auth-field label{font-size:13px;font-weight:500;text-transform:none;letter-spacing:0;color:var(--tx)}
+.ux-prumo .auth-field input{font:400 16px/1.5 system-ui,sans-serif;min-height:48px;border-radius:8px;background:var(--sf);color:var(--tx);padding:11px 13px}
+.ux-prumo .auth-field input:focus{border-color:var(--green);box-shadow:0 0 0 3px color-mix(in srgb,var(--green) 15%,transparent)}
+.ux-prumo .auth-btn{border-radius:8px;font:600 14px/1.5 system-ui,sans-serif;min-height:48px;margin-top:0}
+.ux-prumo .auth-sub{font-size:13px;line-height:1.6;margin-bottom:22px}
+.ux-prumo .auth-recovery{display:flex;justify-content:flex-end;margin:-14px 0 8px}
+.ux-prumo .auth-link{border:0;background:transparent;color:var(--green);font:400 12px/1.5 system-ui,sans-serif;min-height:40px;padding:9px 0;cursor:pointer;text-underline-offset:4px}
+.ux-prumo .auth-link:hover{text-decoration:underline}
+.ux-prumo .auth-link:focus-visible,.ux-prumo .auth-btn:focus-visible{outline:2px solid var(--green);outline-offset:4px}
+.ux-prumo .auth-footer{text-align:center;border-top:1px solid var(--bd);margin-top:20px;padding-top:12px}
+.ux-prumo .auth-switch{font-size:12px;line-height:1.6;margin:0;color:var(--tx2)}
+.ux-prumo .auth-help{color:var(--tx2);margin-top:3px}
+.ux-prumo #auth-network-diagnostic{overflow-wrap:anywhere;text-align:left}
 .ux-prumo .admin-bar,.ux-prumo .admin-card{background:var(--sf);color:var(--tx)}
 .ux-prumo .admin-tabs{flex-wrap:wrap;gap:7px}
 .ux-prumo .admin-tab,.ux-prumo .admin-action-btn{font-size:14px;border-radius:6px;min-height:40px}
@@ -171,7 +186,8 @@ body.ux-prumo[data-surface=light]{color-scheme:light}
   .ux-prumo #quick-actions{padding:12px 14px;gap:8px}.ux-prumo #quick-actions .quick-action-btn,.ux-prumo .ux-action-menu>summary{font-size:13px;padding:9px 11px;min-height:42px}
   .ux-prumo .ux-save-state{font-size:12px}.ux-prumo .ux-action-popover{width:auto}
   .ux-prumo .f input,.ux-prumo .f select,.ux-prumo .f textarea{font-size:16px}
-  .ux-prumo .auth-card{padding:24px;width:min(100%,430px)}
+  .ux-prumo #auth-screen{padding:24px 16px}
+  .ux-prumo .auth-card{padding:28px 24px;width:min(100%,420px);margin:auto;border-radius:16px}
 }
 @media(max-width:420px){.ux-prumo .g2,.ux-prumo .g3,.ux-prumo .g4,.ux-prumo .module-form-grid{grid-template-columns:1fr}.ux-prumo .clinical-options{display:grid;grid-template-columns:minmax(0,1fr)}.ux-prumo .clinical-chip{width:100%}.ux-prumo .sh>div:has(.sh-t){min-width:140px}.ux-prumo .ux-favorite-toggle{margin-left:0}.ux-prumo .ux-risk-review-heading{align-items:flex-start}}
 @media(pointer:coarse){.ux-prumo .btn,.ux-prumo .quick-action-btn,.ux-prumo summary,.ux-prumo .ux-link,.ux-prumo .ux-favorite-toggle,.ux-prumo .nb{min-height:44px}.ux-prumo .f input,.ux-prumo .f select,.ux-prumo .f textarea{font-size:16px}}

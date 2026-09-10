@@ -905,7 +905,7 @@ body.sidebar-collapsed .dev-nav{display:none}
 
 <div class="bar">
   <button class="sidebar-toggle" onclick="alternarMenuLateral()" title="Recolher ou expandir menu">‹</button>
-  <div class="bar-logo" aria-label="PRUMO APS — Clareza para cuidar"><span class="prumo-mark" aria-hidden="true">P</span><div class="prumo-wordmark"><strong>PRUMO <small>APS</small></strong><span>Clareza para cuidar.</span></div></div>
+  <div class="bar-logo" aria-label="PRUMO APS"><span class="prumo-mark" aria-hidden="true">P</span><div class="prumo-wordmark"><strong>PRUMO <small>APS</small></strong></div></div>
   <div class="bar-nav">
     <button class="nb on" onclick="go('inicio',this)">⌂ Início</button>
     <button class="nb" onclick="go('pn-abertura',this)"><span data-ic="pregnant"></span> Abertura PN</button>
@@ -9596,17 +9596,16 @@ document.querySelectorAll('[onclick*="go("]').forEach(btn => {
 <!-- ══ AUTH SCREEN ══════════════════════════════════════════════ -->
 <div id="auth-screen" class="visible">
   <div class="auth-card">
-    <div class="auth-logo"><span class="prumo-mark" aria-hidden="true">P</span><div class="prumo-wordmark"><strong>PRUMO <small>APS</small></strong><span>Clareza para cuidar.</span></div></div>
+    <div class="auth-logo" aria-label="PRUMO APS"><span class="prumo-mark" aria-hidden="true">P</span><div class="prumo-wordmark"><strong>PRUMO <small>APS</small></strong></div></div>
     <div id="auth-login-view">
       <div class="auth-title">Entrar</div>
       <div class="auth-sub" id="auth-connection-status">Preparando acesso seguro...</div>
-      <div class="auth-err" id="auth-err-login"></div>
-      <div class="auth-field"><label>Email ou Usuário</label><input type="text" id="auth-email" placeholder="seu@email.com ou joao123" autocomplete="username"></div>
-      <div class="auth-field"><label>Senha</label><input type="password" id="auth-pass" placeholder="••••••••" autocomplete="current-password"></div>
+      <div class="auth-err" id="auth-err-login" role="status" aria-live="polite"></div>
+      <div class="auth-field"><label for="auth-email">Email ou usuário</label><input type="text" id="auth-email" autocomplete="username" autocapitalize="none" spellcheck="false"></div>
+      <div class="auth-field"><label for="auth-pass">Senha</label><input type="password" id="auth-pass" autocomplete="current-password"></div>
+      <div class="auth-recovery"><button class="auth-link" type="button" onclick="recuperarSenha()">Esqueci minha senha</button></div>
       <button class="auth-btn" id="auth-login-btn" onclick="authLogin()">Entrar</button>
-      <div class="auth-switch">Acesso privado. Solicite uma conta ao administrador.</div>
-      <div style="text-align:center;margin-top:10px"><button type="button" onclick="recuperarSenha()" style="background:none;border:none;color:var(--green);font:inherit;font-size:12px;text-decoration:underline;cursor:pointer">Esqueci minha senha</button></div>
-      <div style="text-align:center;margin-top:10px"><button type="button" onclick="diagnosticarConexao()" style="background:none;border:none;color:var(--green);font:inherit;font-size:12px;text-decoration:underline;cursor:pointer">Diagnóstico de conexão</button></div>
+      <div class="auth-footer"><div class="auth-switch">Acesso restrito. Contas pelo administrador.</div><button class="auth-link auth-help" type="button" onclick="diagnosticarConexao()">Diagnóstico de conexão</button></div>
       <div id="auth-network-diagnostic" style="display:none;margin-top:12px;padding:10px;border:1px solid var(--bd);border-radius:8px;background:var(--sf2);font-size:11px;line-height:1.55;white-space:pre-wrap"></div>
     </div>
   </div>
@@ -9769,7 +9768,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   try{
     const { data: { session } } = await comLimite(_sb.auth.getSession(),9000,'O serviço de login não respondeu. A rede da unidade pode estar bloqueando o Supabase.');
     verificarAcesso(session);
-    if(status)status.textContent='Acesse com seu email e senha cadastrados';
+    if(status)status.textContent='Acesse sua conta.';
     _sb.auth.onAuthStateChange((event, session) => verificarAcesso(session));
   }catch(e){
     // Sessão não respondeu: tenta modo offline com sessão em cache antes de bloquear.
