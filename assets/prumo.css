@@ -1,6 +1,6 @@
 /* PRUMO APS: comfortable reading and a shared visual hierarchy. */
-body.ux-prumo{--sidebar-w:240px;--prumo-nav:var(--theme-nav,#183e2b);--prumo-nav-active:var(--theme-nav-active,#345540);--prumo-nav-muted:#b6cbbd;--prumo-tint:color-mix(in srgb,var(--sf) 92%,var(--green));font-size:15px;line-height:1.6;transition:none}
-.ux-prumo .wrap{max-width:1340px;padding:28px 30px 80px}
+body.ux-prumo{--sidebar-w:clamp(208px,16vw,232px);--prumo-nav:var(--theme-nav,#183e2b);--prumo-nav-active:var(--theme-nav-active,#345540);--prumo-nav-muted:#b6cbbd;--prumo-tint:color-mix(in srgb,var(--sf) 92%,var(--green));font-size:14px;line-height:1.5;transition:none}
+.ux-prumo .wrap{max-width:1520px;padding:20px clamp(16px,1.6vw,28px) 70px}
 .ux-prumo .bar{background:var(--prumo-nav);padding:22px 14px 14px;gap:18px;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;border-right:1px solid rgba(255,255,255,.08);transition:none}
 .ux-prumo .bar-logo{padding:0 30px 20px 7px;gap:10px;min-width:0;min-height:57px;overflow:visible;color:#eef5ef;white-space:normal;border-bottom:1px solid rgba(255,255,255,.12)}
 .prumo-mark{display:grid;place-items:center;flex:none;border:1px solid currentColor;border-radius:9px 3px 9px 3px;width:31px;height:35px;font:500 23px/1 system-ui,sans-serif}
@@ -47,29 +47,29 @@ body.ux-prumo{--sidebar-w:240px;--prumo-nav:var(--theme-nav,#183e2b);--prumo-nav
 .ux-prumo.sidebar-collapsed .ux-nav-copy{display:none}
 .ux-prumo.sidebar-collapsed .nb svg{width:20px;height:20px;margin:0}
 .ux-prumo.sidebar-collapsed .ux-nav-group{margin-bottom:10px}
-.ux-prumo .sh{gap:12px;margin-bottom:22px;align-items:center;flex-wrap:wrap}
+.ux-prumo .sh{gap:10px;margin-bottom:14px;align-items:center;flex-wrap:wrap}
 .ux-prumo .sh>div:has(.sh-t){flex:1;min-width:160px}
-.ux-prumo .sh-t{font-size:27px;line-height:1.25;letter-spacing:-.025em}
-.ux-prumo .sh-s{font-size:13px;margin-top:5px;color:var(--tx2)}
+.ux-prumo .sh-t{font-size:clamp(20px,1.6vw,24px);line-height:1.25;letter-spacing:-.025em}
+.ux-prumo .sh-s{font-size:12px;margin-top:4px;color:var(--tx2)}
 .ux-prumo .sh-ic{width:38px;height:38px;border-radius:7px;background:var(--prumo-tint);color:var(--green);font-size:20px}
 .ux-prumo .ux-favorite-toggle{border:1px solid var(--bd);background:var(--sf);color:var(--green);border-radius:6px;font:500 13px/1.4 var(--font);padding:9px 11px;min-height:39px;cursor:pointer;margin-left:auto}
-.ux-prumo .ux-patient-strip{gap:12px;padding:15px 0;margin-bottom:20px}
+.ux-prumo .ux-patient-strip{gap:10px;padding:10px 0;margin-bottom:12px}
 .ux-patient-icon{display:grid;place-items:center;flex:none;width:38px;height:38px;border-radius:50%;background:var(--prumo-tint);color:var(--green);font-size:19px}
-.ux-prumo .ux-patient-name{font-size:15px;font-weight:500;min-width:0;flex:1}
+.ux-prumo .ux-patient-name{font-size:13px;font-weight:500;min-width:0;flex:1}
 .ux-prumo .ux-link{font-size:13px;min-height:36px;line-height:1.5}
-.ux-prumo .tabs{gap:3px;margin-bottom:24px}
-.ux-prumo .tab{font-size:13px;line-height:1.45;padding:12px 10px}
+.ux-prumo .tabs{gap:1px;margin-bottom:16px}
+.ux-prumo .tab{font-size:12px;line-height:1.4;padding:8px}
 .ux-prumo .tab:hover{color:var(--green);background:var(--prumo-tint)!important}
 .ux-prumo .tab.on{color:var(--green);border-bottom-color:var(--green)}
 .ux-prumo .ux-link{text-decoration:none;text-underline-offset:4px}
 .ux-prumo .ux-link:hover{text-decoration:underline}
-.ux-prumo .card{border-color:var(--bd);border-radius:10px!important;padding:24px;margin-bottom:20px}
-.ux-prumo .ct{font-size:17px;line-height:1.35;text-transform:none;letter-spacing:0;font-weight:600;margin-bottom:20px}
+.ux-prumo .card{border-color:var(--bd);border-radius:10px!important;padding:18px;margin-bottom:16px}
+.ux-prumo .ct{font-size:16px;line-height:1.35;text-transform:none;letter-spacing:0;font-weight:600;margin-bottom:14px}
 .ux-prumo .ct .dot{display:none}
-.ux-prumo .g2,.ux-prumo .g3,.ux-prumo .g4,.ux-prumo .module-form-grid{gap:20px}
-.ux-prumo .f{margin-bottom:16px}
-.ux-prumo .f>label,.ux-prumo .user-input-row>label{font-size:14px;line-height:1.45;margin-bottom:8px;color:var(--tx2)}
-.ux-prumo .f input,.ux-prumo .f select,.ux-prumo .f textarea{padding:10px 12px;min-height:44px;font-size:15px;line-height:1.5;border-radius:6px!important;background:var(--sf)!important;color:var(--tx)}
+.ux-prumo .g2,.ux-prumo .g3,.ux-prumo .g4,.ux-prumo .module-form-grid{gap:12px}
+.ux-prumo .f{margin-bottom:10px}
+.ux-prumo .f>label,.ux-prumo .user-input-row>label{font-size:13px;line-height:1.4;margin-bottom:6px;color:var(--tx2)}
+.ux-prumo .f input,.ux-prumo .f select,.ux-prumo .f textarea{padding:8px 10px;min-height:38px;font-size:clamp(13px,.95vw,15px);line-height:1.4;border-radius:6px!important;background:var(--sf)!important;color:var(--tx)}
 .ux-prumo .f textarea{min-height:90px}
 .ux-prumo .btn,.ux-prumo .save-atend-btn{font-size:14px;line-height:1.45;min-height:40px;padding:9px 13px;border-radius:6px!important}
 .ux-prumo .btn-p,.ux-prumo .save-atend-btn,.ux-prumo .auth-btn{background:var(--green)!important;border-color:var(--green)!important;color:var(--prumo-primary-ink,#fff)!important}
@@ -127,10 +127,10 @@ body.ux-prumo{--sidebar-w:240px;--prumo-nav:var(--theme-nav,#183e2b);--prumo-nav
 .ux-prumo .pg>.sh>.admin-test-btn{display:none!important}
 .ux-admin-test-label{display:flex;flex-direction:column;gap:9px;font-size:14px;max-width:480px;margin:20px 0}
 .ux-admin-test-label select{font:inherit;background:var(--sf);color:var(--tx);border:1px solid var(--bd);border-radius:6px;padding:11px}
-.ux-prumo #quick-actions{padding:15px 28px;gap:11px;border-top:1px solid var(--bd)}
-.ux-prumo #quick-actions .quick-action-btn,.ux-prumo .ux-action-menu>summary{font-size:14px;line-height:1.45;min-height:42px;padding:10px 14px;border-radius:6px}
+.ux-prumo #quick-actions{padding:10px 20px;gap:9px;border-top:1px solid var(--bd)}
+.ux-prumo #quick-actions .quick-action-btn,.ux-prumo .ux-action-menu>summary{font-size:13px;line-height:1.4;min-height:38px;padding:8px 12px;border-radius:6px}
 .ux-prumo #ux-primary{color:var(--prumo-primary-ink,#fff);background:var(--green);border-color:var(--green)}
-.ux-prumo .ux-save-state{font-size:13px;display:flex;align-items:center;gap:7px}
+.ux-prumo .ux-save-state{font-size:12px;display:flex;align-items:center;gap:7px}
 .ux-prumo .ux-save-state::before{content:'';width:6px;height:6px;flex:none;background:var(--tx2);border-radius:50%}
 .ux-prumo .ux-action-popover{width:310px;padding:16px;border-radius:8px}
 .ux-prumo .ux-action-popover label,.ux-prumo .ux-action-popover select{font-size:14px}
@@ -149,6 +149,15 @@ body.ux-prumo{--sidebar-w:240px;--prumo-nav:var(--theme-nav,#183e2b);--prumo-nav
 .ux-prumo .home-op-label,.ux-prumo #pg-inicio .update-log-sub,.ux-prumo #pg-inicio .update-date{color:var(--tx2);font-size:12px}
 .ux-prumo #pg-inicio .update-text{color:var(--tx);font-size:14px}
 .ux-prumo #pg-inicio .update-tag,.ux-prumo #pg-inicio .update-log-pill{background:var(--prumo-tint);color:var(--green);border-color:var(--bd);border-radius:5px}
+body.ux-home{isolation:isolate}
+#ux-home-background{display:none;position:fixed;inset:0 0 0 var(--sidebar-w);overflow:hidden;pointer-events:none;z-index:-1}
+.ux-home #ux-home-background{display:block}
+#ux-home-background::before{content:'';position:absolute;inset:-18px;background:url('login-toledo.png') center 55%/cover no-repeat;filter:blur(6px)}
+#ux-home-background::after{content:'';position:absolute;inset:0;background:rgba(17,31,29,.38)}
+.ux-prumo.ux-home #pg-inicio{background:transparent}
+.ux-prumo.ux-home #pg-inicio .home-head{padding:18px;border:1px solid var(--bd);border-radius:10px;background:var(--sf)}
+.ux-prumo.ux-home #pg-inicio .home-title{font-size:clamp(22px,1.9vw,28px)}
+.ux-prumo.ux-home #pg-inicio .home-section-title{color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.35)}
 .ux-prumo .vd-step summary,.ux-prumo .vd-type-card{background:var(--sf);color:var(--tx);border-color:var(--bd)}
 .ux-prumo .vd-type-card:has(input:checked){background:var(--prumo-tint);color:var(--green)}
 /* Keep the supplied photograph decorative; only this layer is blurred. */
@@ -175,6 +184,11 @@ body.ux-prumo{--sidebar-w:240px;--prumo-nav:var(--theme-nav,#183e2b);--prumo-nav
 .ux-prumo #auth-network-diagnostic{overflow-wrap:anywhere;text-align:left}
 .ux-prumo .admin-bar,.ux-prumo .admin-card{background:var(--sf);color:var(--tx)}
 .ux-prumo .admin-tabs{flex-wrap:wrap;gap:7px}
+.admin-account-fields{display:grid;grid-template-columns:1fr;gap:8px;margin-top:12px;min-width:220px;max-width:350px}
+.admin-account-fields label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--tx2)}
+.admin-account-fields select,.admin-account-fields input{width:100%;min-width:0;min-height:36px;font:inherit;padding:7px 8px;border:1px solid var(--bd);border-radius:6px;background:var(--sf);color:var(--tx)}
+.ux-prumo #u-unidade{width:100%;min-width:0;font-size:14px;min-height:40px}
+.ux-prumo #u-unidade-ajuda{color:var(--tx2);font-size:12px;line-height:1.5}
 .ux-prumo .admin-tab,.ux-prumo .admin-action-btn{font-size:14px;border-radius:6px;min-height:40px}
 body.ux-prumo[data-surface=dark]{color-scheme:dark;--gbg:#283f31;--gmid:#759c81;--rbg:#482b33;--rose:#ffb7bf;--rmid:#a36471;--abg:#3b3224;--amber:#f0cc8c;--amid:#957742;--bbg:#24394c;--blue:#b4d7f5;--bmid:#607d9d;--pbg:#352c47;--pmid:#837292;--tbg:#243e39;--teal:#a4d4c8}
 body.ux-prumo[data-surface=light]{color-scheme:light}
@@ -189,16 +203,16 @@ body.ux-prumo[data-surface=light]{color-scheme:light}
   .ux-prumo .ux-mobile-header{padding:11px 14px;font-size:15px;gap:16px}
   .ux-prumo .ux-mobile-brand{font-weight:600;letter-spacing:.03em}
   .ux-prumo .ux-mobile-menu{font-size:14px;min-height:40px;padding:8px 11px}
-  .ux-prumo .wrap{padding:22px 14px 90px}
-  .ux-prumo .sh-t{font-size:24px}.ux-prumo .sh-s{font-size:12px}
+  .ux-prumo .wrap{padding:16px 12px 90px}
+  .ux-prumo .sh-t{font-size:20px}.ux-prumo .sh-s{font-size:12px}
   .ux-prumo .sh-ic{display:none}.ux-prumo .ux-favorite-toggle{font-size:12px;padding:8px;min-height:36px}
   .ux-prumo .ux-patient-strip{gap:10px;flex-wrap:wrap}.ux-prumo .ux-patient-name{flex-basis:calc(100% - 48px)}
   .ux-prumo .ux-patient-strip .ux-link{margin-left:48px}
-  .ux-prumo .ux-stage-label{font-size:13px;margin-bottom:21px}
+  .ux-prumo .ux-stage-label{font-size:13px;margin-bottom:14px}
   .ux-prumo .ux-stage-select{font-size:16px;padding:10px 12px;min-height:44px}
-  .ux-prumo .card{padding:20px 17px;border-radius:9px!important}
-  .ux-prumo .ct{font-size:18px}
-  .ux-prumo .g2,.ux-prumo .g3,.ux-prumo .g4,.ux-prumo .module-form-grid{gap:16px}
+  .ux-prumo .card{padding:16px 14px;border-radius:9px!important}
+  .ux-prumo .ct{font-size:16px}
+  .ux-prumo .g2,.ux-prumo .g3,.ux-prumo .g4,.ux-prumo .module-form-grid{gap:12px}
   .ux-prumo .ux-risk-title{font-size:23px}.ux-prumo .ux-calculated{font-size:12px;background:transparent;padding:0;flex-basis:100%}
   .ux-prumo .ux-risk-completeness{border-left:0;border-top:1px solid var(--bd);padding:16px}
   .ux-prumo .ux-criterion{grid-template-columns:minmax(0,1fr);gap:5px}.ux-prumo .ux-criterion .ux-link{justify-self:start}
@@ -212,5 +226,5 @@ body.ux-prumo[data-surface=light]{color-scheme:light}
   .ux-prumo .auth-card{padding:28px 24px;width:min(100%,420px);margin:auto;border-radius:16px}
 }
 @media(max-width:420px){.ux-prumo .g2,.ux-prumo .g3,.ux-prumo .g4,.ux-prumo .module-form-grid{grid-template-columns:1fr}.ux-prumo .clinical-options{display:grid;grid-template-columns:minmax(0,1fr)}.ux-prumo .clinical-chip{width:100%}.ux-prumo .sh>div:has(.sh-t){min-width:140px}.ux-prumo .ux-favorite-toggle{margin-left:0}.ux-prumo .ux-risk-review-heading{align-items:flex-start}}
-@media(pointer:coarse){.ux-prumo .btn,.ux-prumo .quick-action-btn,.ux-prumo summary,.ux-prumo .ux-link,.ux-prumo .ux-favorite-toggle,.ux-prumo .nb{min-height:44px}.ux-prumo .f input,.ux-prumo .f select,.ux-prumo .f textarea{font-size:16px}}
-@media print{.ux-prumo .ux-favorite-toggle,.ux-prumo .ux-patient-icon{display:none!important}.ux-prumo .wrap{padding:0}.ux-prumo .ux-documents{border:0}}
+@media(pointer:coarse){.ux-prumo .btn,.ux-prumo .quick-action-btn,.ux-prumo summary,.ux-prumo .ux-link,.ux-prumo .ux-favorite-toggle,.ux-prumo .nb{min-height:44px}.ux-prumo .f input,.ux-prumo .f select,.ux-prumo .f textarea{font-size:16px;min-height:44px}}
+@media print{#ux-home-background,.ux-prumo .ux-favorite-toggle,.ux-prumo .ux-patient-icon{display:none!important}.ux-prumo .wrap{padding:0}.ux-prumo .ux-documents{border:0}}

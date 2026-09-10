@@ -900,6 +900,8 @@ body.sidebar-collapsed .dev-nav{display:none}
 <link rel="stylesheet" href="assets/usability.css">
 <link rel="stylesheet" href="assets/prumo.css">
 <script defer src="assets/usability.js?v=prumo-1"></script>
+<script defer src="assets/unidades-toledo.js"></script>
+<script defer src="assets/unidades.js"></script>
 </head>
 <body>
 
@@ -954,7 +956,8 @@ body.sidebar-collapsed .dev-nav{display:none}
       </select>
     </div>
     <div class="user-input-row"><label>COREN / CRM (opcional)</label><input type="text" id="u-conselho" placeholder="Ex: COREN-PR 123456"></div>
-    <div class="user-input-row"><label>Unidade de Saúde</label><input type="text" id="u-unidade" placeholder="Ex: ESF Jardim Europa"></div>
+    <div class="user-input-row"><label for="u-unidade">Unidade de saúde</label><select id="u-unidade" disabled aria-describedby="u-unidade-ajuda"></select><small id="u-unidade-ajuda">Conferindo a unidade da conta...</small></div>
+    <button type="button" class="btn btn-p" id="u-salvar-unidade" hidden onclick="ESFUnidades.salvarMinhaUnidade()">Salvar unidade</button>
     <button class="user-save-btn" onclick="event.stopPropagation();salvarUsuario()">✓ Salvar</button>
     <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--bd)">
       <button class="btn btn-s" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:6px" onclick="event.stopPropagation();sincronizarAgora()"><span data-ic="globe"></span> Sincronizar agora</button>
@@ -5953,7 +5956,7 @@ function avaliarResultadosTR(){
 function trVal(id,fallback=''){return(document.getElementById(id)?.value||fallback).trim();}function formatarDataBR(data){if(!data)return'';const p=data.split('-');return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:data;}function idadePorNascimento(data){if(!data)return'';const n=new Date(data+'T12:00:00'),h=new Date();let a=h.getFullYear()-n.getFullYear();if(h<new Date(h.getFullYear(),n.getMonth(),n.getDate()))a--;return String(a);}
 function dadosLaudoTR(prefix,gestante){
   const nome=trVal(`${prefix}-nome`),nasc=trVal(`${prefix}-nasc`),hivKey=gestante?'duo-hiv':'hiv',hiv2Key=gestante?'duo-hiv2':'hiv2',sifKey=gestante?'duo-sif':'sif',res=k=>trVal(`${prefix}-${k}-res`,'NÃO REALIZADO'),marca=k=>trVal(`${prefix}-${k}-marca`,'NÃO INFORMADO'),hiv1=res(hivKey),hiv2=res(hiv2Key);
-  return{nome,pront:trVal(`${prefix}-pront`),nasc:formatarDataBR(nasc),idade:idadePorNascimento(nasc),sexo:trVal(`${prefix}-sexo`),municipio:trVal(prefix.startsWith('ist-')?'ist-tr-municipio':'tr-municipio','Toledo'),unidade:PROTO?.unit?.nome||'ESF - COSMOS',cidade:PROTO?.unit?.cidade||'TOLEDO - PR',data:formatarDataBR(trVal(`${prefix}-data`)),hora:trVal(`${prefix}-hora`),executor:trVal(`${prefix}-executor`),hivMarca:marca(hivKey),hiv1,hiv2Marca:marca(hiv2Key),hiv2,hivConclusao:hiv1==='NÃO REAGENTE'?'AMOSTRA NÃO REAGENTE':(hiv1==='REAGENTE'&&hiv2==='REAGENTE'?'AMOSTRA REAGENTE':'AMOSTRA INCONCLUSIVA'),sifMarca:gestante?marca('duo-hiv'):marca(sifKey),sif:res(sifKey),hepbMarca:marca('hepb'),hepb:res('hepb'),hepcMarca:marca('hepc'),hepc:res('hepc')};
+  return{nome,pront:trVal(`${prefix}-pront`),nasc:formatarDataBR(nasc),idade:idadePorNascimento(nasc),sexo:trVal(`${prefix}-sexo`),municipio:trVal(prefix.startsWith('ist-')?'ist-tr-municipio':'tr-municipio','Toledo'),unidade:(typeof getUsuarioAtual==='function'?getUsuarioAtual()?.unidade:'')||'',cidade:PROTO?.unit?.cidade||'TOLEDO - PR',data:formatarDataBR(trVal(`${prefix}-data`)),hora:trVal(`${prefix}-hora`),executor:trVal(`${prefix}-executor`),hivMarca:marca(hivKey),hiv1,hiv2Marca:marca(hiv2Key),hiv2,hivConclusao:hiv1==='NÃO REAGENTE'?'AMOSTRA NÃO REAGENTE':(hiv1==='REAGENTE'&&hiv2==='REAGENTE'?'AMOSTRA REAGENTE':'AMOSTRA INCONCLUSIVA'),sifMarca:gestante?marca('duo-hiv'):marca(sifKey),sif:res(sifKey),hepbMarca:marca('hepb'),hepb:res('hepb'),hepcMarca:marca('hepc'),hepc:res('hepc')};
 }
 function resumoTestesRapidosPna(){
   const d=dadosLaudoTR('tr-p',document.getElementById('tr-principal-condicao')?.value==='gestante'),todos=[['HIV TR1',d.hiv1],['HIV TR2',d.hiv2],['Sífilis',d.sif],['Hepatite B',d.hepb],['Hepatite C',d.hepc]],realizados=todos.filter(([,r])=>r&&!/NÃO REALIZADO|NAO REALIZADO/i.test(r)),pendentes=todos.filter(([,r])=>!r||/NÃO REALIZADO|NAO REALIZADO/i.test(r)).map(x=>x[0]),reag=realizados.filter(([,r])=>r==='REAGENTE');
@@ -8327,6 +8330,7 @@ function carregarUsuario() {
 }
 
 function salvarUsuario() {
+  if(CURRENT_AUTH_USER_ID){showToast('O cadastro da conta é gerenciado pelo administrador.');return;}
   const nomeEl = document.getElementById('u-nome');
   const cargoEl = document.getElementById('u-cargo');
   const conselhoEl = document.getElementById('u-conselho');
@@ -9721,7 +9725,7 @@ document.querySelectorAll('[onclick*="go("]').forEach(btn => {
     <div class="admin-section" id="admin-sec-usuarios">
       <div class="admin-card">
         <div class="admin-card-title">Permissões por usuário</div>
-        <div class="alert alert-i">Marque apenas os recursos que cada profissional pode utilizar. As alterações são aplicadas no próximo acesso do usuário.</div>
+        <div class="alert alert-i">Defina a unidade de saúde e os recursos de cada profissional. Somente administradores podem alterar a unidade. A outra conta recebe a atualização no próximo acesso.</div>
         <table class="admin-table">
           <thead><tr><th>Profissional e escopo</th><th>Histórico</th><th>Modo TESTE</th><th>IA SOAP</th><th>Documentos/PDF</th><th>Protocolos</th><th>Gerenciar relatos</th><th>Admin</th></tr></thead>
           <tbody id="admin-users-tbody"><tr><td colspan="8" style="text-align:center;color:var(--tx2);padding:20px">Carregando permissões...</td></tr></tbody>
@@ -9819,6 +9823,7 @@ function aplicarPermissoesInterface(){
   }
   aplicarModulosAtivos();
   window.ESFUsability?.refreshNavigation();
+  window.ESFUnidades?.refresh();
 }
 
 function reabrirAtendimento(id){
@@ -9845,7 +9850,8 @@ async function carregarPermissoesUsuario(user){
       const p=data?.permissoes;
       const permissoes=p&&typeof p==='object'&&!Array.isArray(p)?p:{};
       PERMISSOES_ATUAIS={...(admin?base:{...base,...permissoes}),usar_ia_soap:permissoes.usar_ia_soap===true||permissoes.ver_admin===true};
-      if(data)CURRENT_USER_PROFILE={...(CURRENT_USER_PROFILE||{}),nome:data.nome||CURRENT_USER_PROFILE?.nome||'',cargo:data.cargo||CURRENT_USER_PROFILE?.cargo||'',unidade:data.unidade||CURRENT_USER_PROFILE?.unidade||'',nivel_acesso:PERMISSOES_ATUAIS.nivel_acesso,municipio:PERMISSOES_ATUAIS.municipio_escopo||'Toledo'};
+      if(data)CURRENT_USER_PROFILE={...(CURRENT_USER_PROFILE||{}),nome:data.nome||CURRENT_USER_PROFILE?.nome||'',cargo:data.cargo||CURRENT_USER_PROFILE?.cargo||'',unidade:data.unidade||'',nivel_acesso:PERMISSOES_ATUAIS.nivel_acesso,municipio:PERMISSOES_ATUAIS.municipio_escopo||'Toledo'};
+      window.ESFUnidades?.receberPerfil(user.id,data?.unidade||'');
     }
   }catch(e){
     if(leitura!==window.__leituraPermissoesIA||user?.id!==CURRENT_AUTH_USER_ID)return;
@@ -9913,7 +9919,8 @@ function verificarAcesso(session) {
     const user = session.user;
     const meta = user.user_metadata || {};
     CURRENT_AUTH_USER_ID=user.id;
-    CURRENT_USER_PROFILE={nome:meta.nome||user.email||'',cargo:meta.cargo||'',conselho:meta.conselho||'',unidade:meta.unidade||''};
+    CURRENT_USER_PROFILE={nome:meta.nome||user.email||'',cargo:meta.cargo||'',conselho:meta.conselho||'',unidade:''};
+    window.ESFUnidades?.iniciarSessao();
     carregarPermissoesUsuario(user);
     localStorage.setItem(chaveUsuarioAtual(),JSON.stringify(CURRENT_USER_PROFILE));
     registrarAuditoria('Login','Acesso autenticado');
@@ -9943,8 +9950,8 @@ function verificarAcesso(session) {
     }
     if(document.getElementById('u-unidade')) {
       const el = document.getElementById('u-unidade');
-      el.value = meta.unidade || '';
-      el.readOnly = true;
+      el.value = '';
+      el.disabled = true;
       el.style.backgroundColor = 'var(--sf2)';
     }
     
@@ -10269,15 +10276,16 @@ async function adminCarregarPermissoes(){
   tbody.innerHTML=(data||[]).map(p=>{
     const perms={...PERMISSOES_PADRAO,...(p.permissoes||{})};
     const nome=escTR(p.nome||p.email||'Usuário');
-    const detalhe=[p.cargo,p.unidade,p.email].filter(Boolean).map(escTR).join(' · ');
-    const nivel=perms.nivel_acesso||'enfermeiro',unidade=escTR(perms.unidade_escopo||p.unidade||''),municipio=escTR(perms.municipio_escopo||'Toledo');
-    const escopo=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:6px"><select onchange="adminAlterarPermissao('${p.user_id}','nivel_acesso',this.value)" style="font-size:11px;padding:4px"><option value="enfermeiro" ${nivel==='enfermeiro'?'selected':''}>Enfermeiro</option><option value="gerente_esf" ${nivel==='gerente_esf'?'selected':''}>Gerente ESF/APS</option><option value="gerente_municipal" ${nivel==='gerente_municipal'?'selected':''}>Gerente municipal</option></select><input value="${unidade}" placeholder="Unidade/ESF" onchange="adminAlterarPermissao('${p.user_id}','unidade_escopo',this.value)" style="font-size:11px;padding:4px"><input value="${municipio}" placeholder="Município" onchange="adminAlterarPermissao('${p.user_id}','municipio_escopo',this.value)" style="font-size:11px;padding:4px;grid-column:1/-1"></div>`;
+    const detalhe=[p.cargo,p.email].filter(Boolean).map(escTR).join(' · ');
+    const nivel=perms.nivel_acesso||'enfermeiro',municipio=escTR(perms.municipio_escopo||'Toledo');
+    const escopo=`<div class="admin-account-fields"><label>Perfil de acesso<select onchange="adminAlterarPermissao('${p.user_id}','nivel_acesso',this.value)"><option value="enfermeiro" ${nivel==='enfermeiro'?'selected':''}>Enfermeiro</option><option value="gerente_esf" ${nivel==='gerente_esf'?'selected':''}>Gerente ESF/APS</option><option value="gerente_municipal" ${nivel==='gerente_municipal'?'selected':''}>Gerente municipal</option></select></label><label>Unidade de saúde<select data-unit-user="${escTR(p.user_id)}" data-current="${escTR(p.unidade||'')}" aria-label="Unidade de ${nome}" onchange="ESFUnidades.alterar('${p.user_id}',this.value,this)">${window.ESFUnidades?.options(p.unidade||'')||''}</select></label><label>Município<input value="${municipio}" onchange="adminAlterarPermissao('${p.user_id}','municipio_escopo',this.value)"></label></div>`;
     const check=chave=>`<td style="text-align:center"><input type="checkbox" ${perms[chave]?'checked':''} onchange="adminAlterarPermissao('${p.user_id}','${chave}',this.checked)"></td>`;
     return `<tr><td><strong>${nome}</strong><div style="font-size:11px;color:var(--tx2)">${detalhe}</div>${escopo}</td>${check('ver_historico')}${check('usar_modo_teste')}${check('usar_ia_soap')}${check('gerar_documentos')}${check('editar_protocolos')}${check('ver_reportes')}${check('ver_admin')}</tr>`;
   }).join('')||'<tr><td colspan="8">Nenhum perfil encontrado.</td></tr>';
 }
 async function adminAlterarPermissao(userId,chave,valor){
   if(!await usuarioAdminAtual())return;
+  if(chave==='unidade_escopo')return window.ESFUnidades?.alterar(userId,valor);
   const {data,error:readError}=await _sb.from('perfis').select('permissoes').eq('user_id',userId).single();
   if(readError){showToast('Não foi possível ler as permissões.');return;}
   const permissoes={...PERMISSOES_PADRAO,...(data?.permissoes||{}),[chave]:valor};
