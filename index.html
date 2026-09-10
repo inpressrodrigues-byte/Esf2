@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Roteiro ESF – Enfermagem Completo</title>
+<title>PRUMO APS — Enfermagem</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght=400;500;600&family=DM+Mono:wght=400;500&display=swap" rel="stylesheet">
@@ -898,13 +898,14 @@ body.sidebar-collapsed .dev-nav{display:none}
 
 </style>
 <link rel="stylesheet" href="assets/usability.css">
-<script defer src="assets/usability.js"></script>
+<link rel="stylesheet" href="assets/prumo.css">
+<script defer src="assets/usability.js?v=prumo-1"></script>
 </head>
 <body>
 
 <div class="bar">
   <button class="sidebar-toggle" onclick="alternarMenuLateral()" title="Recolher ou expandir menu">‹</button>
-  <div class="bar-logo"><span class="ic-wrap"><span data-ic="cross"></span> ESF Enfermagem</span> <span class="pill">Toledo · PR</span></div>
+  <div class="bar-logo" aria-label="PRUMO APS — Clareza para cuidar"><span class="prumo-mark" aria-hidden="true">P</span><div class="prumo-wordmark"><strong>PRUMO <small>APS</small></strong><span>Clareza para cuidar.</span></div></div>
   <div class="bar-nav">
     <button class="nb on" onclick="go('inicio',this)">⌂ Início</button>
     <button class="nb" onclick="go('pn-abertura',this)"><span data-ic="pregnant"></span> Abertura PN</button>
@@ -9595,7 +9596,7 @@ document.querySelectorAll('[onclick*="go("]').forEach(btn => {
 <!-- ══ AUTH SCREEN ══════════════════════════════════════════════ -->
 <div id="auth-screen" class="visible">
   <div class="auth-card">
-    <div class="auth-logo"><span class="ic-wrap"><span data-ic="cross"></span> ESF Enfermagem</span> <span style="color:var(--tx2);font-weight:400">Toledo · PR</span></div>
+    <div class="auth-logo"><span class="prumo-mark" aria-hidden="true">P</span><div class="prumo-wordmark"><strong>PRUMO <small>APS</small></strong><span>Clareza para cuidar.</span></div></div>
     <div id="auth-login-view">
       <div class="auth-title">Entrar</div>
       <div class="auth-sub" id="auth-connection-status">Preparando acesso seguro...</div>
@@ -9614,7 +9615,7 @@ document.querySelectorAll('[onclick*="go("]').forEach(btn => {
 <!-- ══ ADMIN SCREEN ═════════════════════════════════════════════ -->
 <div id="admin-screen">
   <div class="admin-bar">
-    <div class="admin-bar-title" style="display:inline-flex;align-items:center;gap:6px"><span data-ic="shield"></span> Painel Admin — ESF Enfermagem</div>
+    <div class="admin-bar-title" style="display:inline-flex;align-items:center;gap:6px"><span data-ic="shield"></span> Administração — PRUMO APS</div>
     <div style="display:flex;gap:8px">
       <button class="admin-action-btn" onclick="adminRefresh()">↻ Atualizar</button>
       <button class="admin-action-btn" onclick="fecharAdmin()">✕ Fechar</button>
@@ -9643,7 +9644,8 @@ document.querySelectorAll('[onclick*="go("]').forEach(btn => {
           <div class="admin-card-title">Personalização visual</div>
           <div class="alert alert-i">As alterações aparecem imediatamente. Salve quando gostar do resultado.</div>
           <div class="appearance-presets">
-            <button class="appearance-preset" onclick="aplicarPresetAparencia('liquid')">Liquid Glass</button>
+            <button class="appearance-preset" onclick="aplicarPresetAparencia('prumo')">PRUMO APS</button>
+            <button class="appearance-preset" onclick="aplicarPresetAparencia('escuro')">PRUMO escuro</button>
             <button class="appearance-preset" onclick="aplicarPresetAparencia('clinico')">Clínico claro</button>
             <button class="appearance-preset" onclick="aplicarPresetAparencia('contraste')">Alto contraste</button>
           </div>
@@ -9817,6 +9819,7 @@ function aplicarPermissoesInterface(){
     if(nav){btn.id='admin-nav-btn';btn.className='nb';btn.style.borderColor='rgba(255,100,100,0.5)';btn.style.color='#ff9999';btn.innerHTML=ic('shield')+' Admin';btn.onclick=abrirAdmin;nav.appendChild(btn);}
   }
   aplicarModulosAtivos();
+  window.ESFUsability?.refreshNavigation();
 }
 
 function reabrirAtendimento(id){
@@ -10101,7 +10104,12 @@ async function recuperarSenha(){
 }
 
 const APARENCIA_KEY='esf_aparencia_v1';
-const APARENCIA_PADRAO={primary:'#175930',accent:'#3a1d68',bg:'#f1f0eb',surface:'#ffffff',font:'DM Sans',corner:8,opacity:64,blur:20,radius:18,shadow:12};
+const APARENCIA_PADRAO={primary:'#235b3c',accent:'#235b3c',bg:'#f4f6f4',surface:'#ffffff',font:'Inter',corner:6,opacity:100,blur:0,radius:10,shadow:0};
+function migrarAparenciaPrumo(cfg){
+  const antigo={primary:'#175930',accent:'#3a1d68',bg:'#f1f0eb',surface:'#ffffff',font:'DM Sans',corner:8,opacity:64,blur:20,radius:18,shadow:12};
+  if(!cfg||Object.keys(antigo).every(key=>cfg[key]===undefined||cfg[key]===antigo[key]))return {...APARENCIA_PADRAO};
+  return {...APARENCIA_PADRAO,...cfg};
+}
 let APARENCIA_ATUAL={...APARENCIA_PADRAO};
 function hexRgb(hex){const h=(hex||'#ffffff').replace('#','');return {r:parseInt(h.slice(0,2),16),g:parseInt(h.slice(2,4),16),b:parseInt(h.slice(4,6),16)}}
 function rgbHex({r,g,b}){return '#'+[r,g,b].map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('')}
@@ -10109,12 +10117,14 @@ function misturarCor(a,b,p){const x=hexRgb(a),y=hexRgb(b);return rgbHex({r:x.r+(
 function corRgba(hex,alpha){const c=hexRgb(hex);return `rgba(${c.r},${c.g},${c.b},${alpha})`}
 function corEscura(hex){const c=hexRgb(hex);return (c.r*299+c.g*587+c.b*114)/1000<145}
 function aplicarAparencia(cfg){
-  APARENCIA_ATUAL={...APARENCIA_PADRAO,...cfg};
+  APARENCIA_ATUAL=migrarAparenciaPrumo(cfg);
   const a=APARENCIA_ATUAL,root=document.documentElement.style,tx=corEscura(a.surface)?'#f4f6f4':'#1c1b17',tx2=corEscura(a.surface)?'#c5cec8':'#59574f';
   const font=a.font==='Inter'?'Inter, system-ui, sans-serif':a.font==='DM Sans'?"'DM Sans', sans-serif":a.font==='Georgia'?'Georgia, serif':`${a.font}, sans-serif`;
   root.setProperty('--green',a.primary);root.setProperty('--purple',a.accent);root.setProperty('--bg',a.bg);root.setProperty('--sf',a.surface);
   root.setProperty('--sf2',misturarCor(a.surface,a.bg,.55));root.setProperty('--bd',misturarCor(a.surface,corEscura(a.surface)?'#ffffff':'#777777',.2));
   root.setProperty('--tx',tx);root.setProperty('--tx2',tx2);root.setProperty('--font',font);root.setProperty('--r',`${a.corner}px`);root.setProperty('--rl',`${Number(a.corner)+5}px`);
+  root.setProperty('--tx3',tx2);root.setProperty('--bd2',misturarCor(a.surface,corEscura(a.surface)?'#ffffff':'#45594b',.35));
+  root.setProperty('--prumo-primary-ink',corEscura(a.primary)?'#ffffff':'#173322');document.body.dataset.surface=corEscura(a.surface)?'dark':'light';
   root.setProperty('--theme-control-radius',`${a.corner}px`);root.setProperty('--theme-glass-radius',`${a.radius}px`);root.setProperty('--theme-dashboard-radius',`${Number(a.radius)+4}px`);
   root.setProperty('--theme-glass-blur',`${a.blur}px`);root.setProperty('--theme-glass-bg',`linear-gradient(145deg,${corRgba(a.surface,a.opacity/100)},${corRgba(a.surface,Math.max(.18,a.opacity/100-.28))})`);
   root.setProperty('--theme-glass-hover',`linear-gradient(145deg,${corRgba(a.surface,Math.min(.98,a.opacity/100+.14))},${corRgba(misturarCor(a.surface,a.primary,.12),Math.max(.3,a.opacity/100-.12))})`);
@@ -10135,7 +10145,7 @@ async function salvarAparenciaAdmin(){const a=lerAparenciaAdmin();aplicarAparenc
 async function carregarAparenciaNuvem(){if(!_sb)return;const {data}=await _sb.from('configuracoes_sistema').select('valor').eq('chave','aparencia').maybeSingle();if(data?.valor){APARENCIA_ATUAL={...APARENCIA_PADRAO,...data.valor};localStorage.setItem(APARENCIA_KEY,JSON.stringify(APARENCIA_ATUAL));aplicarAparencia(APARENCIA_ATUAL);preencherControlesAparencia(APARENCIA_ATUAL)}}
 async function restaurarAparenciaPadrao(){APARENCIA_ATUAL={...APARENCIA_PADRAO};preencherControlesAparencia();aplicarAparencia(APARENCIA_ATUAL);localStorage.removeItem(APARENCIA_KEY);if(_sb)await _sb.from('configuracoes_sistema').upsert({chave:'aparencia',valor:APARENCIA_ATUAL,updated_at:new Date().toISOString()},{onConflict:'chave'});showToast('Aparência padrão restaurada.')}
 function aplicarPresetAparencia(nome){
-  const presets={liquid:{...APARENCIA_PADRAO},clinico:{...APARENCIA_PADRAO,accent:'#193b6a',opacity:88,blur:8,radius:12,shadow:7},contraste:{...APARENCIA_PADRAO,primary:'#0b4725',accent:'#193b6a',bg:'#e8ebe8',opacity:95,blur:0,radius:10,shadow:16}};
+  const presets={prumo:{...APARENCIA_PADRAO},escuro:{...APARENCIA_PADRAO,primary:'#b3ddbe',accent:'#b3ddbe',bg:'#141e19',surface:'#1e2a23'},clinico:{...APARENCIA_PADRAO,accent:'#193b6a'},contraste:{...APARENCIA_PADRAO,primary:'#0b4725',accent:'#193b6a',bg:'#e8ebe8'}};
   APARENCIA_ATUAL={...(presets[nome]||APARENCIA_PADRAO)};preencherControlesAparencia();aplicarAparencia(APARENCIA_ATUAL);
 }
 document.addEventListener('DOMContentLoaded',()=>{try{APARENCIA_ATUAL={...APARENCIA_PADRAO,...JSON.parse(localStorage.getItem(APARENCIA_KEY)||'{}')}}catch(e){}aplicarAparencia(APARENCIA_ATUAL);preencherControlesAparencia(APARENCIA_ATUAL)});

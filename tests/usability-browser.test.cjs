@@ -22,13 +22,14 @@ async function main(){try{
  await check('Risco vazio e parcial têm revisão explícita; critérios elevados permanecem visíveis',async()=>{
   await page.evaluate(()=>{go('pn-abertura');quickLimpar();});assert.match(await page.locator('#ux-risk-state').textContent(),/Ainda não avaliado/);
   await page.locator('#pna-idade').evaluate(e=>{e.value='25';e.dispatchEvent(new Event('input',{bubbles:true}));});
-  assert.match(await page.locator('#ux-risk-state').textContent(),/Avaliação parcial/);
+  assert.match(await page.locator('#ux-risk-state').textContent(),/Completude a conferir/);
   await page.evaluate(()=>{document.querySelector('#pna-comorbidades-list [data-comorb="has"]').checked=true;avaliarProtocolosPna();document.querySelector('[aria-controls="pna-5"]').click();});
   assert.match(await page.locator('#pna-risco-automatico').textContent(),/ALTO RISCO/);assert.equal(await page.locator('input[name="risco-pna"]:visible').count(),0);
   await page.screenshot({path:path.join(out,'usabilidade-risco-desktop.png')});
  });
  await check('Revisão perde validade quando os dados mudam; origem leva ao campo correto',async()=>{
-  await page.locator('#ux-risk-reviewed').check();assert.match(await page.locator('#ux-risk-state').textContent(),/Dados revisados/);
+  await page.locator('#ux-risk-reviewed').check();assert.match(await page.locator('#ux-risk-review-status').textContent(),/Dados revisados/);
+  assert.match(await page.locator('#ux-risk-state').textContent(),/Completude a conferir/);
   await page.locator('#pna-risco-motivos').getByRole('button',{name:'Ver origem'}).first().click();
   assert.equal(await page.locator('#pna-3').evaluate(e=>e.classList.contains('on')),true);
   await page.locator('#pna-comorbidades-list [data-comorb="dm"]').check();assert.equal(await page.locator('#ux-risk-reviewed').isChecked(),false);
@@ -115,6 +116,68 @@ async function main(){try{
  });
  await check('Menu móvel abre, fecha por Escape e não ocupa espaço quando fechado',async()=>{
   await page.getByRole('button',{name:'☰ Menu',exact:true}).click();assert.equal(await page.locator('.bar').isVisible(),true);await page.keyboard.press('Escape');assert.equal(await page.locator('.bar').isVisible(),false);assert.equal(await page.evaluate(()=>parseFloat(getComputedStyle(document.body).paddingLeft)),0);
+ });
+ await check('Favoritos preservam módulos únicos, respeitam permissões e são separados por conta',async()=>{
+  await page.setViewportSize({width:1366,height:900});
+  await page.locator('.sidebar-toggle').click();
+  await page.evaluate(()=>{CURRENT_AUTH_USER_ID='prumo-preference-a';go('puericultura');});
+  await page.locator('#pg-puericultura .ux-favorite-toggle').click();
+  assert.equal(await page.locator('.ux-favorite-list [data-ux-page="puericultura"]').count(),1);
+  assert.equal(await page.locator('[data-ux-page="puericultura"]').count(),1);
+  await page.evaluate(()=>{CURRENT_AUTH_USER_ID='prumo-preference-b';ESFUsability.refreshNavigation();});
+  assert.equal(await page.locator('.ux-favorite-list [data-ux-page="puericultura"]').count(),0);
+  await page.evaluate(()=>{CURRENT_AUTH_USER_ID='prumo-preference-a';ESFUsability.refreshNavigation();go('historico');});
+  await page.locator('#pg-historico .ux-favorite-toggle').click();
+  await page.evaluate(()=>{PERMISSOES_ATUAIS.ver_historico=false;aplicarPermissoesInterface();});
+  assert.equal(await page.locator('.ux-favorite-list [data-ux-page="historico"]').isVisible(),false);
+  await page.evaluate(()=>{PERMISSOES_ATUAIS.ver_historico=true;aplicarPermissoesInterface();});
+  assert.equal(await page.locator('.ux-favorite-list [data-ux-page="puericultura"]').count(),1);
+  await page.locator('.ux-favorite-list [data-ux-page="puericultura"]').click();
+  assert.equal(await page.locator('#pg-puericultura').evaluate(e=>e.classList.contains('on')),true);
+  const group=page.locator('#ux-nav-group-1');await group.locator('summary').click();
+  assert.equal(await group.getAttribute('open'),null);
+  await page.waitForFunction(()=>JSON.parse(localStorage.getItem('esf_prumo_navigation_v1:prumo-preference-a')||'{}').closed?.includes('Acompanhamento'));
+  const pref=await page.evaluate(()=>JSON.parse(localStorage.getItem('esf_prumo_navigation_v1:prumo-preference-a')));assert.ok(pref.closed.includes('Acompanhamento'));
+  await page.locator('.sidebar-toggle').click();assert.equal(await page.locator('[data-ux-page="pacientes"]').isVisible(),true);
+  await page.locator('.sidebar-toggle').click();assert.equal(await group.getAttribute('open'),null);
+  await page.reload();await page.waitForTimeout(1500);await login();await page.evaluate(()=>{CURRENT_AUTH_USER_ID='prumo-preference-a';ESFUsability.refreshNavigation();});
+  assert.equal(await page.locator('.ux-favorite-list [data-ux-page="puericultura"]').count(),1);
+  assert.equal(await page.locator('#ux-nav-group-1').getAttribute('open'),null);
+ });
+ await check('Ferramentas de teste ficam na administração e a autorização continua obrigatória',async()=>{
+  await page.evaluate(()=>{go('pn-abertura');document.getElementById('admin-screen').classList.add('visible');});
+  await page.locator('#ux-admin-test-tab').click();
+  assert.ok(await page.locator('#ux-admin-test-module option').count()>1);
+  await page.locator('#ux-admin-test-module').selectOption('pg-pn-abertura');
+  const r=await page.evaluate(()=>{const original=document.querySelector('#pg-pn-abertura>.sh>.admin-test-btn');window.originalTestClicks=0;original.addEventListener('click',()=>window.originalTestClicks++,{once:true});return{visible:getComputedStyle(original).display};});assert.equal(r.visible,'none');
+  await page.locator('#ux-admin-run-test').click();assert.equal(await page.evaluate(()=>window.originalTestClicks),1);
+  assert.equal(await page.locator('#admin-screen').isVisible(),false);
+  await page.evaluate(()=>{PERMISSOES_ATUAIS.usar_modo_teste=false;aplicarPermissoesInterface();});
+  assert.equal(await page.locator('#ux-admin-run-test').isDisabled(),true);assert.equal(await page.locator('#ux-admin-test-tab').getAttribute('hidden'),'');
+  await page.evaluate(()=>{PERMISSOES_ATUAIS.usar_modo_teste=true;aplicarPermissoesInterface();});
+ });
+ await check('Referências e documentos recolhem sem ocultar a conduta nem alterar o formulário',async()=>{
+  await page.evaluate(()=>{go('pn-abertura');document.querySelector('[aria-controls="pna-5"]').click();});
+  assert.equal(await page.locator('#pna-risco-conduta .alert').isVisible(),true);
+  await page.locator('.ux-risk-references summary').click();assert.equal(await page.locator('#ux-risk-references').getAttribute('open'),'');
+  assert.equal(await page.locator('#pna-dmg-doc-status').isVisible(),false);
+  await page.locator('.ux-documents summary').click();assert.equal(await page.locator('#pna-dmg-doc-status').isVisible(),true);
+ });
+ await check('PRUMO mantém legibilidade e estilos salvos, com risco em cinco larguras e tema escuro',async()=>{
+  const migrated=await page.evaluate(()=>migrarAparenciaPrumo({primary:'#175930',accent:'#3a1d68',bg:'#f1f0eb',surface:'#ffffff',font:'DM Sans',corner:8,opacity:64,blur:20,radius:18,shadow:12}));assert.equal(migrated.primary,'#235b3c');
+  assert.equal(await page.evaluate(()=>migrarAparenciaPrumo({primary:'#193b6a'}).primary),'#193b6a');
+  assert.match(await page.title(),/PRUMO APS/);
+  for(const width of [1366,1024,768,390,320]){
+   await page.setViewportSize({width,height:900});await page.evaluate(()=>{aplicarPresetAparencia('escuro');go('pn-abertura');document.querySelector('[aria-controls="pna-5"]').click();window.scrollTo(0,0);});
+   const dims=await page.evaluate(()=>({width:document.documentElement.scrollWidth,state:parseFloat(getComputedStyle(document.getElementById('ux-risk-state')).fontSize)}));assert.ok(dims.width<=width,`PRUMO dark ${width} overflow ${dims.width}`);assert.ok(dims.state>=15);
+   await page.screenshot({path:path.join(out,`prumo-risco-escuro-${width}.png`)});
+  }
+  await page.setViewportSize({width:1366,height:900});await page.evaluate(()=>{aplicarPresetAparencia('prumo');go('pn-abertura');document.querySelector('[aria-controls="pna-4"]').click();window.scrollTo(0,0);});
+  assert.ok(await page.locator('#pna-eg').evaluate(e=>parseFloat(getComputedStyle(e).fontSize))>=15);
+  await page.screenshot({path:path.join(out,'prumo-exame-claro.png')});
+  await page.evaluate(()=>{document.querySelector('[aria-controls="pna-5"]').click();window.scrollTo(0,0);});await page.screenshot({path:path.join(out,'prumo-risco-claro.png')});
+  for(const id of ['inicio','puericultura','consulta-geral']){await page.evaluate(id=>{go(id);document.querySelector('.pg.on .tab')?.click();window.scrollTo(0,0);},id);await page.screenshot({path:path.join(out,`prumo-${id}-claro.png`)});}
+  await page.evaluate(()=>document.getElementById('auth-screen').classList.add('visible'));assert.equal(await page.locator('.auth-logo .prumo-wordmark').isVisible(),true);await page.screenshot({path:path.join(out,'prumo-login.png')});
  });
  await check('Nenhuma exceção JavaScript nos percursos',async()=>assert.deepEqual(errors,[]));
 }catch(error){if(page){await page.screenshot({path:path.join(out,'usabilidade-falha.png'),fullPage:false});console.log(await page.evaluate(()=>({body:document.body.className,bar:document.getElementById('quick-actions')?.innerText,errors:document.querySelector('.pg.on')?.id})));}throw error;
