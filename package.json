@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "test": "node --test tests/ai-transport.test.cjs tests/gemini-api.test.cjs tests/permission-repair.test.cjs",
-    "test:browser": "node tests/api-browser.test.cjs && node tests/usability-browser.test.cjs"
+    "test": "node --test tests/ai-transport.test.cjs tests/gemini-api.test.cjs tests/permission-repair.test.cjs tests/unidades.test.cjs",
+    "test:browser": "node tests/api-browser.test.cjs && node tests/usability-browser.test.cjs && node tests/unidades-browser.test.cjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.8",

@@ -1,0 +1,11 @@
+# Unidades das contas profissionais
+
+O administrador escolhe sua unidade em **Minha conta → Unidade de saúde → Salvar unidade**. Para outra conta, usa **Admin → Usuários → Unidade de saúde**; a escolha é salva ao selecionar. Usuários comuns apenas consultam sua unidade. Outra conta recebe a atualização no próximo acesso. Alterações exigem conexão e confirmação do servidor.
+
+A lista contém as 43 unidades e serviços do [catálogo oficial da Secretaria de Saúde de Toledo](https://www.toledo.pr.gov.br/portais/saude/gabinete-da-secretaria-de-saude/servicos-de-saude), atualizado pela fonte em 13/07/2026 e consultado em 09/09/2026. Os grupos e CNES seguem essa fonte, inclusive unidades distritais agrupadas. A lista inclui atenção primária, urgências, farmácias, saúde mental, atenção especializada e a secretaria. Uma unidade pode ficar não definida; cadastros antigos são preservados até uma escolha explícita do administrador.
+
+`assets/unidades-toledo.js` contém o catálogo apresentado no navegador. A migração `supabase/migrations/202609100001_unidades_toledo.sql` mantém a lista permitida no banco e a função `admin_definir_unidade`. Essa função exige usuário autenticado com a permissão administrativa existente, valida a unidade e atualiza, na mesma transação, `perfis.unidade`, `perfis.permissoes.unidade_escopo` e `profiles.unidade`. Os gatilhos também impedem alterações de unidade por usuários comuns nas duas tabelas. A atribuição não concede funções administrativas nem reescreve atendimentos históricos. O catálogo não pode ser modificado por clientes autenticados.
+
+Para atualizar o diretório municipal, atualizar o catálogo do navegador e adicionar uma migração com os mesmos nomes e CNES. Aplicar a migração antes de publicar o front-end. A operação de atribuição usa `perfis` como fonte da unidade; metadados antigos do login não sobrepõem a escolha. Laudos de testes rápidos usam a unidade da conta, sem preencher Cosmos automaticamente.
+
+Validação: `npm test` cobre autorização, escrita direta, catálogo, atualização da própria conta e de outra, consistência entre tabelas e erros sem gravação parcial. `npm run test:browser` verifica controles reais, usuário comum, modo offline, falha do servidor, troca de sessão, laudo e adaptação visual. O ensaio adicional no Supabase real usou contas fictícias em uma transação integralmente revertida.

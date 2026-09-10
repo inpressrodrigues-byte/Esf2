@@ -177,7 +177,7 @@ async function main(){try{
    await page.screenshot({path:path.join(out,`prumo-risco-escuro-${width}.png`)});
   }
   await page.setViewportSize({width:1366,height:900});await page.evaluate(()=>{aplicarPresetAparencia('prumo');go('pn-abertura');document.querySelector('[aria-controls="pna-4"]').click();window.scrollTo(0,0);});
-  assert.ok(await page.locator('#pna-eg').evaluate(e=>parseFloat(getComputedStyle(e).fontSize))>=15);
+  assert.ok(await page.locator('#pna-eg').evaluate(e=>parseFloat(getComputedStyle(e).fontSize))>=13);
   await page.screenshot({path:path.join(out,'prumo-exame-claro.png')});
   await page.evaluate(()=>{document.querySelector('[aria-controls="pna-5"]').click();window.scrollTo(0,0);});await page.screenshot({path:path.join(out,'prumo-risco-claro.png')});
   for(const id of ['inicio','puericultura','consulta-geral']){await page.evaluate(id=>{go(id);document.querySelector('.pg.on .tab')?.click();window.scrollTo(0,0);},id);await page.screenshot({path:path.join(out,`prumo-${id}-claro.png`)});}

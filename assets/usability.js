@@ -442,12 +442,14 @@
   }
   function onNavigate(page) {
     if(!ready||!page)return;
+    document.body.classList.toggle('ux-home',page.id==='pg-inicio');
     document.querySelectorAll('.bar-nav .nb[data-ux-page]').forEach(b=>{const on=`pg-${b.dataset.uxPage}`===page.id;b.classList.toggle('on',on);if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
     renderFavorites();const current=navButtons.get(page.id.slice(3));const group=current?.closest('.ux-nav-group');if(group)group.open=true;
     updatePatient(page);updateTabs(page);refreshChips(page);refreshAdminTests();
   }
   function setup() {
     document.body.classList.add('ux-compact','ux-prumo');
+    const homeBackground=make('div');homeBackground.id='ux-home-background';homeBackground.setAttribute('aria-hidden','true');document.body.prepend(homeBackground);
     document.querySelectorAll('.pg').forEach(page=>{
       const controls=[...page.querySelectorAll('input,select,textarea')];legacy.set(page.id,controls);
       controls.forEach((e,i)=>{if(!e.id&&!['file','password'].includes(e.type))e.id=`ux-field-${page.id}-${i}`;});
