@@ -136,6 +136,7 @@ async function main(){try{
   assert.equal(await page.locator('#pg-puericultura').evaluate(e=>e.classList.contains('on')),true);
   const group=page.locator('#ux-nav-group-1');await group.locator('summary').click();
   assert.equal(await group.getAttribute('open'),null);
+  await page.waitForFunction(()=>JSON.parse(localStorage.getItem('esf_prumo_navigation_v1:prumo-preference-a')||'{}').closed?.includes('Acompanhamento'));
   const pref=await page.evaluate(()=>JSON.parse(localStorage.getItem('esf_prumo_navigation_v1:prumo-preference-a')));assert.ok(pref.closed.includes('Acompanhamento'));
   await page.locator('.sidebar-toggle').click();assert.equal(await page.locator('[data-ux-page="pacientes"]').isVisible(),true);
   await page.locator('.sidebar-toggle').click();assert.equal(await group.getAttribute('open'),null);
