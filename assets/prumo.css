@@ -1,24 +1,40 @@
 /* PRUMO APS: comfortable reading and a shared visual hierarchy. */
-body.ux-prumo{--sidebar-w:224px;--prumo-nav:#163d2a;--prumo-nav-active:#2b503a;--prumo-nav-muted:#c2d4c8;--prumo-tint:color-mix(in srgb,var(--sf) 92%,var(--green));font-size:15px;line-height:1.6;transition:none}
+body.ux-prumo{--sidebar-w:240px;--prumo-nav:var(--theme-nav,#183e2b);--prumo-nav-active:var(--theme-nav-active,#345540);--prumo-nav-muted:#b6cbbd;--prumo-tint:color-mix(in srgb,var(--sf) 92%,var(--green));font-size:15px;line-height:1.6;transition:none}
 .ux-prumo .wrap{max-width:1340px;padding:28px 30px 80px}
-.ux-prumo .bar{background:var(--prumo-nav);padding:22px 12px 14px;gap:18px}
-.ux-prumo .bar-logo{padding:0 30px 14px 5px;gap:10px;min-width:0;min-height:65px;overflow:visible;color:#eef5ef;white-space:normal}
+.ux-prumo .bar{background:var(--prumo-nav);padding:22px 14px 14px;gap:18px;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;border-right:1px solid rgba(255,255,255,.08);transition:none}
+.ux-prumo .bar-logo{padding:0 30px 20px 7px;gap:10px;min-width:0;min-height:57px;overflow:visible;color:#eef5ef;white-space:normal;border-bottom:1px solid rgba(255,255,255,.12)}
 .prumo-mark{display:grid;place-items:center;flex:none;border:1px solid currentColor;border-radius:9px 3px 9px 3px;width:31px;height:35px;font:500 23px/1 system-ui,sans-serif}
 .prumo-wordmark{min-width:0;display:flex;flex-direction:column;gap:2px}
 .prumo-wordmark strong{font:600 21px/1.3 system-ui,sans-serif;letter-spacing:.01em;white-space:nowrap}
 .prumo-wordmark strong small{font-size:11px;font-weight:500}
 .prumo-wordmark>span{display:block!important;font:400 11px/1.4 system-ui,sans-serif;white-space:nowrap}
 .ux-prumo .bar-logo .prumo-wordmark>span{color:var(--prumo-nav-muted)}
-.ux-prumo .sidebar-toggle{top:24px;right:7px;width:24px;height:30px;background:transparent}
-.ux-prumo .bar-nav{display:block;min-height:0}
-.ux-prumo .nb{display:block;font-size:14px;min-height:43px;padding:10px 11px;margin:3px 0;border-radius:6px;white-space:normal;line-height:1.45;text-align:left;width:100%}
-.ux-prumo .nb.on{background:var(--prumo-nav-active);font-weight:600}
-.ux-prumo .nb svg{margin-right:5px;width:16px;height:16px}
-.ux-prumo .dev-nav{font-size:11px;line-height:1.5}
-.ux-prumo .ux-nav-heading{font-size:11px;letter-spacing:.05em;color:var(--prumo-nav-muted);padding:5px 9px 9px;text-transform:uppercase}
-.ux-nav-group,.ux-nav-favorites{margin-bottom:22px}
-.ux-nav-group>summary{cursor:pointer;min-height:32px}
-.ux-prumo .user-chip{border-radius:7px;padding:10px;font-size:13px;background:var(--prumo-nav-active);border-color:transparent}
+.ux-prumo .sidebar-toggle{top:24px;right:12px;width:26px;height:30px;background:transparent;border-color:transparent;color:var(--prumo-nav-muted)}
+.ux-prumo .sidebar-toggle:hover{background:var(--prumo-nav-active);color:#fff}
+.ux-prumo .bar-nav{display:block;min-height:0;scrollbar-width:thin;scrollbar-color:rgba(209,227,216,.25) transparent;padding-right:3px}
+.ux-prumo .bar-nav::-webkit-scrollbar{width:4px}
+.ux-prumo .bar-nav::-webkit-scrollbar-track{background:transparent}
+.ux-prumo .bar-nav::-webkit-scrollbar-thumb{background:rgba(209,227,216,.25);border-radius:8px}
+.ux-prumo .nb{display:flex;align-items:center;gap:11px;position:relative;font:400 13px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;min-height:43px;padding:10px 12px;margin:3px 0;border-radius:8px;white-space:normal;text-align:left;width:100%;color:#d5e2d9!important}
+.ux-prumo .nb:hover{background:rgba(255,255,255,.065);color:#fff!important}
+.ux-prumo .nb.on{background:var(--prumo-nav-active);font-weight:600;color:#fff!important;box-shadow:inset 2px 0 #c0dfc9}
+.ux-prumo .nb:focus-visible,.ux-prumo .bar summary:focus-visible,.ux-prumo .sidebar-toggle:focus-visible,.ux-prumo .user-chip:focus-visible{outline:2px solid #c0dfc9;outline-offset:-2px}
+.ux-nav-icon{display:grid;place-items:center;width:20px;height:20px;flex:none;color:var(--prumo-nav-muted)}
+.ux-prumo .nb.on .ux-nav-icon,.ux-prumo .nb:hover .ux-nav-icon{color:inherit}
+.ux-prumo .nb svg{margin:0;width:19px;height:19px;stroke-width:1.65}
+.ux-nav-copy{display:flex;flex-direction:column;gap:3px;min-width:0}
+.ux-nav-label{display:block}
+.ux-prumo .dev-nav{font-size:10px;font-weight:400;line-height:1.4;letter-spacing:0;margin:0;color:var(--prumo-nav-muted)}
+.ux-prumo .ux-nav-heading{font:500 10px/1.5 system-ui,sans-serif;letter-spacing:.09em;color:var(--prumo-nav-muted);padding:8px 12px;text-transform:uppercase}
+.ux-nav-group,.ux-nav-favorites{margin-bottom:18px}
+.ux-nav-group>summary{display:flex;align-items:center;justify-content:space-between;gap:10px;list-style:none;cursor:pointer;min-height:34px;border-radius:6px}
+.ux-nav-group>summary::-webkit-details-marker{display:none}
+.ux-nav-group>summary::after{content:'';width:5px;height:5px;border-right:1px solid currentColor;border-bottom:1px solid currentColor;transform:rotate(-45deg);margin-right:3px}
+.ux-nav-group[open]>summary::after{transform:rotate(45deg)}
+.ux-nav-group>summary:hover{color:#fff;background:rgba(255,255,255,.035)}
+.ux-prumo .user-chip{border-radius:8px;padding:12px;font-size:13px;font-weight:500;gap:10px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.09)}
+.ux-prumo .user-chip:hover{background:var(--prumo-nav-active)}
+.ux-prumo .user-avatar{background:rgba(255,255,255,.1);width:30px;height:30px}
 .ux-prumo.sidebar-collapsed .bar{padding-inline:8px}
 .ux-prumo.sidebar-collapsed .bar-logo{padding:0 4px 14px;color:#eef5ef}
 .ux-prumo.sidebar-collapsed .bar .prumo-wordmark{display:none}
@@ -27,7 +43,8 @@ body.ux-prumo{--sidebar-w:224px;--prumo-nav:#163d2a;--prumo-nav-active:#2b503a;-
 .ux-prumo.sidebar-collapsed .user-chip{order:3}
 .ux-prumo.sidebar-collapsed .ux-nav-group>summary,.ux-prumo.sidebar-collapsed .ux-nav-favorites>.ux-nav-heading{display:none}
 .ux-prumo.sidebar-collapsed .ux-nav-group:not([open])>.ux-nav-list{display:block}
-.ux-prumo.sidebar-collapsed .nb{font-size:0;text-align:center;padding:10px 4px;min-height:40px}
+.ux-prumo.sidebar-collapsed .nb{font-size:0;justify-content:center;gap:0;text-align:center;padding:10px 4px;min-height:40px}
+.ux-prumo.sidebar-collapsed .ux-nav-copy{display:none}
 .ux-prumo.sidebar-collapsed .nb svg{width:20px;height:20px;margin:0}
 .ux-prumo.sidebar-collapsed .ux-nav-group{margin-bottom:10px}
 .ux-prumo .sh{gap:12px;margin-bottom:22px;align-items:center;flex-wrap:wrap}
@@ -42,6 +59,10 @@ body.ux-prumo{--sidebar-w:224px;--prumo-nav:#163d2a;--prumo-nav-active:#2b503a;-
 .ux-prumo .ux-link{font-size:13px;min-height:36px;line-height:1.5}
 .ux-prumo .tabs{gap:3px;margin-bottom:24px}
 .ux-prumo .tab{font-size:13px;line-height:1.45;padding:12px 10px}
+.ux-prumo .tab:hover{color:var(--green);background:var(--prumo-tint)!important}
+.ux-prumo .tab.on{color:var(--green);border-bottom-color:var(--green)}
+.ux-prumo .ux-link{text-decoration:none;text-underline-offset:4px}
+.ux-prumo .ux-link:hover{text-decoration:underline}
 .ux-prumo .card{border-color:var(--bd);border-radius:10px!important;padding:24px;margin-bottom:20px}
 .ux-prumo .ct{font-size:17px;line-height:1.35;text-transform:none;letter-spacing:0;font-weight:600;margin-bottom:20px}
 .ux-prumo .ct .dot{display:none}
@@ -155,12 +176,13 @@ body.ux-prumo{--sidebar-w:224px;--prumo-nav:#163d2a;--prumo-nav-active:#2b503a;-
 .ux-prumo .admin-bar,.ux-prumo .admin-card{background:var(--sf);color:var(--tx)}
 .ux-prumo .admin-tabs{flex-wrap:wrap;gap:7px}
 .ux-prumo .admin-tab,.ux-prumo .admin-action-btn{font-size:14px;border-radius:6px;min-height:40px}
-body.ux-prumo[data-surface=dark]{color-scheme:dark;--prumo-nav:#112d20;--prumo-nav-active:#30523d;--gbg:#283f31;--gmid:#759c81;--rbg:#482b33;--rose:#ffb7bf;--rmid:#a36471;--abg:#3b3224;--amber:#f0cc8c;--amid:#957742;--bbg:#24394c;--blue:#b4d7f5;--bmid:#607d9d;--pbg:#352c47;--pmid:#837292;--tbg:#243e39;--teal:#a4d4c8}
+body.ux-prumo[data-surface=dark]{color-scheme:dark;--gbg:#283f31;--gmid:#759c81;--rbg:#482b33;--rose:#ffb7bf;--rmid:#a36471;--abg:#3b3224;--amber:#f0cc8c;--amid:#957742;--bbg:#24394c;--blue:#b4d7f5;--bmid:#607d9d;--pbg:#352c47;--pmid:#837292;--tbg:#243e39;--teal:#a4d4c8}
 body.ux-prumo[data-surface=light]{color-scheme:light}
 @media(max-width:1100px){.ux-prumo .wrap{padding-inline:22px}.ux-prumo .g4{grid-template-columns:1fr 1fr}.ux-prumo #quick-actions{padding-inline:20px}.ux-prumo .ux-risk-overview{grid-template-columns:1fr}.ux-prumo .ux-risk-completeness{border-left:0;border-top:1px solid var(--bd)}}
 @media(min-width:761px){.ux-prumo.sidebar-collapsed .bar-nav .ux-nav-group>.ux-nav-list{display:block}}
 @media(max-width:760px){
-  .ux-prumo .bar{width:254px;padding-top:20px}
+  .ux-prumo .bar{width:254px;padding-top:20px;transition:transform .18s ease}
+  .ux-prumo:not(.sidebar-collapsed) #user-chip-label{display:block;overflow:hidden;text-overflow:ellipsis}
   .ux-prumo .bar .nb{font-size:14px;text-align:left}
   .ux-prumo .bar .bar-logo{min-width:0;color:#eef5ef;padding-right:24px}
   .ux-prumo .prumo-wordmark{display:flex!important}

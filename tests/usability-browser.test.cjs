@@ -165,7 +165,11 @@ async function main(){try{
  });
  await check('PRUMO mantém legibilidade e estilos salvos, com risco em cinco larguras e tema escuro',async()=>{
   const migrated=await page.evaluate(()=>migrarAparenciaPrumo({primary:'#175930',accent:'#3a1d68',bg:'#f1f0eb',surface:'#ffffff',font:'DM Sans',corner:8,opacity:64,blur:20,radius:18,shadow:12}));assert.equal(migrated.primary,'#235b3c');
-  assert.equal(await page.evaluate(()=>migrarAparenciaPrumo({primary:'#193b6a'}).primary),'#193b6a');
+  assert.equal(await page.evaluate(()=>migrarAparenciaPrumo({paletteVersion:2,primary:'#193b6a'}).primary),'#193b6a');
+  const legacy=await page.evaluate(async()=>{
+   const original=_sb;_sb={from:()=>({select:()=>({eq:()=>({maybeSingle:async()=>({data:{valor:{primary:'#22108f',accent:'#193b6a',bg:'#f1f0eb',surface:'#ffffff',font:'Georgia'}}})})})})};
+   try{await carregarAparenciaNuvem();return{saved:JSON.parse(localStorage.getItem(APARENCIA_KEY)),primary:getComputedStyle(document.documentElement).getPropertyValue('--green'),control:document.getElementById('theme-primary').value};}finally{_sb=original;}
+  });assert.equal(legacy.saved.primary,'#235b3c');assert.equal(legacy.saved.accent,'#235b3c');assert.equal(legacy.saved.bg,'#f1f0eb');assert.equal(legacy.saved.font,'Georgia');assert.equal(legacy.primary,'#235b3c');assert.equal(legacy.control,'#235b3c');assert.equal(legacy.saved.paletteVersion,2);
   assert.match(await page.title(),/PRUMO APS/);
   for(const width of [1366,1024,768,390,320]){
    await page.setViewportSize({width,height:900});await page.evaluate(()=>{aplicarPresetAparencia('escuro');go('pn-abertura');document.querySelector('[aria-controls="pna-5"]').click();window.scrollTo(0,0);});

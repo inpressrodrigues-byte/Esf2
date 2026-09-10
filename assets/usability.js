@@ -176,6 +176,11 @@
     });
   }
   function updateNavigation() {
+    const admin=byId('admin-nav-btn'),support=navGroups.get('Gestão e apoio')?.querySelector('.ux-nav-list');
+    if(admin&&support){
+      if(!admin.querySelector('.ux-nav-icon')){const icon=make('span','ux-nav-icon'),copy=make('span','ux-nav-copy','Administração');icon.setAttribute('aria-hidden','true');icon.innerHTML=ic('shield');admin.replaceChildren(icon,copy);admin.setAttribute('aria-label','Administração');admin.title='Administração';}
+      if(admin.parentElement!==support)support.append(admin);
+    }
     const collapsed = document.body.classList.contains('sidebar-collapsed');
     const compact=collapsed&&innerWidth>760;
     if(compact)navGroups.forEach(group=>group.open=true);
@@ -193,6 +198,7 @@
       ['Gestão e apoio',['indicadores','territorio','relatorios','editor','auditoria-clinica','reportes']]
     ];
     const buttons = [...nav.querySelectorAll('.nb')];
+    const icons={inicio:'house','pn-abertura':'pregnant','pn-consulta':'stethoscope',puericultura:'baby',preventivo:'flower',idoso:'elder','saude-mental':'brain','consulta-geral':'cross',hiperdia:'heart',feridas:'cross',puerperio:'baby',ist:'flask','visita-domiciliar':'house',pacientes:'users',historico:'clipboard',sinan:'report',pni:'syringe','busca-ativa':'search',indicadores:'report',territorio:'house',relatorios:'doc',editor:'gear','auditoria-clinica':'shield',reportes:'chat'};
     const favorites = make('section','ux-nav-favorites'); favorites.id='ux-nav-favorites';
     favorites.append(make('div','ux-nav-heading','Favoritos'),make('div','ux-favorite-list'));nav.append(favorites);
     groups.forEach(([title,ids],index) => {
@@ -202,7 +208,15 @@
         if(navOwner!==owner()||(document.body.classList.contains('sidebar-collapsed')&&innerWidth>760))return;
         navPreferences.closed=[...navGroups.entries()].filter(([,g])=>!g.open).map(([name])=>name);saveNavPreferences();
       });
-      ids.forEach(id => { const b = buttons.find(b => b.getAttribute('onclick')?.includes(`'${id}'`)); if (!b) return; b.dataset.uxPage = id;b.dataset.uxGroup=title; b.setAttribute('aria-label',b.textContent.trim()); b.title = b.textContent.trim(); list.append(b);navButtons.set(id,b); });
+      ids.forEach(id => {
+        const b=buttons.find(b=>b.getAttribute('onclick')?.includes(`'${id}'`));if(!b)return;
+        const clone=b.cloneNode(true),status=b.querySelector('.dev-nav');clone.querySelectorAll('[data-ic],svg,.dev-nav').forEach(e=>e.remove());
+        const name=clone.textContent.trim().replace(/^[^\p{L}\p{N}]+/u,''),icon=make('span','ux-nav-icon'),copy=make('span','ux-nav-copy');
+        icon.setAttribute('aria-hidden','true');icon.innerHTML=ic(icons[id]||'doc');copy.append(make('span','ux-nav-label',name));
+        if(status){status.textContent='Em desenvolvimento';copy.append(status);}
+        b.replaceChildren(icon,copy);b.dataset.uxPage=id;b.dataset.uxGroup=title;b.setAttribute('aria-label',name+(status?' — Em desenvolvimento':''));b.title=b.getAttribute('aria-label');
+        list.append(b);navButtons.set(id,b);
+      });
     });
     document.querySelectorAll('.pg>.sh').forEach(head=>{
       const button=make('button','ux-favorite-toggle','☆ Favoritar');button.type='button';button.setAttribute('aria-pressed','false');
