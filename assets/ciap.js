@@ -6,7 +6,8 @@
   const states = new Map();
   let catalog = [], catalogError = '', owner = '';
   const indicatorGuide='https://sisaps.saude.gov.br/sistemas/esusaps/docs/guias-preenchimento%20Atual/equipeaps/';
-  function indicator(code){
+  function indicator(code,p){
+    if(p==='prev'&&code==='A98')return 'A98 descreve o atendimento preventivo. Para o indicador de prevenção do câncer, registre o exame/procedimento efetivamente realizado, solicitado ou avaliado no sistema oficial, com os campos e critérios exigidos. O CIAP isolado não comprova coleta.';
     if(['K86','K87'].includes(code))return 'Cuidado da pessoa com hipertensão: registrar na Avaliação e na lista de problemas/condições. A elegibilidade também depende dos demais critérios da ficha técnica.';
     if(['T89','T90'].includes(code))return 'Cuidado da pessoa com diabetes: registrar na Avaliação e na lista de problemas/condições. O código isolado não comprova as boas práticas realizadas.';
     if(['W03','W78','W79','W81','W84','W85'].includes(code))return 'Cuidado da gestante: código citado no guia nacional. Conferir DUM, lista de problemas, consultas e procedimentos registrados nos campos estruturados.';
@@ -21,16 +22,35 @@
   }
   function capture(p){return structuredClone(states.get(p)||[]);}
   function persist(p){const e=byId(p+'-ciap-registro');if(e){e.value=JSON.stringify(capture(p));e.dispatchEvent(new Event('input',{bubbles:true}));}}
-  function restore(p,items){states.set(p,Array.isArray(items)?items.filter(x=>catalog.some(c=>c.code===x.code)).map(x=>({code:x.code,s:String(x.s||''),o:String(x.o||''),a:String(x.a||''),p:String(x.p||'')})):[]);renderSelected(p);const e=byId(p+'-ciap-registro');if(e)e.value=JSON.stringify(capture(p));}
+  function restore(p,items){states.set(p,Array.isArray(items)?items.filter(x=>catalog.some(c=>c.code===x.code)).map(x=>({code:x.code,s:String(x.s||''),o:String(x.o||''),a:String(x.a||''),p:String(x.p||'')})):[]);renderSelected(p);const e=byId(p+'-ciap-registro');if(e)e.value=JSON.stringify(capture(p));if(p==='prev')refreshSuggestions(p);}
   function restoreFromPage(p){try{restore(p,JSON.parse(byId(p+'-ciap-registro')?.value||'[]'));}catch{restore(p,[]);}}
   function source(p){
     const page=byId('pg-'+moduloPorPrefixo(p)?.page);
-    return [...(page?.querySelectorAll('input,textarea')||[])].filter(e=>!e.closest('[data-ciap]')&&/(queixa|queixa-principal|complaints|sintomas|hma|historia-atual)$/.test(e.id)).map(e=>e.value).filter(Boolean).join('\n');
+    return [...(page?.querySelectorAll('input,textarea')||[])].filter(e=>!e.closest('[data-ciap]')&&/(queixas?|queixa-principal|complaints|sintomas|hma|historia-atual)$/.test(e.id)).map(e=>e.value).filter(Boolean).join('\n');
+  }
+  function preventiveReason(){return document.querySelector('input[name="prev-motivo"]:checked')?.value||'';}
+  function suggestModule(p){
+    const codes=new Set(suggest(source(p)).map(c=>c.code));
+    if(p==='prev'){
+      const reason=preventiveReason();
+      if(reason==='rastr')codes.add('A98');
+      // O rótulo de repetição deste formulário especifica exame anterior alterado.
+      if(reason==='repet')codes.add('X86');
+      if(norm(byId('prev-sang-rel')?.value)==='sim')codes.add('X13');
+      if(norm(byId('prev-sang-menop')?.value)==='sim')codes.add('X12');
+    }
+    return catalog.filter(c=>codes.has(c.code));
+  }
+  function refreshSuggestions(p){
+    if(byId(p+'-ciap-busca')?.value.trim())return;
+    results(p,suggestModule(p));
   }
   function draft(p,i){
     const item=states.get(p)?.[i];if(!item)return;
     const c=catalog.find(c=>c.code===item.code);
     const excerpts=source(p).split(/[.!?;\n]+/).map(s=>s.trim()).filter(s=>suggest(s).some(c=>c.code===item.code));
+    if(p==='prev'&&item.code==='A98'&&preventiveReason()==='rastr')excerpts.unshift('Comparece para rastreamento citopatológico do colo do útero.');
+    if(p==='prev'&&item.code==='X86'&&preventiveReason()==='repet')excerpts.unshift('Comparece para repetição de exame citopatológico anterior alterado, conforme motivo registrado.');
     if(!item.s)item.s=[...new Set(excerpts)].join('. ');
     if(!item.a)item.a=`Problema classificado pelo profissional: ${item.code} — ${c.display}.`;
     // Exame e plano precisam ser vinculados a este problema pelo profissional.
@@ -43,7 +63,7 @@
   function soapFor(item){const c=catalog.find(c=>c.code===item.code);return ['CIAP-2: '+item.code+' — '+(c?.display||''),...['s','o','a','p'].map(k=>k.toUpperCase()+': '+(item[k]||'Não registrado para este problema.'))].join('\n');}
   function renderSelected(p){const out=byId(p+'-ciap-selecionados');if(!out)return;out.replaceChildren();capture(p).forEach((item,i)=>{
     const card=document.createElement('div');card.className='card';const title=document.createElement('h4');title.textContent=item.code+' — '+(catalog.find(c=>c.code===item.code)?.display||'');card.append(title);
-    const info=document.createElement('p');info.textContent=indicator(item.code)+' ';const link=document.createElement('a');link.href=indicatorGuide;link.target='_blank';link.rel='noopener';link.textContent='Guia nacional de registro (MS)';info.append(link);card.append(info);
+    const info=document.createElement('p');info.textContent=indicator(item.code,p)+' ';const link=document.createElement('a');link.href=indicatorGuide;link.target='_blank';link.rel='noopener';link.textContent='Guia nacional de registro (MS)';info.append(link);card.append(info);
     const grid=document.createElement('div');grid.className='soap-grid';
     [['s','S — relato desta queixa'],['o','O — achados deste problema'],['a','A — avaliação deste problema'],['p','P — conduta realizada/pactuada para este problema']].forEach(([key,label])=>{
       const wrap=document.createElement('div');wrap.className='f';const l=document.createElement('label'),input=document.createElement('textarea');input.id=p+'-ciap-'+item.code+'-'+key;l.htmlFor=input.id;l.textContent=label;input.value=item[key];input.oninput=()=>{states.get(p)[i][key]=input.value;persist(p);};wrap.append(l,input);grid.append(wrap);
@@ -67,8 +87,9 @@
       const result=document.createElement('div');result.id=p+'-ciap-resultados';result.className='brow';
       const selected=document.createElement('div');selected.id=p+'-ciap-selecionados';
       const hidden=document.createElement('input');hidden.type='hidden';hidden.id=p+'-ciap-registro';
-      panel.append(h,note,button('Sugerir pela queixa',()=>results(p,suggest(source(p)))),input,result,selected,hidden,button('Gerar SOAP por CIAP no atendimento',()=>apply(p)));
-      anchor.before(panel);renderSelected(p);
+      panel.append(h,note,button(p==='prev'?'Sugerir pelo motivo e queixas':'Sugerir pela queixa',()=>results(p,suggestModule(p))),input,result,selected,hidden,button('Gerar SOAP por CIAP no atendimento',()=>apply(p)));
+      if(p==='prev'){const help=document.createElement('p');help.textContent='Rastreamento sugere A98; repetição de citopatológico alterado sugere X86. Seguimento depende do resultado/condição avaliada. Confirme o motivo na Anamnese. Nenhuma coleta ou resultado normal é presumido.';panel.append(help);}
+      anchor.before(panel);renderSelected(p);if(p==='prev')refreshSuggestions(p);
     }
   }
   function aggregate(records){const counts=new Map();const seen=new Set();for(const r of records){if(seen.has(r.id))continue;seen.add(r.id);const items=r.dados?.__ciap2||[];for(const code of new Set(items.map(x=>x.code).filter(code=>catalog.some(c=>c.code===code))))counts.set(code,(counts.get(code)||0)+1);}return [...counts].sort((a,b)=>b[1]-a[1]).map(([code,n])=>({ciap:code,descricao:catalog.find(c=>c.code===code).display,atendimentos:n}));}
@@ -81,13 +102,14 @@
     const data=aggregate(records);if(!data.length)box.append(document.createTextNode('Nenhum CIAP-2 confirmado neste recorte.'));
     else{const table=document.createElement('table');for(const row of [['CIAP-2','Descrição','Atendimentos'],...data.map(x=>[x.ciap,x.descricao,x.atendimentos])]){const tr=document.createElement('tr');for(const cell of row){const td=document.createElement('td');td.textContent=cell;tr.append(td);}table.append(tr);}box.append(table,button('Exportar contagem CIAP-2',()=>exportarLinhasCSV('ciap2-toledo',data)));}
   }
-  window.ESFCiap={capture,restore,restoreFromPage,suggest,aggregate,soapFor,mount};
+  window.ESFCiap={capture,restore,restoreFromPage,suggest,suggestModule,aggregate,soapFor,mount};
   async function init(){
     try{const res=await fetch('assets/ciap2.json');if(!res.ok)throw Error('HTTP '+res.status);const data=await res.json();catalog=data.concept.filter(c=>/^[A-Z][0-9]{2}$/.test(c.code));}catch{catalogError='Catálogo CIAP-2 indisponível. Recarregue para tentar novamente.';}
     mount();owner=CURRENT_AUTH_USER_ID;
-    const navigate=window.go;window.go=function(...args){if(owner!==CURRENT_AUTH_USER_ID){states.clear();for(const cfg of Object.values(MODULOS_ATENDIMENTO))restore(cfg.prefix,[]);owner=CURRENT_AUTH_USER_ID;}mount();const r=navigate.apply(this,args);if(args[0]==='indicadores')indicators();return r;};
+    const navigate=window.go;window.go=function(...args){if(owner!==CURRENT_AUTH_USER_ID){states.clear();for(const cfg of Object.values(MODULOS_ATENDIMENTO))restore(cfg.prefix,[]);owner=CURRENT_AUTH_USER_ID;}mount();const r=navigate.apply(this,args);if(args[0]==='indicadores')indicators();if(args[0]==='preventivo')refreshSuggestions('prev');return r;};
     const render=window.renderIndicadores;window.renderIndicadores=function(...args){const r=render.apply(this,args);indicators();return r;};
     document.addEventListener('input',e=>{const p=e.target?.closest('[data-ciap]')?.dataset.ciap;if(p&&e.target.id!==p+'-ciap-registro')persist(p);});
+    for(const event of ['input','change'])document.addEventListener(event,e=>{if(e.target?.closest('#pg-preventivo')&&!e.target.closest('[data-ciap]'))refreshSuggestions('prev');});
   }
   document.addEventListener('DOMContentLoaded',()=>setTimeout(init,1200));
 })();
