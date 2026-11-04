@@ -903,6 +903,7 @@ body.sidebar-collapsed .dev-nav{display:none}
 <script defer src="assets/unidades-toledo.js"></script>
 <script defer src="assets/unidades.js"></script>
 <script defer src="assets/ciap.js"></script>
+<script defer src="assets/escopo.js"></script>
 </head>
 <body>
 
@@ -8136,9 +8137,15 @@ let syncRunning = false;
 let ATENDIMENTO_EM_EDICAO = null;
 
 function chaveUsuarioAtual(){ return CURRENT_AUTH_USER_ID ? `${USR_KEY}:${CURRENT_AUTH_USER_ID}` : USR_KEY; }
-function chaveAtendimentosAtual(){ return CURRENT_AUTH_USER_ID ? `${ATD_KEY}:${CURRENT_AUTH_USER_ID}` : ATD_KEY; }
+function escopoDadosClinicos(){
+  const municipal=!!CURRENT_AUTH_USER_ID&&(temPermissao('ver_admin')||PERMISSOES_ATUAIS.nivel_acesso==='gerente_municipal');
+  const unidade=String(CURRENT_USER_PROFILE?.unidade||'').trim();
+  return {municipal,unidade,permitido:!!CURRENT_AUTH_USER_ID&&(municipal||!!unidade),chave:`${CURRENT_AUTH_USER_ID||'sem-sessao'}:${municipal?'municipal':encodeURIComponent(unidade||'sem-ubs')}`};
+}
+function chaveAtendimentosAtual(){return `${ATD_KEY}:ubs-v2:${escopoDadosClinicos().chave}`;}
 function chaveExclusoesAtual(){ return `${chaveAtendimentosAtual()}:exclusoes`; }
-function chavePacientesPendentes(){return `${PAC_KEY}:pendentes`;}
+function chavePacientesAtual(){return `${PAC_KEY}:ubs-v2:${escopoDadosClinicos().chave}`;}
+function chavePacientesPendentes(){return `${chavePacientesAtual()}:pendentes`;}
 
 const MODULOS_ATENDIMENTO={
   'Abertura PN':{prefix:'pna',page:'pn-abertura',nome:'pna-nome',cpf:'pna-cpf',soap:['pna-s','pna-o','pna-a-soap','pna-soap-p']},
@@ -8174,8 +8181,14 @@ const CAMPOS_PACIENTE={
 };
 function normalizarCPF(v){return String(v||'').replace(/\D/g,'').slice(0,11);}
 function formatarCPF(v){const n=normalizarCPF(v);return n.length===11?n.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4'):v;}
-function carregarPacientes(){try{return JSON.parse(localStorage.getItem(PAC_KEY)||'{}')}catch(e){return{}}}
-function salvarPacientesLocal(p){localStorage.setItem(PAC_KEY,JSON.stringify(p));}
+function carregarPacientes(){try{const s=escopoDadosClinicos();if(!s.permitido)return{};return Object.fromEntries(Object.entries(JSON.parse(localStorage.getItem(chavePacientesAtual())||'{}')).filter(([,p])=>s.municipal||p.unidade===s.unidade));}catch(e){return{}}}
+function salvarPacientesLocal(p){const s=escopoDadosClinicos();if(!s.permitido)return;const rows=Object.fromEntries(Object.entries(p).map(([cpf,d])=>[cpf,{...d,unidade:Object.hasOwn(d,'unidade')?d.unidade:(s.unidade||null)}]).filter(([,d])=>s.municipal||d.unidade===s.unidade));localStorage.setItem(chavePacientesAtual(),JSON.stringify(rows));}
+async function gravarPacienteNuvem(cpf,dados){
+  const s=escopoDadosClinicos();if(!s.permitido)throw new Error('Peça à administração para definir sua UBS.');
+  const unidade=Object.hasOwn(dados,'unidade')?dados.unidade:(s.unidade||null);
+  const {error}=await _sb.from('pacientes').upsert({cpf,dados,unidade,updated_by:CURRENT_AUTH_USER_ID},{onConflict:'cpf'});
+  if(error)throw error;
+}
 function moduloPorPrefixo(prefix){return Object.values(MODULOS_ATENDIMENTO).find(x=>x.prefix===prefix)}
 function coletarDadosPaciente(prefix){
   const mapa=CAMPOS_PACIENTE[prefix]||{}, dados={};
@@ -8191,42 +8204,54 @@ function preencherDadosPaciente(prefix,dados){
 async function buscarPacientePorCPF(input){
   const cpf=normalizarCPF(input?.value);if(cpf.length!==11)return;
   input.value=formatarCPF(cpf);
-  const prefix=input.id.split('-')[0], locais=carregarPacientes();
+  const prefix=input.id.split('-')[0], locais=carregarPacientes(),escopo=escopoDadosClinicos().chave;
   let dados=locais[cpf]||null;
   if(_sb&&CURRENT_AUTH_USER_ID&&navigator.onLine){
-    try{const r=await _sb.from('pacientes').select('dados').eq('cpf',cpf).maybeSingle();if(r.data?.dados){dados={...(dados||{}),...r.data.dados};locais[cpf]=dados;salvarPacientesLocal(locais);}}catch(e){}
+    try{const r=await _sb.from('pacientes').select('dados,unidade').eq('cpf',cpf).maybeSingle();if(escopo!==escopoDadosClinicos().chave)return;if(r.error)throw r.error;dados=r.data?{...r.data.dados,unidade:r.data.unidade}:null;if(dados)locais[cpf]=dados;else delete locais[cpf];salvarPacientesLocal(locais);}catch(e){showToast('Não foi possível conferir o cadastro na nuvem.');return;}
   }
   if(dados){preencherDadosPaciente(prefix,dados);showToast('✓ Cadastro do paciente localizado e preenchido.');}
   else showToast('CPF ainda não cadastrado. Os dados serão salvos ao finalizar o atendimento.');
 }
 async function salvarCadastroPaciente(prefix){
+  if(!escopoDadosClinicos().permitido)return showToast('Peça à administração para definir sua UBS antes de cadastrar pacientes.');
+  const escopo=escopoDadosClinicos().chave;
   const novos=coletarDadosPaciente(prefix),cpf=normalizarCPF(novos.cpf);if(cpf.length!==11)return;
   const pacientes=carregarPacientes(), dados={...(pacientes[cpf]||{})};
   Object.entries(novos).forEach(([k,v])=>{if(v)dados[k]=v;});
   pacientes[cpf]=dados;salvarPacientesLocal(pacientes);
   if(_sb&&CURRENT_AUTH_USER_ID&&navigator.onLine){
     try{
-      const remoto=await _sb.from('pacientes').select('dados').eq('cpf',cpf).maybeSingle();
-      const completo={...(remoto.data?.dados||{}),...dados};
-      await _sb.from('pacientes').upsert({cpf,dados:completo,updated_by:CURRENT_AUTH_USER_ID},{onConflict:'cpf'});
+      const remoto=await _sb.from('pacientes').select('dados,unidade').eq('cpf',cpf).maybeSingle();
+      if(escopo!==escopoDadosClinicos().chave)return;if(remoto.error)throw remoto.error;
+      const completo={...(remoto.data?.dados||{}),...dados,unidade:remoto.data?remoto.data.unidade:(dados.unidade||escopoDadosClinicos().unidade||null)};
+      await gravarPacienteNuvem(cpf,completo);
+      if(escopo!==escopoDadosClinicos().chave)return;
       pacientes[cpf]=completo;salvarPacientesLocal(pacientes);
       return;
     }catch(e){console.warn('[ESF] Cadastro do paciente pendente:',e?.message||e);}
   }
+  if(escopo!==escopoDadosClinicos().chave)return;
   const pendentes=new Set(JSON.parse(localStorage.getItem(chavePacientesPendentes())||'[]'));pendentes.add(cpf);localStorage.setItem(chavePacientesPendentes(),JSON.stringify([...pendentes]));
 }
 async function sincronizarPacientesPendentes(){
   if(!_sb||!CURRENT_AUTH_USER_ID||!navigator.onLine)return;
   const pendentes=JSON.parse(localStorage.getItem(chavePacientesPendentes())||'[]'),pacientes=carregarPacientes();if(!pendentes.length)return;
-  for(const cpf of pendentes){if(pacientes[cpf])await _sb.from('pacientes').upsert({cpf,dados:pacientes[cpf],updated_by:CURRENT_AUTH_USER_ID},{onConflict:'cpf'});}
-  localStorage.removeItem(chavePacientesPendentes());
+  const chave=chavePacientesPendentes(),escopo=escopoDadosClinicos().chave,restantes=[];
+  for(const cpf of pendentes){if(escopo!==escopoDadosClinicos().chave)return;try{if(pacientes[cpf])await gravarPacienteNuvem(cpf,pacientes[cpf]);else restantes.push(cpf);}catch(e){restantes.push(cpf);}}
+  if(escopo!==escopoDadosClinicos().chave)return;
+  localStorage.setItem(chave,JSON.stringify(restantes));
+  if(restantes.length)throw new Error('Há cadastros pendentes: confira a UBS e a permissão no servidor.');
 }
 async function baixarPacientesNuvem(forcar=false){
   if(!_sb||!CURRENT_AUTH_USER_ID||!navigator.onLine)return;
+  const escopo=escopoDadosClinicos().chave;if(!escopoDadosClinicos().permitido)return;
   try{
-    const {data,error}=await _sb.from('pacientes').select('cpf,dados').order('updated_at',{ascending:false});
+    const {data,error}=await _sb.from('pacientes').select('cpf,dados,unidade').order('updated_at',{ascending:false});
+    if(escopo!==escopoDadosClinicos().chave)return;
     if(error)throw error;
-    const locais=carregarPacientes();(data||[]).forEach(p=>locais[p.cpf]={...(locais[p.cpf]||{}),...(p.dados||{}),cpf:p.cpf});
+    const pendentes=new Set(JSON.parse(localStorage.getItem(chavePacientesPendentes())||'[]'));
+    const locais=Object.fromEntries(Object.entries(carregarPacientes()).filter(([cpf])=>pendentes.has(cpf)));
+    (data||[]).forEach(p=>locais[p.cpf]={...(p.dados||{}),...(locais[p.cpf]||{}),cpf:p.cpf,unidade:p.unidade});
     salvarPacientesLocal(locais);
     if(document.getElementById('pg-pacientes')?.classList.contains('on'))renderPacientes();
     if(forcar)showToast('Banco de pacientes atualizado.');
@@ -8282,21 +8307,28 @@ function editarCadastroPacienteAtual(){
   document.getElementById('pac-modal-conteudo').innerHTML=`<div class="alert alert-i">Atualize documentação, endereço, território e informações familiares. O histórico de consultas é preservado.</div><div class="patient-edit-grid">${PACIENTE_CAMPOS_EDICAO.map(campo).join('')}</div><div class="edit-actions"><button class="btn btn-p" onclick="salvarEdicaoPaciente()">Salvar alterações</button><button class="btn btn-s" onclick="abrirPaciente('${cpf}')">Cancelar</button></div>`;
 }
 async function salvarEdicaoPaciente(){
+  const escopo=escopoDadosClinicos().chave;
   const antigo=PACIENTE_MODAL_CPF,banco=carregarPacientes(),original=banco[antigo]||{},dados={...original};
   PACIENTE_CAMPOS_EDICAO.forEach(([k])=>{const e=document.getElementById(`pac-edit-${k}`);if(e)dados[k]=e.value.trim()});
   const novo=normalizarCPF(dados.cpf||antigo);if(novo.length!==11){showToast('Confira o CPF: são necessários 11 números.');return}
+  if(novo!==antigo){showToast('A correção de CPF precisa de revisão administrativa para preservar o vínculo com o histórico.');return;}
+  if(_sb&&CURRENT_AUTH_USER_ID&&navigator.onLine){try{await gravarPacienteNuvem(novo,dados);}catch(e){showToast('Alteração não confirmada: confira a UBS, a permissão e a conexão.');return;}}
+  if(escopo!==escopoDadosClinicos().chave)return;
   dados.cpf=novo;if(novo!==antigo)delete banco[antigo];banco[novo]=dados;salvarPacientesLocal(banco);PACIENTE_MODAL_CPF=novo;
   const pendentes=new Set(JSON.parse(localStorage.getItem(chavePacientesPendentes())||'[]'));pendentes.delete(antigo);pendentes.add(novo);localStorage.setItem(chavePacientesPendentes(),JSON.stringify([...pendentes]));
-  if(_sb&&CURRENT_AUTH_USER_ID&&navigator.onLine){try{await _sb.from('pacientes').upsert({cpf:novo,dados,updated_by:CURRENT_AUTH_USER_ID},{onConflict:'cpf'});if(novo!==antigo)await _sb.from('pacientes').delete().eq('cpf',antigo).eq('updated_by',CURRENT_AUTH_USER_ID)}catch(e){}}
   registrarAuditoria('Cadastro de paciente editado',`CPF final ${String(novo).slice(-4)}`);
   renderPacientes();abrirPaciente(novo);showToast('Cadastro atualizado.');
 }
 async function excluirCadastroPacienteAtual(){
+  if(!escopoDadosClinicos().municipal)return showToast('Somente a gestão municipal pode excluir cadastros.');
+  if(!_sb||!CURRENT_AUTH_USER_ID||!navigator.onLine)return showToast('Conecte-se para excluir um cadastro.');
+  const escopo=escopoDadosClinicos().chave;
   const cpf=PACIENTE_MODAL_CPF,d=carregarPacientes()[cpf];if(!d)return;
   if(!confirm(`Excluir o cadastro de ${d.nome||'este paciente'}?\n\nAs consultas do histórico serão preservadas.`))return;
+  try{const {data,error}=await _sb.from('pacientes').delete().eq('cpf',cpf).select('cpf');if(error||!data?.length)throw error||Error('Cadastro indisponível');}catch(e){showToast('Exclusão não confirmada pelo servidor.');return;}
+  if(escopo!==escopoDadosClinicos().chave)return;
   const banco=carregarPacientes();delete banco[cpf];salvarPacientesLocal(banco);
   const pendentes=new Set(JSON.parse(localStorage.getItem(chavePacientesPendentes())||'[]'));pendentes.delete(cpf);localStorage.setItem(chavePacientesPendentes(),JSON.stringify([...pendentes]));
-  if(_sb&&CURRENT_AUTH_USER_ID&&navigator.onLine){try{await _sb.from('pacientes').delete().eq('cpf',cpf).eq('updated_by',CURRENT_AUTH_USER_ID)}catch(e){}}
   registrarAuditoria('Cadastro de paciente excluído',`CPF final ${String(cpf).slice(-4)}`);
   fecharPaciente();renderPacientes();showToast('Cadastro excluído. O histórico foi mantido.');
 }
@@ -9001,34 +9033,19 @@ document.addEventListener('input',()=>setTimeout(atualizarIndicadorPreenchimento
 function carregarAtendimentos() {
   try {
     const chaveAtual=chaveAtendimentosAtual();
-    // Migra o historico compartilhado uma unica vez, para o primeiro usuario autenticado.
-    if(CURRENT_AUTH_USER_ID&&!localStorage.getItem('esf_atendimentos_legacy_migrated')){
-      for (const k of ['esf_atendimentos', 'esf_atendimentos_v1', 'esf_atendimentos_v2']) {
-        const old = localStorage.getItem(k);
-        if (old && !localStorage.getItem(chaveAtual)) {
-          try {
-            const lista = JSON.parse(old);
-            if (lista.length) localStorage.setItem(chaveAtual, JSON.stringify(lista.map(a=>({...a,synced:false}))));
-          } catch(e) {}
-        }
-      }
-      localStorage.setItem('esf_atendimentos_legacy_migrated','1');
-    }
+    // O cache legado compartilhado não prova a unidade; não é importado automaticamente.
     return filtrarAtendimentosPorEscopo(JSON.parse(localStorage.getItem(chaveAtual) || '[]'));
   } catch(e) { return []; }
 }
 function filtrarAtendimentosPorEscopo(lista){
-  const nivel=PERMISSOES_ATUAIS.nivel_acesso||'enfermeiro',unidade=(PERMISSOES_ATUAIS.unidade_escopo||CURRENT_USER_PROFILE?.unidade||'').trim().toLowerCase(),municipio=(PERMISSOES_ATUAIS.municipio_escopo||'Toledo').trim().toLowerCase();
-  if(nivel==='gerente_municipal')return lista.filter(a=>!municipio||!a.municipio||String(a.municipio).toLowerCase()===municipio);
-  if(nivel==='gerente_esf')return lista.filter(a=>!unidade||String(a.unidade||'').trim().toLowerCase()===unidade);
-  return lista.filter(a=>!a.user_id||a.user_id===CURRENT_AUTH_USER_ID);
+  const s=escopoDadosClinicos();if(!s.permitido)return[];if(s.municipal)return lista;
+  return lista.filter(a=>a.unidade===s.unidade&&(PERMISSOES_ATUAIS.nivel_acesso==='gerente_esf'||a.user_id===CURRENT_AUTH_USER_ID));
 }
 function aplicarEscopoQueryAtendimentos(query){
   const nivel=PERMISSOES_ATUAIS.nivel_acesso||'enfermeiro';
-  if(temPermissao('ver_admin'))return query;
-  if(nivel==='gerente_municipal')return query.eq('municipio',PERMISSOES_ATUAIS.municipio_escopo||'Toledo');
-  if(nivel==='gerente_esf')return query.eq('unidade',PERMISSOES_ATUAIS.unidade_escopo||CURRENT_USER_PROFILE?.unidade||'');
-  return query.eq('user_id',CURRENT_AUTH_USER_ID);
+  const s=escopoDadosClinicos();if(s.municipal)return query;
+  query=query.eq('unidade',s.permitido?s.unidade:'__SEM_UBS__');
+  return nivel==='gerente_esf'?query:query.eq('user_id',CURRENT_AUTH_USER_ID);
 }
 
 function salvarAtendimentos(lista) {
@@ -9043,6 +9060,7 @@ function agendarSincronizacao(){
 
 async function sincronizarAtendimentosPendentes(){
   if(syncRunning||!_sb||!CURRENT_AUTH_USER_ID||!navigator.onLine)return;
+  const escopo=escopoDadosClinicos().chave,actor=CURRENT_AUTH_USER_ID;
   const lista=carregarAtendimentos(), pendentes=lista.filter(a=>!a.synced);
   const exclusoes=JSON.parse(localStorage.getItem(chaveExclusoesAtual())||'[]');
   const pacientesPendentes=JSON.parse(localStorage.getItem(chavePacientesPendentes())||'[]');
@@ -9050,16 +9068,21 @@ async function sincronizarAtendimentosPendentes(){
   syncRunning=true;
   try{
     await sincronizarPacientesPendentes();
+    if(escopo!==escopoDadosClinicos().chave)return;
     if(exclusoes.length){
       const {error}=await _sb.from('atendimentos').delete().eq('user_id',CURRENT_AUTH_USER_ID).in('id_local',exclusoes);
       if(error)throw error;
+      if(escopo!==escopoDadosClinicos().chave)return;
       localStorage.removeItem(chaveExclusoesAtual());
     }
     if(pendentes.length){
-      const linhas=pendentes.map(a=>({id_local:a.id,paciente:a.nome,paciente_cpf:a.cpf||'',tipo:a.tipo,profissional:a.profissional,unidade:a.unidade||'',municipio:a.municipio||'Toledo',data:a.data,soap:a.soap,dados:a.dados||{},user_id:CURRENT_AUTH_USER_ID}));
+      if(escopo!==escopoDadosClinicos().chave)return;
+      const linhas=pendentes.map(a=>({id_local:a.id,paciente:a.nome,paciente_cpf:a.cpf||'',tipo:a.tipo,profissional:a.profissional,unidade:a.unidade||'',municipio:a.municipio||'Toledo',data:a.data,soap:a.soap,dados:a.dados||{},user_id:actor}));
       let {error}=await _sb.from('atendimentos').upsert(linhas,{onConflict:'user_id,id_local'});
+      if(escopo!==escopoDadosClinicos().chave)return;
       if(error&&/municipio|schema cache|column/i.test(error.message||'')){const compativeis=linhas.map(({municipio,...a})=>a);({error}=await _sb.from('atendimentos').upsert(compativeis,{onConflict:'user_id,id_local'}))}
       if(error)throw error;
+      if(escopo!==escopoDadosClinicos().chave)return;
       const ids=new Set(pendentes.map(a=>a.id));
       const atualizados=carregarAtendimentos().map(a=>ids.has(a.id)?{...a,synced:true}:a);
       localStorage.setItem(chaveAtendimentosAtual(),JSON.stringify(atualizados));
@@ -9071,10 +9094,11 @@ async function sincronizarAtendimentosPendentes(){
 
 async function baixarAtendimentosNuvem(){
   if(!_sb||!CURRENT_AUTH_USER_ID||!navigator.onLine)return;
+  const escopo=escopoDadosClinicos().chave;
   try{
     const {data,error}=await aplicarEscopoQueryAtendimentos(_sb.from('atendimentos').select('*')).order('data',{ascending:false});
-    if(error)throw error;
-    const locais=carregarAtendimentos(), mapa=new Map(locais.map(a=>[a.id,a]));
+    if(escopo!==escopoDadosClinicos().chave)return;if(error)throw error;
+    const locais=carregarAtendimentos().filter(a=>a.synced===false), mapa=new Map(locais.map(a=>[a.id,a]));
     (data||[]).forEach(a=>{
       const local=mapa.get(a.id_local);
       if(!local||local.synced!==false)mapa.set(a.id_local,{id:a.id_local,nome:a.paciente,cpf:a.paciente_cpf||'',tipo:a.tipo,profissional:a.profissional,unidade:a.unidade||'',municipio:a.municipio||'',user_id:a.user_id,data:a.data,soap:a.soap,dados:a.dados||{},synced:true});
@@ -9186,6 +9210,8 @@ function confirmarSalvarSemIdentificacao(faltando){
 }
 
 async function salvarAtendimentoModulo(tipo){
+  if(!escopoDadosClinicos().permitido)return showToast('Peça à administração para definir sua UBS antes de salvar atendimentos.');
+  const escopoSalvar=escopoDadosClinicos().chave;
   const cfgSalvar=MODULOS_ATENDIMENTO[tipo],prefixSalvar=cfgSalvar?.prefix;
   if(prefixSalvar){
     validarEntradaPreSoap(prefixSalvar);
@@ -9199,6 +9225,7 @@ async function salvarAtendimentoModulo(tipo){
     }
   }
   if(typeof abrirChecklistPreSalvar==='function'&&!(await abrirChecklistPreSalvar(tipo)))return;
+  if(escopoSalvar!==escopoDadosClinicos().chave)return showToast('A conta ou a UBS mudou. Confira os dados antes de salvar.');
   const a=criarAtendimento(tipo);if(!a)return;
   const lista = carregarAtendimentos();
   const cfg=MODULOS_ATENDIMENTO[tipo];
@@ -9900,6 +9927,8 @@ async function carregarPermissoesUsuario(user){
   if(leitura!==window.__leituraPermissoesIA||user?.id!==CURRENT_AUTH_USER_ID)return;
   aplicarPermissoesInterface();
   _cacharSessaoOffline(user);
+  window.ESFEscopo?.atualizar();
+  baixarAtendimentosNuvem();baixarPacientesNuvem();
 }
 
 // Guarda a última sessão bem-sucedida (id, perfil, permissões) para permitir
@@ -9950,6 +9979,7 @@ function verificarAcesso(session) {
     if(CURRENT_AUTH_USER_ID)registrarAuditoria('Logout','Sessão encerrada');
     CURRENT_AUTH_USER_ID='';
     CURRENT_USER_PROFILE=null;
+    window.ESFEscopo?.atualizar();
     clearTimeout(inactivityTimer);
     if(window.trialInterval){clearInterval(window.trialInterval);window.trialInterval=null;}
     authScreen.classList.add('visible');

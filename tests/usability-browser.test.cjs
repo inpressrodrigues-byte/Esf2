@@ -66,7 +66,7 @@ async function main(){try{
   assert.equal(await page.locator('#pna-eg').inputValue(),'');assert.equal(await page.locator('#pna-nome').inputValue(),'Registro antigo fictício');
  });
  await check('Limpar remove achados e entradas também do novo rascunho, preservando identificação',async()=>{
-  const r=await page.evaluate(()=>{document.getElementById('pna-nome').value='Pessoa fictícia';document.querySelector('#clinical-guide-pna-exam .clinical-chip:not([hidden])').click();quickLimpar();return{selected:document.querySelectorAll('#pg-pn-abertura .selected').length,name:document.getElementById('pna-nome').value,eg:document.getElementById('pna-eg').value,edema:document.getElementById('pna-edema').value,draft:JSON.parse(localStorage.getItem('esf_rascunho_interface_v2:synthetic-usability:pg-pn-abertura'))};});
+  const r=await page.evaluate(()=>{document.getElementById('pna-nome').value='Pessoa fictícia';document.querySelector('#clinical-guide-pna-exam .clinical-chip:not([hidden])').click();quickLimpar();return{selected:document.querySelectorAll('#pg-pn-abertura .selected').length,name:document.getElementById('pna-nome').value,eg:document.getElementById('pna-eg').value,edema:document.getElementById('pna-edema').value,draft:JSON.parse(localStorage.getItem('esf_rascunho_interface_v2:'+escopoDadosClinicos().chave+':pg-pn-abertura'))};});
   assert.equal(r.selected,0);assert.equal(r.name,'Pessoa fictícia');assert.equal(r.eg,'');assert.equal(r.edema,'');assert.deepEqual(r.draft.interface.chips,[]);
  });
  await check('Rascunho inclui checkbox sem ID original e achados; é retomado explicitamente',async()=>{

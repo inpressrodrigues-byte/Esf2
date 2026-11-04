@@ -6,7 +6,7 @@
   const pageNow = () => document.querySelector('.pg.on');
   const prefix = page => typeof QUICK_PAGE_PREFIX === 'undefined' ? '' : QUICK_PAGE_PREFIX[page?.id] || '';
   const owner = () => typeof CURRENT_AUTH_USER_ID === 'undefined' ? '' : CURRENT_AUTH_USER_ID || '';
-  const stateKey = page => `${owner()}:${page?.id}`;
+  const stateKey = page => `${typeof escopoDadosClinicos==='function'?escopoDadosClinicos().chave:owner()}:${page?.id}`;
   const draftKey = page => `esf_rascunho_interface_v2:${stateKey(page)}`;
   const normal = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   const make = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text) e.textContent = text; return e; };

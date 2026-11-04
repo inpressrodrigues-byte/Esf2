@@ -27,7 +27,7 @@
     resolvedOwner=userId;CURRENT_USER_PROFILE={...(CURRENT_USER_PROFILE||{}),unidade:unit||''};
     try{localStorage.setItem(chaveUsuarioAtual(),JSON.stringify(CURRENT_USER_PROFILE));}catch(_){}
     if(typeof atualizarResumoDashboard==='function')atualizarResumoDashboard();
-    refresh();
+    window.ESFEscopo?.atualizar();refresh();
   }
   async function change(userId,unit,control){
     if(!CURRENT_AUTH_USER_ID||!temPermissao('ver_admin')){showToast('Somente o administrador pode alterar a unidade.');return false;}
