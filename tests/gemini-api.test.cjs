@@ -2,6 +2,15 @@ const test=require('node:test'),assert=require('node:assert/strict');
 let create;test.before(async()=>{create=(await import('../supabase/functions/clever-processor/handler.mjs')).createCleverProcessor;});
 const env=k=>({SUPABASE_URL:'https://project.test',SUPABASE_ANON_KEY:'public-test',GEMINI_API_KEY:'server-secret-for-test'}[k]||'');
 const good={candidates:[{finishReason:'STOP',content:{parts:[{text:'S: Dados revisados.\nO: Não avaliado.\nA: Registro.\nP: Revisar.'}]}}]};
+test('Gemini: preserva CIAP por problema e recusa remoção, troca ou adição de códigos',async()=>{
+ const soap='S: CIAP-2 N01 Cefaleia. CIAP-2 U01 Disúria.\nO: CIAP-2 N01 Não informado. CIAP-2 U01 Não informado.\nA: CIAP-2 N01 Cefaleia. CIAP-2 U01 Disúria.\nP: CIAP-2 N01 Plano A. CIAP-2 U01 Plano B.';
+ for(const [output,status]of [[soap,200],[soap.replaceAll('U01','U71'),502],[soap.replace('CIAP-2 U01',''),502],[soap+' CIAP-2 T90',502]]){
+  const m=mock({gemini:async()=>new Response(JSON.stringify({candidates:[{finishReason:'STOP',content:{parts:[{text:output}]}}]}))});
+  const r=await create({env,...m})(request({tipoAcao:'gerar_soap',dadosConsulta:{soapLocal:soap}}));assert.equal(r.status,status);
+  if(status===502)assert.equal((await r.json()).codigo,'CIAP_CHANGED');
+  assert.match(JSON.parse(m.calls.find(c=>c.url.includes('generativelanguage')).options.body).systemInstruction.parts[0].text,/Não acrescente, exclua, altere códigos/);
+ }
+});
 const request=(body,headers={})=>new Request('https://function.test',{method:'POST',headers:{Authorization:'Bearer synthetic',Origin:'https://esf2.vercel.app','Content-Type':'application/json',...headers},body:typeof body==='string'?body:JSON.stringify(body||{tipoAcao:'gerar_soap',tipoConsulta:'consulta_enfermagem',dadosConsulta:{soapLocal:'S: Informado. O: Não avaliado. A: Acompanhamento. P: Proposta de revisão.'}})});
 function mock(changes={}){const calls=[];return{calls,fetchImpl:async(url,options)=>{calls.push({url,options});let data=url.includes('/auth/v1/')?{id:'user-a'}:url.includes('/perfis?')?[{permissoes:{usar_ia_soap:true}}]:url.includes('/rpc/')?true:good;const route=url.includes('generativelanguage')?'gemini':url.includes('/auth/v1/')?'auth':url.includes('/perfis?')?'profile':'quota';if(changes[route])return changes[route](url,options);return new Response(JSON.stringify(data),{status:200});}};}
 test('Gemini: CORS permitido e autenticação obrigatória antes do provedor',async()=>{const m=mock(),h=create({env,...m});assert.equal((await h(new Request('https://function.test',{method:'OPTIONS',headers:{Origin:'https://esf2.vercel.app'}}))).status,204);assert.equal((await h(request(undefined,{Authorization:''}))).status,401);assert.equal((await h(request(undefined,{Origin:'https://evil.test'}))).status,403);assert.equal(m.calls.length,0);});

@@ -12,10 +12,10 @@ async function main(){try{
  await page.goto(base);await page.waitForTimeout(1500);await login();
  const check=async(name,fn)=>{await fn();tests.push({name,passed:true});console.log('PASS '+name);};
  await check('Interface inicializa e todas as abas usam botões acessíveis',async()=>{
-  assert.deepEqual(errors,[]);assert.equal(await page.locator('body.ux-compact').count(),1);assert.equal(await page.locator('.tabs .tab:not(button)').count(),0);assert.equal(await page.locator('button.tab[role=tab]').count(),62);
+  assert.deepEqual(errors,[]);assert.equal(await page.locator('body.ux-compact').count(),1);assert.equal(await page.locator('.tabs .tab:not(button)').count(),0);assert.equal(await page.locator('button.tab[role=tab]').count(),66);
  });
- await check('24 páginas e 62 abas abrem sem perder o estado ativo',async()=>{
-  const ids=await page.locator('.pg').evaluateAll(nodes=>nodes.map(n=>n.id));assert.equal(ids.length,24);
+ await check('25 páginas e 66 abas abrem sem perder o estado ativo',async()=>{
+  const ids=await page.locator('.pg').evaluateAll(nodes=>nodes.map(n=>n.id));assert.equal(ids.length,25);
   for(const id of ids){await page.evaluate(id=>go(id.slice(3)),id);const tabs=page.locator('#'+id+' .tabs .tab');for(let i=0;i<await tabs.count();i++){await tabs.nth(i).evaluate(e=>e.click());assert.equal(await tabs.nth(i).getAttribute('aria-selected'),'true');}}
   assert.deepEqual(errors,[]);
  });

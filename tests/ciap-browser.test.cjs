@@ -1,0 +1,37 @@
+const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),assert=require('node:assert/strict');
+const {chromium}=require(process.env.ESF_PLAYWRIGHT_PATH||'playwright');
+const root=path.resolve(__dirname,'..');
+const server=http.createServer((req,res)=>{const file=path.resolve(root,'.'+(req.url==='/'?'/index.html':req.url.split('?')[0]));if(!file.startsWith(root+path.sep))return res.writeHead(403).end();try{res.setHeader('Content-Type',file.endsWith('.js')?'text/javascript':file.endsWith('.json')?'application/json':file.endsWith('.css')?'text/css':'text/html');res.end(fs.readFileSync(file));}catch{res.writeHead(404).end();}});
+(async()=>{let browser;try{
+ await new Promise(r=>server.listen(0,'127.0.0.1',r));const base='http://127.0.0.1:'+server.address().port;
+ browser=await chromium.launch({headless:true,channel:process.env.ESF_BROWSER_CHANNEL||'msedge'});const page=await browser.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());await page.route('**/*',r=>r.request().url().startsWith(base)?r.continue():r.abort());await page.goto(base);await page.waitForTimeout(2500);
+ await page.evaluate(()=>{CURRENT_AUTH_USER_ID='synthetic-ciap';PERMISSOES_ATUAIS={...PERMISSOES_PADRAO,ver_historico:true,ver_admin:true};_sb=null;document.getElementById('auth-screen').classList.remove('visible');go('consulta-geral');});
+ assert.ok(await page.locator('#ger-ciap-painel').count());
+ await page.locator('[aria-controls="ger-soap"]').click();
+ const suggestions=await page.evaluate(()=>({yes:ESFCiap.suggest('Refere cefaleia e disúria').map(c=>c.code),no:ESFCiap.suggest('Nega febre e tosse. Sem disúria. Histórico de cefaleia.').map(c=>c.code)}));assert.deepEqual(suggestions.yes.sort(),['N01','U01']);assert.deepEqual(suggestions.no,[]);
+ await page.evaluate(()=>ESFCiap.restore('ger',[{code:'N01',s:'Dor de cabeça há 2 dias',o:'',a:'Cefaleia em avaliação',p:'Retorno pactuado'},{code:'U01',s:'Ardor ao urinar',o:'',a:'Disúria em avaliação',p:'Avaliação clínica realizada'}]));
+ await page.locator('#ger-ciap-N01-p').fill('Plano somente da cefaleia');
+ const state=await page.evaluate(()=>coletarDadosModulo('ger'));assert.equal(state.__ciap2.length,2);assert.equal(state.__ciap2[0].p,'Plano somente da cefaleia');assert.ok(!state.__ciap2[1].p.includes('cefaleia'));
+ await page.evaluate(data=>restaurarDadosModulo('ger',data),state);assert.equal(await page.locator('#ger-ciap-N01-p').inputValue(),'Plano somente da cefaleia');
+ await page.getByRole('button',{name:'Gerar SOAP por CIAP no atendimento',exact:true}).filter({visible:true}).click();
+ assert.match(await page.locator('#ger-s').inputValue(),/CIAP-2 N01/);assert.match(await page.locator('#ger-s').inputValue(),/CIAP-2 U01/);
+ const totals=await page.evaluate(()=>ESFCiap.aggregate([{id:'1',dados:{__ciap2:[{code:'N01'},{code:'N01'},{code:'U01'}]}},{id:'1',dados:{__ciap2:[{code:'N01'}]}}]));assert.equal(totals.length,2);assert.ok(totals.every(x=>x.atendimentos===1));
+ await page.evaluate(()=>quickLimpar());assert.deepEqual(await page.evaluate(()=>ESFCiap.capture('ger')),[]);
+ await page.evaluate(()=>{ESFCiap.restore('ger',[{code:'N01',s:'Paciente anterior'}]);restaurarDadosModulo('ger',{'ger-nome':'Outro atendimento'});});assert.deepEqual(await page.evaluate(()=>ESFCiap.capture('ger')),[]);
+ await page.evaluate(()=>{ESFCiap.restore('ger',[{code:'N01'}]);document.getElementById('ger-queixa').value='Refere cefaleia. Refere disúria.';});
+ await page.getByRole('button',{name:'Gerar rascunho deste problema',exact:true}).click();
+ const draft=await page.evaluate(()=>ESFCiap.capture('ger')[0]);assert.match(draft.s,/cefaleia/);assert.doesNotMatch(draft.s,/disúria/);assert.equal(draft.p,'');assert.equal(draft.o,'');
+ await page.evaluate(()=>{CURRENT_AUTH_USER_ID='outro-profissional';go('consulta-geral');});assert.deepEqual(await page.evaluate(()=>ESFCiap.capture('ger')),[]);
+ const clinical=await page.evaluate(()=>{
+   go('saude-mulher');const set=(id,v)=>document.getElementById('smu-'+id).value=v;
+   const treatment=()=>condutaSaudeMulher('',FONTES_PROTOCOLARES_MODULOS.smu);
+   set('diagnostico-confirmado','Candidíase vulvovaginal');set('criterios-confirmados','Sim');set('exame-especular','Sim');set('achados-exame','Achados fictícios para teste');set('lactante','Não');set('alergia-medicamentos','Não');set('gestante','Não informado');
+   const unknown=treatment();set('gestante','Não');const incomplete=treatment();set('caso-complicado','Não');const allowed=treatment();
+   set('gestante','Sim');const pregnant=treatment();set('gestante','Não');set('alergia-medicamentos','Sim');const allergy=treatment();set('alergia-medicamentos','Não');set('lactante','Sim');const lactation=treatment();set('lactante','Não');set('alerts','Sangramento intenso');const alert=treatment();set('alerts','');set('temp','38.5');const fever=treatment();set('temp','36.5');set('violencia','Não');const priority=avaliarPrioridadeModulo('smu');
+   set('queixa-principal','Prurido relatado');set('historia-atual','Início há três dias');set('dum','2026-10-10');set('antecedentes-gineco','Antecedente fictício');set('conduta','Orientação registrada para teste');gerarSoapGenerico('smu');
+   return {unknown,incomplete,allowed,pregnant,allergy,lactation,alert,fever,priority,s:val('smu-s'),o:val('smu-o'),a:val('smu-a'),p:val('smu-p')};
+ });
+ assert.match(clinical.allowed.medicacao,/Miconazol/);for(const key of ['unknown','incomplete','pregnant','allergy','lactation','alert','fever'])assert.doesNotMatch(clinical[key].medicacao,/Miconazol/);
+ assert.doesNotMatch(clinical.priority.grau,/alta|Urgência/);assert.match(clinical.s,/três dias/);assert.match(clinical.s,/2026-10-10/);assert.match(clinical.s,/Antecedente fictício/);assert.match(clinical.o,/Achados fictícios/);assert.match(clinical.a,/Candidíase/);assert.match(clinical.p,/Orientação registrada/);assert.doesNotMatch(clinical.p,/Miconazol/);
+ assert.deepEqual(errors,[]);console.log('PASS CIAP: montagem, sugestões/negações, SOAP separado, persistência/restauração e contagem sem duplicação.');
+ }finally{await browser?.close();server.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

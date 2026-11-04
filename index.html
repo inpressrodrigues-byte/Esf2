@@ -902,6 +902,7 @@ body.sidebar-collapsed .dev-nav{display:none}
 <script defer src="assets/usability.js?v=prumo-1"></script>
 <script defer src="assets/unidades-toledo.js"></script>
 <script defer src="assets/unidades.js"></script>
+<script defer src="assets/ciap.js"></script>
 </head>
 <body>
 
@@ -916,6 +917,7 @@ body.sidebar-collapsed .dev-nav{display:none}
     <button class="nb" onclick="go('preventivo',this)"><span data-ic="flower"></span> Preventivo</button>
     <button class="nb" onclick="go('idoso',this)"><span data-ic="elder"></span> Idoso</button>
     <button class="nb" onclick="go('saude-mental',this)"><span data-ic="brain"></span> Saúde Mental</button>
+    <button class="nb" onclick="go('saude-mulher',this)"><span data-ic="flower"></span> Saúde da Mulher</button>
       <button class="nb" onclick="go('consulta-geral',this)">✚ Demanda Espontânea</button>
     <button class="nb" onclick="go('hiperdia',this)">♥ Hiperdia<span class="dev-nav">(EM DESENVOLVIMENTO)</span></button>
     <button class="nb" onclick="go('feridas',this)">✣ Feridas<span class="dev-nav">(EM DESENVOLVIMENTO)</span></button>
@@ -993,6 +995,7 @@ body.sidebar-collapsed .dev-nav{display:none}
     <button class="module-tile" onclick="abrirModulo('preventivo')"><span class="module-icon" data-ic="flower"></span><span><span class="module-name">Preventivo</span><span class="module-desc">Consulta, coleta citopatológica e Ficha Rosa.</span></span></button>
     <button class="module-tile" onclick="abrirModulo('idoso')"><span class="module-icon" data-ic="elder"></span><span><span class="module-name">Saúde do Idoso</span><span class="module-desc">Avaliação integral e acompanhamento da pessoa idosa.</span></span></button>
     <button class="module-tile" onclick="abrirModulo('saude-mental')"><span class="module-icon" data-ic="brain"></span><span><span class="module-name">Saúde Mental</span><span class="module-desc">ERSM, estratificação e evolução SOAP.</span></span></button>
+    <button class="module-tile" onclick="abrirModulo('saude-mulher')"><span class="module-icon" data-ic="flower"></span><span><span class="module-name">Saúde da Mulher <span class="dev-badge">VALIDAÇÃO CLÍNICA</span></span><span class="module-desc">Anamnese ginecológica, queixas, conduta protocolar, SOAP e IA.</span></span></button>
     <button class="module-tile" onclick="abrirModulo('consulta-geral')"><span class="module-icon">✚</span><span><span class="module-name">Demanda Espontânea / Acolhimento</span><span class="module-desc">Porta de entrada da APS, classificação Toledo 2026 e desfecho obrigatório.</span></span></button>
     <button class="module-tile" onclick="abrirModulo('hiperdia')"><span class="module-icon">♥</span><span><span class="module-name">Hiperdia / Condições Crônicas <span class="dev-badge">EM DESENVOLVIMENTO</span></span><span class="module-desc">Hipertensão, diabetes, adesão e acompanhamento.</span></span></button>
     <button class="module-tile" onclick="abrirModulo('feridas')"><span class="module-icon">✣</span><span><span class="module-name">Feridas / Curativos <span class="dev-badge">EM DESENVOLVIMENTO</span></span><span class="module-desc">Avaliação, curativo e evolução comparativa.</span></span></button>
@@ -4611,6 +4614,7 @@ function renderHomeUpdateLog(){
 }
 const MODULOS_SISTEMA={
   'pn-abertura':'Abertura PN','pn-consulta':'Consulta PN','puericultura':'Puericultura','preventivo':'Preventivo','idoso':'Idoso','saude-mental':'Saúde Mental',
+  'saude-mulher':'Saúde da Mulher',
   'consulta-geral':'Consulta Geral','hiperdia':'Hiperdia','feridas':'Feridas / Curativos','puerperio':'Puerpério','ist':'IST / Testes Rápidos','visita-domiciliar':'Visita Domiciliar','pni':'PNI',
   'sinan':'SINAN','pacientes':'Pacientes','historico':'Histórico','busca-ativa':'Busca Ativa','indicadores':'Indicadores','territorio':'Território e ACS','relatorios':'Relatórios','auditoria-clinica':'Auditoria Clínica','reportes':'Reportar erro','editor':'Protocolos'
 };
@@ -6061,7 +6065,7 @@ function renderClinicalGuides(){
 function toggleClinicalChip(btn){const group=btn.closest('.clinical-group'),normal=btn.dataset.level==='normal',was=btn.classList.contains('selected');if(!was){if(normal)group.querySelectorAll('.clinical-chip:not([data-level="normal"])').forEach(x=>x.classList.remove('selected'));else group.querySelectorAll('.clinical-chip[data-level="normal"]').forEach(x=>x.classList.remove('selected'));}btn.classList.toggle('selected',!was);const module=btn.closest('.clinical-guide').dataset.module;atualizarAlertaClinico(module);if(module==='pna'){checkPnaQueixas();avaliarProtocolosPna();}if(typeof MODULOS_CLINICOS!=='undefined'&&MODULOS_CLINICOS[module])avaliarPrioridadeModulo(module);}
 function selecionarResultadosEsperados(module,kind){if(window.ESFUsability){showToast('Selecione somente os achados que você avaliou, em cada grupo.');return;}document.querySelectorAll(`.clinical-guide[data-module="${module}"] .clinical-pane[data-kind="${kind}"] .clinical-group`).forEach(group=>{group.querySelectorAll('.clinical-chip').forEach(x=>x.classList.remove('selected'));group.querySelectorAll('.clinical-chip[data-level="normal"]').forEach(x=>x.classList.add('selected'));});atualizarAlertaClinico(module);if(module==='pna')checkPnaQueixas();if(typeof MODULOS_CLINICOS!=='undefined'&&MODULOS_CLINICOS[module])avaliarPrioridadeModulo(module);}
 function limparResultadosClinicos(module,kind){window.ESFUsability?.clearGuide(module,kind);document.querySelectorAll(`.clinical-guide[data-module="${module}"] .clinical-pane[data-kind="${kind}"] .clinical-chip`).forEach(x=>x.classList.remove('selected'));atualizarAlertaClinico(module);if(module==='pna')checkPnaQueixas();if(typeof MODULOS_CLINICOS!=='undefined'&&MODULOS_CLINICOS[module])avaliarPrioridadeModulo(module);}
-const MODULOS_EM_DESENVOLVIMENTO=new Set(['ger','acol','hip','fer','puerp']);
+const MODULOS_EM_DESENVOLVIMENTO=new Set(['ger','acol','hip','fer','puerp','smu']);
 const MODULOS_COM_PROTOCOLO_ATIVO=new Set(['ist',...MODULOS_EM_DESENVOLVIMENTO]);
 const FONTES_PROTOCOLARES_MODULOS={
   ger:{nome:'Protocolos da Secretaria da Saúde — Toledo',url:'https://www.toledo.pr.gov.br/portais/saude/gabinete-da-secretaria-de-saude/protocolos-da-secretaria-da-saude'},
@@ -6069,9 +6073,37 @@ const FONTES_PROTOCOLARES_MODULOS={
   hip:{nome:'Protocolo Municipal de Cardiologia — Protocolo 1: HAS',url:'https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2026-01/protocolo_municipal_de_cardiologia_1versao_06112023.pdf'},
   fer:{nome:'Protocolos da Secretaria da Saúde — Toledo',url:'https://www.toledo.pr.gov.br/portais/saude/gabinete-da-secretaria-de-saude/protocolos-da-secretaria-da-saude'},
   puerp:{nome:'Protocolo Pré-Natal de Toledo — assistência puerperal',url:'https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2022-08/protocolo_pre-natal_alteracao_2021_versao_final-2_pdf.pdf'},
-  ist:{nome:'Protocolo IST Toledo 2020',url:'https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2022-08/protocolo_ist_2020_final_dezembro.pdf'}
+  ist:{nome:'Protocolo IST Toledo 2020',url:'https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2022-08/protocolo_ist_2020_final_dezembro.pdf'},
+  smu:{nome:'Protocolo Municipal de Enfermagem - Cuidado em Saúde da Mulher (Toledo, 2026)',url:'https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2026-09/protocolo_municipal_de_enf_cuidado_em_saude_da_mulher_2026.pdf'}
 };
 function normalizarTextoProtocolo(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()}
+function condutaSaudeMulher(contexto,fonte){
+  const get=id=>document.getElementById('smu-'+id)?.value||'',t=normalizarTextoProtocolo(get('complaints')),diagnostico=normalizarTextoProtocolo(get('diagnostico-confirmado'));
+  const confirmado=get('criterios-confirmados')==='Sim'&&get('exame-especular')==='Sim'&&get('lactante')==='Não'&&get('caso-complicado')==='Não'&&!!get('achados-exame').trim(),naoGestante=get('gestante')==='Não',semAlergia=get('alergia-medicamentos')==='Não';
+  const alertas=get('alerts').split('; ').filter(Boolean),temp=Number(get('temp'));
+  const bloqueio='O esquema não é exibido automaticamente. Confirme diagnóstico, exame e achados, ausência de gestação, lactação, alergia e fatores de complicação/recorrência; então revise e registre a decisão profissional.';
+  if(alertas.includes('Violência sexual')||get('violencia')==='Sim')return decisaoProtocolar(fonte,'Acolher em ambiente seguro, avaliar risco imediato e acionar a rede/fluxo municipal de violência sexual. Não atrasar a avaliação por preenchimento do sistema.','Não sugerida automaticamente.','Seguir fluxo institucional específico.',true,'Registrar apenas o necessário, preservar privacidade e seguir notificações e encaminhamentos vigentes.');
+  if(alertas.length||temp>=38||document.querySelector('#pg-saude-mulher [data-priority]:checked'))return decisaoProtocolar(fonte,'Alerta ou fator de risco selecionado: revisar a avaliação clínica e definir prioridade conforme gravidade.','Não sugerida automaticamente.','Não sugerida automaticamente.',true,'Revisar alertas antes de considerar o esquema de caso não complicado.');
+  if(/candidiase vulvovaginal/.test(diagnostico)){
+    if(!(confirmado&&naoGestante&&semAlergia))return decisaoProtocolar(fonte,'Suspeita/diagnóstico de candidíase: confirmar quadro clínico e os critérios de segurança antes de registrar tratamento.',bloqueio,bloqueio,true,'Na gestação, o protocolo recomenda exclusivamente via vaginal e por no mínimo 10 dias; usar o fluxo de pré-natal. Investigar recorrência, diabetes, imunodepressão e uso de corticoides quando aplicável.');
+    return decisaoProtocolar(fonte,'Candidíase vulvovaginal com critérios confirmados: orientar higiene e medidas não farmacológicas, registrar tratamento e retorno se persistência/recorrência.','Miconazol creme vaginal 2%.','1 aplicador cheio via vaginal, à noite, ao deitar-se, por 7 dias.',true,'Alternativas do protocolo existem, mas este módulo exibe somente a primeira linha. Parceria só necessita avaliação se sintomática. Fonte: seção 2.1.1.1.');
+  }
+  if(/vaginose bacteriana/.test(diagnostico)){
+    if(!(confirmado&&naoGestante&&semAlergia))return decisaoProtocolar(fonte,'Suspeita/diagnóstico de vaginose: confirmar quadro clínico e critérios de segurança antes de registrar tratamento.',bloqueio,bloqueio,true,'Casos recorrentes ou persistentes necessitam reavaliação.');
+    return decisaoProtocolar(fonte,'Vaginose bacteriana com critérios confirmados: registrar tratamento, orientar tomada após refeições e retorno se não houver melhora.','Metronidazol 250 mg VO.','2 comprimidos, VO, 2 vezes ao dia, por 7 dias.',true,'Alternativa prevista: metronidazol 400 mg VO, 1 comprimido 8/8h por 7 dias; ou gel vaginal 100 mg/g, 1 aplicador à noite por 7 dias. Fonte: seção 2.1.1.2.');
+  }
+  if(/tricomon/i.test(diagnostico)){
+    if(!(confirmado&&naoGestante&&semAlergia))return decisaoProtocolar(fonte,'Suspeita/diagnóstico de tricomoníase: confirmar quadro clínico e critérios de segurança antes de registrar tratamento.',bloqueio,bloqueio,true,'Na gestação, utilizar o fluxo de pré-natal.');
+    return decisaoProtocolar(fonte,'Tricomoníase com critérios confirmados: tratar a pessoa e as parcerias concomitantemente, orientar preservativo e retorno.','Metronidazol 250 mg VO.','2 comprimidos, VO, 2 vezes ao dia, por 7 dias.',true,'Creme vaginal de metronidazol não trata tricomoníase. Fonte: seção 2.1.1.3.');
+  }
+  if(/cervicite/.test(diagnostico)){
+    if(!(confirmado&&naoGestante&&semAlergia))return decisaoProtocolar(fonte,'Suspeita/diagnóstico de cervicite: confirmar exame, critérios de segurança e investigação de IST antes de registrar tratamento.',bloqueio,bloqueio,true,'Em gestantes, a doxiciclina é contraindicada; utilizar fluxo obstétrico/avaliação responsável.');
+    return decisaoProtocolar(fonte,'Cervicite com critérios confirmados: tratar conforme protocolo, avaliar/tratar parcerias e ofertar investigação de outras IST.','Ceftriaxona 500 mg IM + doxiciclina 100 mg VO.','Ceftriaxona: dose única. Doxiciclina: 12/12h por 7 dias.',true,'Alternativa prevista: ceftriaxona 500 mg IM, dose única + azitromicina 500 mg, 2 comprimidos VO em dose única. Fonte: seção 2.1.1.4.');
+  }
+  if(/cistite simples/.test(diagnostico))return decisaoProtocolar(fonte,'Cistite simples em mulher não gestante: confirmar ausência de sinais de complicação e seguir o fluxo de infecção urinária do protocolo antes de registrar prescrição.','Consultar seção 2.4 do protocolo no momento da prescrição.','Não exibido automaticamente nesta primeira versão.',true,'O protocolo autoriza prescrição apenas para cistite simples em mulheres não gestantes; em gestantes, seguir fluxo obstétrico.');
+  if(/climaterio|menopausa/.test(diagnostico)||/climaterio|menopausa/.test(t))return decisaoProtocolar(fonte,'Realizar escuta qualificada e orientar medidas não farmacológicas: atividade física, alimentação equilibrada, cessação do tabagismo, redução de álcool e medidas específicas para a queixa.','Não sugerida automaticamente.','Terapia hormonal exige avaliação individualizada.',true,'Encaminhar para avaliação médica se sintomas persistentes/intensos, sangramento genital não esclarecido ou contraindicação à terapia hormonal. CIAP sugerido: X11. Fonte: seção 10.');
+  return decisaoProtocolar(fonte,'Registre anamnese, exame, hipóteses e orientações. Para queixas sem diagnóstico/critério confirmado, o sistema não sugere medicação.','Não prevista sem confirmação diagnóstica e critérios de segurança.','Não prevista sem confirmação diagnóstica e critérios de segurança.',false,'Fonte: Protocolo Municipal de Enfermagem - Cuidado em Saúde da Mulher, Toledo, 2026.');
+}
 function avisoSemCondutaProtocolada(p,achado='o achado informado'){
   return`Conduta automática não definida: não foi localizada, para ${achado}, uma conduta explícita nos protocolos oficiais de Toledo cadastrados neste módulo. O sistema não sugere medicação nem encaminhamento; registre a avaliação e defina a conduta profissionalmente.`;
 }
@@ -6081,6 +6113,7 @@ function decisaoProtocolar(fonte,conduta,medicacao='Não prevista neste protocol
 function condutaProtocoladaModulo(p,contexto=''){
   const t=normalizarTextoProtocolo(contexto),fonte=FONTES_PROTOCOLARES_MODULOS[p]||FONTES_PROTOCOLARES_MODULOS.ger;
   if(!MODULOS_COM_PROTOCOLO_ATIVO.has(p))return decisaoProtocolar(fonte,'',undefined,undefined,true);
+  if(p==='smu')return condutaSaudeMulher(contexto,fonte);
   if(p==='hip'){
     if(/dor toracica: sim|sindrome coronariana|falta de ar: sim|alteracao neurologica: sim/.test(t))return decisaoProtocolar(fonte,'Avaliar imediatamente sinais vitais e estabilidade. Suspeita de síndrome coronariana aguda ou instabilidade deve seguir atendimento de urgência/emergência.','Não prevista neste protocolo de encaminhamento.','Não prevista neste protocolo de encaminhamento.');
     if(/insuficiencia cardiaca.*sincope|insuficiencia cardiaca.*hipoperfusao|insuficiencia cardiaca.*congestao pulmonar/.test(t))return decisaoProtocolar(fonte,'Encaminhar para urgência/emergência quando a insuficiência cardíaca apresentar síncope, sinais de hipoperfusão ou congestão pulmonar sem condições de manejo ambulatorial.','Não prevista neste protocolo de encaminhamento.','Não prevista neste protocolo de encaminhamento.',true,'Registrar sinais/sintomas, classe funcional, congestão/hipoperfusão, medicamentos e posologias, descompensações/internações, ECG, radiografia e ecocardiograma disponíveis.');
@@ -6420,14 +6453,14 @@ const SOAP_IDS_MODULO={
   pna:{s:'pna-s',o:'pna-o',a:'pna-a-soap',p:'pna-soap-p'},pnc:{s:'pnc-s',o:'pnc-o',a:'pnc-a-soap',p:'pnc-p'},pu:{s:'pu-s',o:'pu-o',a:'pu-a-soap',p:'pu-p'},
   prev:{s:'prev-s',o:'prev-o',a:'prev-a-soap',p:'prev-p'},id:{s:'id-s',o:'id-o',a:'id-a-soap',p:'id-p'},sm:{s:'sm-s',o:'sm-o',a:'sm-a',p:'sm-p'},
   ger:{s:'ger-s',o:'ger-o',a:'ger-a',p:'ger-p'},acol:{s:'acol-s',o:'acol-o',a:'acol-a',p:'acol-p'},hip:{s:'hip-s',o:'hip-o',a:'hip-a',p:'hip-p'},
-  fer:{s:'fer-s',o:'fer-o',a:'fer-a',p:'fer-p'},puerp:{s:'puerp-s',o:'puerp-o',a:'puerp-a',p:'puerp-p'},ist:{s:'ist-s',o:'ist-o',a:'ist-a',p:'ist-p'},vd:{s:'vd-s',o:'vd-o',a:'vd-a',p:'vd-p'}
+  fer:{s:'fer-s',o:'fer-o',a:'fer-a',p:'fer-p'},puerp:{s:'puerp-s',o:'puerp-o',a:'puerp-a',p:'puerp-p'},ist:{s:'ist-s',o:'ist-o',a:'ist-a',p:'ist-p'},smu:{s:'smu-s',o:'smu-o',a:'smu-a',p:'smu-p'},vd:{s:'vd-s',o:'vd-o',a:'vd-a',p:'vd-p'}
 };
 const SOAP_BASE_PROTOCOLAR={
  pna:'Linha de Cuidado Materno-Infantil; Protocolo Municipal de Pré-Natal de Toledo, 4ª edição; Calendário Nacional de Vacinação/PNI vigente.',
  pnc:'Linha de Cuidado Materno-Infantil; Protocolo Municipal de Pré-Natal de Toledo, 4ª edição; Calendário Nacional de Vacinação/PNI vigente.',
  pu:'Estratificação de Risco de Crianças do Paraná; fluxo municipal de Pediatria; Calendário Nacional de Vacinação/PNI vigente.',
  prev:'Rastreamento citopatológico vigente; Protocolo IST Toledo.',id:'IVCF-20 e protocolos municipais aplicáveis.',sm:'ERSM e Fluxograma Municipal de Saúde Mental.',
- hip:'Protocolos municipais de Cardiologia e Endocrinologia.',fer:'Protocolo municipal de Teledermatologia e fluxos aplicáveis.',puerp:'Protocolo Municipal de Pré-Natal de Toledo, seção de puerpério.',ist:'Protocolo IST Toledo.',vd:'Atenção Domiciliar na APS/ESF; protocolos municipais aplicáveis ao quadro registrado.',ger:'Protocolos municipais aplicáveis ao quadro registrado.',acol:'Protocolos municipais aplicáveis ao quadro registrado.'
+ hip:'Protocolos municipais de Cardiologia e Endocrinologia.',fer:'Protocolo municipal de Teledermatologia e fluxos aplicáveis.',puerp:'Protocolo Municipal de Pré-Natal de Toledo, seção de puerpério.',ist:'Protocolo IST Toledo.',smu:'Protocolo Municipal de Enfermagem - Cuidado em Saúde da Mulher, Toledo, 2026.',vd:'Atenção Domiciliar na APS/ESF; protocolos municipais aplicáveis ao quadro registrado.',ger:'Protocolos municipais aplicáveis ao quadro registrado.',acol:'Protocolos municipais aplicáveis ao quadro registrado.'
 };
 function limparSegmentosVazios(linha){
   return String(linha||'').split('|').map(x=>x.trim()).filter(x=>x&&!/:\s*(?:-|—)(?:\s|$)|:\s*(?:não informado|nao informado|não realizada?|nao realizada?|não calculad[ao]|nao calculad[ao])\.?$/i.test(x)).join(' | ');
@@ -6440,8 +6473,8 @@ function limparTextoSoap(texto){
 }
 function campoExiste(...ids){return ids.some(id=>!!document.getElementById(id))}
 function campoTemValor(...ids){return ids.some(id=>{const e=document.getElementById(id);if(!e)return false;if(e.type==='checkbox'||e.type==='radio')return e.checked;if('value' in e)return !!String(e.value||'').trim();return !!String(e.textContent||'').trim()})}
-const SOAP_MANUAL_PREFIXOS=['pna','pnc','pu','prev','id','sm','ger','acol','hip','fer','puerp','ist','vd'];
-const SOAP_MANUAL_ANCHORS={pna:'pna-3',pnc:'pnc-2',pu:'pu-2',prev:'prev-2',id:'id-2',sm:'sm-2',ger:'ger-anamnese',acol:'acol-anamnese',hip:'hip-anamnese',fer:'fer-anamnese',puerp:'puerp-anamnese',ist:'ist-anamnese',vd:'vd-aval'};
+const SOAP_MANUAL_PREFIXOS=['pna','pnc','pu','prev','id','sm','ger','acol','hip','fer','puerp','ist','smu','vd'];
+const SOAP_MANUAL_ANCHORS={pna:'pna-3',pnc:'pnc-2',pu:'pu-2',prev:'prev-2',id:'id-2',sm:'sm-2',ger:'ger-anamnese',acol:'acol-anamnese',hip:'hip-anamnese',fer:'fer-anamnese',puerp:'puerp-anamnese',ist:'ist-anamnese',smu:'smu-aval',vd:'vd-aval'};
 function textoManual(id){return String(document.getElementById(id)?.value||'').trim()}
 function manualSoapPartes(prefix){
   const queixa=textoManual(`${prefix}-manual-queixa`),hma=textoManual(`${prefix}-manual-hma`),objetivo=textoManual(`${prefix}-manual-objetivo`),avaliacao=textoManual(`${prefix}-manual-avaliacao`),conduta=textoManual(`${prefix}-manual-conduta`);
@@ -8114,6 +8147,7 @@ const MODULOS_ATENDIMENTO={
   'Preventivo':{prefix:'prev',page:'preventivo',nome:'prev-nome',cpf:'prev-cpf',soap:['prev-s','prev-o','prev-a-soap','prev-p']},
   'Idoso':{prefix:'id',page:'idoso',nome:'id-nome',cpf:'id-cpf',soap:['id-s','id-o','id-a-soap','id-p']},
   'Saúde Mental':{prefix:'sm',page:'saude-mental',nome:'sm-nome',cpf:'sm-cpf',soap:['sm-s','sm-o','sm-a','sm-p']},
+  'Saúde da Mulher':{prefix:'smu',page:'saude-mulher',nome:'smu-nome',cpf:'smu-cpf',soap:['smu-s','smu-o','smu-a','smu-p']},
   'Consulta Geral':{prefix:'ger',page:'consulta-geral',nome:'ger-nome',cpf:'ger-cpf',soap:['ger-s','ger-o','ger-a','ger-p']},
   'Acolhimento':{prefix:'acol',page:'acolhimento',nome:'acol-nome',cpf:'acol-cpf',soap:['acol-s','acol-o','acol-a','acol-p']},
   'Hiperdia':{prefix:'hip',page:'hiperdia',nome:'hip-nome',cpf:'hip-cpf',soap:['hip-s','hip-o','hip-a','hip-p']},
@@ -8129,6 +8163,7 @@ const CAMPOS_PACIENTE={
   prev:{nome:'prev-nome',cpf:'prev-cpf',nasc:'prev-nasc',cns:'prev-cns',prontuario:'prev-prontuario',telefone:'prev-tel',raca:'prev-raca',escolaridade:'prev-escol',nome_mae:'prev-nome-mae',cep:'prev-cep',logradouro:'prev-logr',numero:'prev-num',bairro:'prev-bairro',municipio:'prev-mun'},
   id:{nome:'id-nome',cpf:'id-cpf',nasc:'id-nasc',cronicas:'id-cron',cuidador:'id-cuidador',rede_apoio:'id-rede-apoio',visita_domiciliar:'id-visita',risco_queda:'id-risco-queda',fragilidade:'id-fragilidade',polifarmacia:'id-polifarmacia'},
   sm:{nome:'sm-nome',cpf:'sm-cpf',nasc:'sm-nasc',cns:'sm-cns',prontuario:'sm-prontuario',endereco:'sm-area',telefone:'sm-tel',raca:'sm-raca',escolaridade:'sm-escol',ocupacao:'sm-ocupacao',responsavel:'sm-resp',sexo:'sm-sexo'},
+  smu:{nome:'smu-nome',cpf:'smu-cpf',nasc:'smu-nasc',cns:'smu-cns',telefone:'smu-telefone',endereco:'smu-endereco',microarea:'smu-microarea'},
   ger:{nome:'ger-nome',cpf:'ger-cpf',nasc:'ger-nasc',cns:'ger-cns',telefone:'ger-telefone',endereco:'ger-endereco',microarea:'ger-microarea'},
   acol:{nome:'acol-nome',cpf:'acol-cpf',nasc:'acol-nasc',cns:'acol-cns',telefone:'acol-telefone',endereco:'acol-endereco',microarea:'acol-microarea'},
   hip:{nome:'hip-nome',cpf:'hip-cpf',nasc:'hip-nasc',cns:'hip-cns',telefone:'hip-telefone',endereco:'hip-endereco',microarea:'hip-microarea',cronicas:'hip-diagnostico'},
@@ -8594,7 +8629,7 @@ document.addEventListener('input',e=>{clearTimeout(autoDraftTimer);autoDraftTime
 document.addEventListener('blur',e=>{if(e.target.matches?.('.paciente-cpf')&&normalizarCPF(e.target.value).length===11&&!validarCPFReal(e.target.value)){e.target.style.borderColor='#b32848';showToast('CPF parece inválido. Confira os números antes de salvar.')}else if(e.target.matches?.('.paciente-cpf'))e.target.style.borderColor='';if(/-cns$/.test(e.target.id||'')&&e.target.value&&e.target.value.replace(/\D/g,'').length!==15){e.target.style.borderColor='#b32848';showToast('O CNS deve possuir 15 números. Confira antes de salvar.')}else if(/-cns$/.test(e.target.id||''))e.target.style.borderColor=''},true);
 document.addEventListener('DOMContentLoaded',()=>{montarIVCF20();montarPlanosCuidados();filtrosGestao();const mes=new Date().toISOString().slice(0,7);['ind-mes','rel-mes'].forEach(id=>{const e=document.getElementById(id);if(e&&!e.value)e.value=mes});['pna','pnc','pu','prev','id','sm','ger','acol','hip','fer','puerp','ist'].forEach(p=>[`${p}-nome`,`${p}-cpf`].forEach(id=>{const e=document.getElementById(id);if(e){e.required=true;e.closest('.f')?.classList.add('required-mark')}}));const i=document.createElement('div');i.id='autosave-indicator';i.textContent='Salvamento automático ativo';i.style.cssText='position:fixed;right:12px;bottom:10px;z-index:240;background:var(--sf);border:1px solid var(--bd);padding:5px 9px;border-radius:5px;font-size:10px;color:var(--tx2);opacity:.45';document.body.appendChild(i);document.getElementById('id-nasc')?.addEventListener('change',sincronizarIdadeIVCF)});
 
-const QUICK_PAGE_PREFIX={'pg-pn-abertura':'pna','pg-pn-consulta':'pnc','pg-puericultura':'pu','pg-preventivo':'prev','pg-idoso':'id','pg-saude-mental':'sm','pg-consulta-geral':'ger','pg-hiperdia':'hip','pg-feridas':'fer','pg-puerperio':'puerp','pg-ist':'ist','pg-visita-domiciliar':'vd'};
+const QUICK_PAGE_PREFIX={'pg-pn-abertura':'pna','pg-pn-consulta':'pnc','pg-puericultura':'pu','pg-preventivo':'prev','pg-idoso':'id','pg-saude-mental':'sm','pg-saude-mulher':'smu','pg-consulta-geral':'ger','pg-hiperdia':'hip','pg-feridas':'fer','pg-puerperio':'puerp','pg-ist':'ist','pg-visita-domiciliar':'vd'};
 // ATENÇÃO: as listas de hip/fer/puerp/vd abaixo são SUBSTITUÍDAS em runtime por
 // reforcarCamposClinicos() (IIFE de auditoria, ~final do arquivo), que instala versões
 // mais completas. O que roda para esses 4 módulos é a versão de lá, não esta.
@@ -8609,7 +8644,8 @@ const CAMPOS_ESSENCIAIS={
  ger:[['queixa',['ger-queixa']],['tempo de início',['ger-inicio']],['sinais vitais',['ger-pa','ger-fc']],['prioridade',['ger-prioridade']],['orientação',['ger-orientacoes','ger-p']]],
  id:[['pressão arterial',['id-pa']],['avaliação ampliada',['id-avd','id-aivd']],['exame físico',['id-o']],['conduta',['id-p']]],
  puerp:[['data do parto',['puerp-data-parto']],['sangramento',['puerp-sangramento']],['mamas/amamentação',['puerp-amamentacao']],['humor',['puerp-humor']],['conduta',['puerp-conduta','puerp-p']],['retorno',['puerp-retorno']]],
- ist:[['motivo',['ist-motivo']],['testes rápidos',['ist-tr-p-testes']],['sintomas',['ist-sintomas']],['conduta',['ist-conduta','ist-p']],['retorno',['ist-retorno']]]
+ ist:[['motivo',['ist-motivo']],['testes rápidos',['ist-tr-p-testes']],['sintomas',['ist-sintomas']],['conduta',['ist-conduta','ist-p']],['retorno',['ist-retorno']]],
+ smu:[['queixa principal',['smu-queixa-principal','smu-complaints']],['história atual',['smu-historia-atual']],['segurança clínica',['smu-gestante','smu-alergia-medicamentos','smu-criterios-confirmados']],['avaliação/exame',['smu-achados-exame','smu-exame-complementar']],['conduta',['smu-conduta','smu-p']],['retorno',['smu-retorno']]]
 };
 function campoPreenchido(ids,page){
   return ids.some(id=>{const e=document.getElementById(id);if(!e)return false;if(e.matches('input[type=checkbox],input[type=radio]'))return e.checked;if(e.querySelectorAll)return String(e.value||'').trim()||e.querySelector('.selected,input:checked');return false})||
@@ -8690,6 +8726,7 @@ function promptSistemaAISoap(cfg){
     'Você é um revisor de redação SOAP para enfermagem na APS/ESF.',
     'Sua função é SOMENTE melhorar a escrita do SOAP já gerado pelo sistema, deixando-o semi-narrativo, humano, técnico, claro e copiável para prontuário/e-SUS.',
     'Não invente dados clínicos. Não transforme campo vazio em negação. Não crie diagnóstico, medicação, dose, solicitação de exame, encaminhamento ou conduta que não esteja explícita nos dados enviados.',
+    'Quando houver blocos identificados por CIAP-2, preserve todos os códigos e a separação por problema em S, O, A e P. Não misture os planos e não escolha códigos para pontuar indicadores.',
     'Se a informação estiver incompatível, confusa, fictícia, placeholder ou ausente, remova do corpo do SOAP e coloque em pendencias.',
     'Mantenha a estrutura com: DESCRIÇÃO DA CONSULTA, S:, O:, A:, P:. Não use HMA, HP, HD ou CD como títulos principais.',
     'Pendências, avisos internos, fontes longas e observações de sistema não devem entrar no corpo principal.',
@@ -9086,6 +9123,7 @@ function coletarDadosModulo(prefix){
     else dados[key]=el.value;
   });
   if(window.ESFUsability)dados.__interface=window.ESFUsability.capture(pagina);
+  if(window.ESFCiap)dados.__ciap2=window.ESFCiap.capture(prefix);
   return dados;
 }
 function restaurarDadosModulo(prefix,dados){
@@ -9093,6 +9131,7 @@ function restaurarDadosModulo(prefix,dados){
   window.ESFUsability?.beforeRestore(pagina);
   Object.entries(dados||{}).forEach(([id,v])=>{const el=id.startsWith('@')?controles[Number(id.slice(1))]:document.getElementById(id);if(!el)return;if(typeof v==='object'&&v!==null&&'checked'in v){el.checked=!!v.checked;}else el.value=v??'';});
   window.ESFUsability?.restore(pagina,dados?.__interface);
+  if(window.ESFCiap)window.ESFCiap.restore(prefix,dados?.__ciap2||[]);
   if(prefix==='pna'){idadeGest();calcIG('pna');avaliarProtocolosPna();atualizarTestesRapidosPna();}
   if(prefix==='pnc'){calcAge('pnc-nasc','pnc-idade');calcIG('pnc');checkPncQueixas();checkPncVitais();}
   if(prefix==='pu'){idadeCrianca();updateAntropometria();checkMCHATIdade();avaliarDNPMAutomatico();}
@@ -11229,6 +11268,10 @@ const MODULOS_CLINICOS={
   ist:{tipo:'IST / Testes Rápidos',page:'ist',titulo:'IST / Testes Rápidos',sub:'Testagem isolada, registro profissional, orientação, conduta protocolar e retorno',icone:'＋',desenvolvimento:false,
     campos:[['motivo','Motivo da testagem/atendimento','textarea'],['queixa-sindrome','Queixa ou síndrome principal','select',['Corrimento','Prurido/ardor vulvovaginal','Odor vaginal','Disúria','Dor pélvica','Úlcera genital','Vesículas / herpes','Verrugas / HPV','Teste reagente','Parceria com IST','Exposição sexual recente','Violência sexual','Rastreamento sem sintomas','Outro']],['suspeita-clinica','Suspeita clínica inicial','textarea'],['sintomas','Sintomas e exame dirigido','textarea'],['diagnostico-sindromico','Diagnóstico confirmado, se houver','select',['Não definido — manter como suspeita clínica','Diagnóstico clínico confirmado: Candidíase vulvovaginal','Diagnóstico clínico confirmado: Candidíase complicada ou recorrente','Diagnóstico clínico confirmado: Vaginose bacteriana','Diagnóstico clínico confirmado: Vaginose bacteriana recorrente','Diagnóstico clínico confirmado: Tricomoníase','Diagnóstico clínico confirmado: Cervicite','Diagnóstico clínico confirmado: Uretrite','Diagnóstico confirmado: Sífilis recente','Diagnóstico confirmado: Sífilis tardia / duração ignorada','Neurossífilis','Herpes genital — primeiro episódio','Herpes genital — recidiva com lesões maiores','Herpes genital — recidiva com lesões menores','Supressão de herpes — 6 ou mais episódios/ano','Herpes genital em imunossuprimido','Condiloma / HPV — lesões pequenas','Condiloma / HPV — lesões extensas','Cancroide','Linfogranuloma venéreo / LGV','Donovanose']],['lactante','Lactante','select',['Não','Sim']],['corrimento','Corrimento','select',['Não','Sim']],['lesoes','Lesões genitais','select',['Não','Sim']],['dor-pelvica','Dor pélvica','select',['Não','Sim']],['disuria','Disúria','select',['Não','Sim']],['exposicao','Exposição sexual recente','select',['Não','Sim']],['violencia','Violência sexual','select',['Não','Sim']],['parceiro','Parceiro sintomático','select',['Não','Sim']],['tratamento','Tratamento realizado / medicado conforme protocolo','textarea'],['orientacoes','Orientações de prevenção, janela imunológica e sinais de alerta','textarea'],['parceria','Parceria sexual: convocação/testagem/tratamento quando indicado','textarea'],['notificacao','Notificação/SINAN, se aplicável','textarea'],['encaminhamento','Encaminhamento / rede acionada','textarea'],['retorno','Retorno','text'],['conduta','Conduta de enfermagem / protocolo local','textarea'],['sinais-alerta-orientados','Sinais de alerta orientados','textarea']],
     alertas:['Teste reagente','Gestante com teste reagente','Violência sexual','Lesões sugestivas','Dor pélvica importante','Sinais sistêmicos']},
+  smu:{tipo:'Saúde da Mulher',page:'saude-mulher',titulo:'Saúde da Mulher',sub:'Consulta de enfermagem, avaliação ginecológica, conduta conforme protocolo municipal e evolução SOAP',icone:'✿',desenvolvimento:true,
+    queixas:['Corrimento vaginal / prurido','Suspeita de cervicite','Disúria / suspeita de cistite','Dor pélvica','Sangramento vaginal anormal','Mastalgia / alteração mamária','Planejamento reprodutivo','Contracepção de emergência','Climatério / menopausa','Queixa ginecológica diversa'],
+    campos:[['queixa-principal','Queixa principal em palavras da paciente','textarea'],['historia-atual','História da queixa: início, duração, intensidade, fatores associados e tratamentos prévios','textarea'],['dum','DUM','date'],['vida-sexual','Vida sexual / parcerias / preservativo','textarea'],['gestante','Gestante ou suspeita de gestação','select',['Não','Sim','Não informado']],['lactante','Lactante','select',['Não','Sim','Não informado']],['alergia-medicamentos','Alergia aos medicamentos do esquema proposto','select',['Não','Sim','Não informado']],['exame-especular','Exame ginecológico/especular realizado quando indicado','select',['Não','Sim','Não indicado / recusado']],['criterios-confirmados','Diagnóstico clínico e critérios do protocolo confirmados pelo enfermeiro','select',['Não','Sim']],['diagnostico-confirmado','Diagnóstico clínico confirmado','select',['Não definido - requer avaliação','Candidíase vulvovaginal','Vaginose bacteriana','Tricomoníase','Cervicite','Cistite simples em não gestante','Climatério / menopausa']],['corrimento-caracteristicas','Corrimento: cor, odor, aspecto, prurido, dispareunia, disúria e sangramento','textarea'],['achados-exame','Achados do exame: vulva, vagina, colo, mamas e/ou toque bimanual quando indicado','textarea'],['antecedentes-gineco','Antecedentes ginecológicos, obstétricos, IST, câncer e exames preventivos','textarea'],['medicamentos','Medicamentos em uso e contraceptivo atual','textarea'],['comorbidades','Comorbidades e fatores de risco','textarea'],['violencia','Risco ou relato de violência','select',['Não','Sim','Não informado']],['conduta','Conduta, procedimentos e prescrições efetivamente realizados','textarea'],['orientacoes','Orientações realizadas','textarea'],['encaminhamento','Encaminhamentos / rede acionada','textarea'],['retorno','Retorno programado','text'],['sinais-alerta-orientados','Sinais de alerta orientados','textarea']],
+    alertas:['Possível gestação','Sangramento intenso','Dor pélvica importante','Febre / sinais sistêmicos','Violência sexual','Alergia medicamentosa','Massa mamária / alteração cutânea','Lesão genital ulcerada']},
   vd:{tipo:'Visita Domiciliar',page:'visita-domiciliar',titulo:'Visita Domiciliar',sub:'Avaliação no domicílio: acamados, dispositivos, medicações, cuidador, risco e plano de cuidados',icone:'⌂',desenvolvimento:false,
     campos:[
       ['sexo','Sexo','select',['Feminino','Masculino','Outro / não informado']],['cuidador','Cuidador principal','text'],['parentesco-cuidador','Parentesco do cuidador','text'],['telefone-cuidador','Telefone do cuidador','text'],
@@ -11525,6 +11568,9 @@ function avaliarPrioridadeModulo(p){
   if(sat&&sat<92)motivos.push('Saturação baixa');if(glic&&glic<54)motivos.push('Hipoglicemia importante');if(glic>=300)motivos.push('Glicemia muito elevada');
   if(p==='hip'&&val('hip-ultima-medica')&&diasDesde(val('hip-ultima-medica'))>180)motivos.push('Falta de acompanhamento há mais de 6 meses');
   const respostasAlerta=Array.from(pg.querySelectorAll('select,input,textarea')).filter(e=>{const v=normalizarTextoProtocolo(e.value);return v!=='nao reagente'&&/sim|reagente|imediat|intensa|forte|necrose|purulent|alterad/i.test(v)}).map(e=>`${e.id}: ${e.value}`);
+  if(p==='smu'&&val('smu-violencia')==='Sim')motivos.push('Risco de violência');
+  if(p==='smu'&&val('smu-gestante')==='Sim')motivos.push('Possível gestação');
+  if(p==='smu'&&Number(val('smu-temp'))>=38)motivos.push('Febre');
   const texto=[...motivos,...respostasAlerta,val(`${p}-gravidade`),val(`${p}-infeccao`),val(`${p}-sangramento`),val(`${p}-depressao`),guia.condutas||''].join(' ').toLowerCase();
   let grau='Rotina',classe='',acao='Manter acompanhamento e retorno programado.';
   if(/ideação suicida|risco de suicídio|dor torácica|falta de ar|alteração neurológica|sangramento intenso|saturação baixa|pa muito elevada|hipoglicemia|violência sexual|risco de violência|gestante com teste reagente/.test(texto)){grau='Urgência clínica — avaliação profissional';classe='urgencia';acao='Realizar avaliação clínica imediata e registrar os achados.'}
@@ -11549,10 +11595,12 @@ function paginaModuloClinico(p,cfg){
     <div class="tp on" id="${p}-cad"><div class="card"><div class="ct"><span class="dot dg"></span>Identificação</div>${identificacaoModulo(p)}</div></div>
     <div class="tp" id="${p}-aval"><div class="card">${cfg.queixas?`<div class="ct"><span class="dot da"></span>${p==='ger'?'Queixas / fluxos do protocolo Toledo 2026':'Queixas comuns'}</div>${chipsModulo(p,cfg.queixas,'complaint')}<div id="${p}-alertas-dinamicos" style="margin-top:12px"></div>${demandaPainelHtml(p)}`:''}${guiaAnamneseNovo(p)}<div class="ct"><span class="dot db"></span>Avaliação clínica detalhada</div>${p==='fer'?`<div class="brow"><button class="btn btn-s" onclick="gerarEvolucaoComparativaFerida()">Comparar com último curativo</button></div>`:''}${p==='vd'?'':`<div class="module-form-grid">${cfg.campos.map(x=>campoModulo(p,x)).join('')}</div>`}${cfg.extraHtml?cfg.extraHtml(p):''}${cfg.foto?`<div class="lgpd-photo"><strong>Foto evolutiva da ferida</strong><p>Imagem é dado sensível. Anexe somente após autorização do paciente/responsável e conforme regras de LGPD da unidade. A foto não é armazenada automaticamente no navegador.</p><label><input type="checkbox" id="${p}-foto-autorizada"> Autorização registrada</label><br><input type="file" id="${p}-foto" accept="image/*" onchange="preverFotoFerida(event,'${p}')"><img id="${p}-foto-preview" class="photo-preview" alt="Prévia da ferida"></div>`:''}</div><div class="card"><div class="ct"><span class="dot dg"></span>Exame físico</div><div class="alert alert-i">Clique nos achados encontrados. Eles serão usados no SOAP, prioridade e SAE.</div>${guiaExameNovo(p)}</div><div class="card"><div class="ct"><span class="dot dr"></span>Sinais vitais</div>${vitaisModulo(p)}</div>${p==='ist'?testesRapidosISTHtml():''}</div>
     <div class="tp" id="${p}-prio"><div class="card">${alertas.length?`<div class="ct"><span class="dot dr"></span>Alertas específicos</div>${chipsModulo(p,alertas,'alert')}`:''}${prioridadeModuloHtml(p)}${protocoloModuloHtml(p)}</div></div>
-    <div class="tp" id="${p}-soap"><div class="card"><div class="ct"><span class="dot db"></span>Evolução SOAP e orientação ao paciente</div><div class="brow"><button class="btn btn-p" onclick="gerarSoapGenerico('${p}')">Gerar SOAP</button><button class="btn btn-ai" type="button" onclick="gerarSAE('${p}')">GERAR SAE</button>${p==='ist'?`<button class="btn btn-s" onclick="gerarTodosLaudosIST()">Gerar laudos de teste rápido</button>`:''}${p==='vd'?`<button class="btn btn-s" onclick="gerarPDFVisitaDomiciliar()">Gerar relatório PDF</button><button class="btn btn-s" onclick="copiarSoapAnonimizadoVD()">Copiar SOAP anonimizado</button>`:''}<button class="save-atend-btn" onclick="salvarAtendimentoModulo('${cfg.tipo}')">Salvar atendimento</button></div><div class="soap-grid"><div class="soap-item f"><label>S — Subjetivo</label><textarea id="${p}-s"></textarea></div><div class="soap-item f"><label>O — Objetivo</label><textarea id="${p}-o"></textarea></div><div class="soap-item f"><label>A — Avaliação</label><textarea id="${p}-a"></textarea></div><div class="soap-item f"><label>P — Plano</label><textarea id="${p}-p"></textarea></div></div><div class="f"><label>Orientação simples para o paciente</label><textarea id="${p}-orientacao-paciente"></textarea></div></div></div>
+    <div class="tp" id="${p}-soap"><div class="card"><div class="ct"><span class="dot db"></span>Evolução SOAP e orientação ao paciente</div><div class="brow"><button class="btn btn-p" onclick="gerarSoapGenerico('${p}')">Gerar SOAP</button>${p==='smu'?`<button class="btn btn-ai" type="button" onclick="gerarSoapPorIA()">IA SOAP</button>`:''}<button class="btn btn-ai" type="button" onclick="gerarSAE('${p}')">GERAR SAE</button>${p==='ist'?`<button class="btn btn-s" onclick="gerarTodosLaudosIST()">Gerar laudos de teste rápido</button>`:''}${p==='vd'?`<button class="btn btn-s" onclick="gerarPDFVisitaDomiciliar()">Gerar relatório PDF</button><button class="btn btn-s" onclick="copiarSoapAnonimizadoVD()">Copiar SOAP anonimizado</button>`:''}<button class="save-atend-btn" onclick="salvarAtendimentoModulo('${cfg.tipo}')">Salvar atendimento</button></div><div class="soap-grid"><div class="soap-item f"><label>S — Subjetivo</label><textarea id="${p}-s"></textarea></div><div class="soap-item f"><label>O — Objetivo</label><textarea id="${p}-o"></textarea></div><div class="soap-item f"><label>A — Avaliação</label><textarea id="${p}-a"></textarea></div><div class="soap-item f"><label>P — Plano</label><textarea id="${p}-p"></textarea></div></div><div class="f"><label>Orientação simples para o paciente</label><textarea id="${p}-orientacao-paciente"></textarea></div></div></div>
   </div>`
 }
-function montarModulosClinicos(){const wrap=document.querySelector('.wrap');Object.entries(MODULOS_CLINICOS).forEach(([p,c])=>{if(!c.oculto&&!document.getElementById(`pg-${c.page}`))wrap.insertAdjacentHTML('beforeend',paginaModuloClinico(p,c))});renderAlertasAcolhimento('ger');atualizarTestesRapidosIST();if(typeof atualizarTipoVisitaVD==='function')atualizarTipoVisitaVD();if(typeof atualizarSoftChecks==='function')atualizarSoftChecks(document.getElementById('pg-visita-domiciliar')||document);if(typeof atualizarPainelAcamadosVD==='function')atualizarPainelAcamadosVD();['ist-nome','ist-nasc','ist-profissional'].forEach(id=>document.getElementById(id)?.addEventListener('input',copiarDadosPacienteParaISTTR));montarPlanosCuidados()}
+function montarModulosClinicos(){
+  if(!MODULOS_CLINICOS.smu.campos.some(c=>c[0]==='caso-complicado'))MODULOS_CLINICOS.smu.campos.splice(9,0,['caso-complicado','Fatores de complicação, recorrência, imunossupressão ou contraindicação ao esquema','select',['Não','Sim','Não informado']]);
+  const wrap=document.querySelector('.wrap');Object.entries(MODULOS_CLINICOS).forEach(([p,c])=>{if(!c.oculto&&!document.getElementById(`pg-${c.page}`))wrap.insertAdjacentHTML('beforeend',paginaModuloClinico(p,c))});renderAlertasAcolhimento('ger');atualizarTestesRapidosIST();if(typeof atualizarTipoVisitaVD==='function')atualizarTipoVisitaVD();if(typeof atualizarSoftChecks==='function')atualizarSoftChecks(document.getElementById('pg-visita-domiciliar')||document);if(typeof atualizarPainelAcamadosVD==='function')atualizarPainelAcamadosVD();['ist-nome','ist-nasc','ist-profissional'].forEach(id=>document.getElementById(id)?.addEventListener('input',copiarDadosPacienteParaISTTR));montarPlanosCuidados()}
 function preverFotoFerida(event,p){const f=event.target.files?.[0],ok=document.getElementById(`${p}-foto-autorizada`)?.checked,img=document.getElementById(`${p}-foto-preview`);if(!f)return;if(!ok){event.target.value='';showToast('Registre a autorização antes de anexar a foto.');return}img.src=URL.createObjectURL(f);img.style.display='block'}
 function gerarEvolucaoComparativaFerida(){const cpf=normalizarCPF(val('fer-cpf')),anteriores=carregarAtendimentos().filter(a=>a.tipo==='Feridas / Curativos'&&(!cpf||a.cpf===cpf)).sort((a,b)=>new Date(b.data)-new Date(a.data)),ant=anteriores[0];if(!ant){showToast('Nenhum curativo anterior encontrado para comparar.');return}const n=id=>Number(val(id)||0),old=id=>Number(ant.dados?.[id]||0),area=n('fer-comprimento')*n('fer-largura'),areaAnt=old('fer-comprimento')*old('fer-largura'),dif=areaAnt?Math.round(((area-areaAnt)/areaAnt)*100):null,linhas=[`Comparação com ${new Date(ant.data).toLocaleDateString('pt-BR')}:`,areaAnt&&area?`Área estimada: ${areaAnt.toFixed(1)} cm² → ${area.toFixed(1)} cm² (${dif>0?'+':''}${dif}%).`:'Dimensões insuficientes para calcular variação de área.',`Exsudato anterior: ${ant.dados?.['fer-exsudato']||'não informado'}; atual: ${val('fer-exsudato','não informado')}.`,`Tecido anterior: ${ant.dados?.['fer-tecido']||'não informado'}; atual: ${val('fer-tecido','não informado')}.`,`Sinais de infecção anteriores: ${ant.dados?.['fer-infeccao']||'não informados'}; atuais: ${val('fer-infeccao','não informados')}.`];document.getElementById('fer-evolucao').value=linhas.join('\n');showToast('Evolução comparativa gerada. Revise os achados.')}
 function copiarDadosPacienteParaISTTR(){[['ist-nome','ist-tr-p-nome'],['ist-nasc','ist-tr-p-nasc'],['ist-profissional','ist-tr-p-executor']].forEach(([a,b])=>{const x=document.getElementById(a),y=document.getElementById(b);if(x&&y)y.value=x.value||y.value||''})}
@@ -11579,6 +11627,7 @@ function gerarLaudoISTStandalone(pessoa='p'){if(!exigirPermissao('gerar_document
 function gerarTodosLaudosIST(){if(!exigirPermissao('gerar_documentos'))return;copiarDadosPacienteParaISTTR();const principal=dadosLaudoTR('ist-tr-p',document.getElementById('ist-tr-condicao')?.value==='gestante');if(!principal.nome){showToast('Informe os dados da pessoa principal.');return}const paginas=[paginaLaudoTR(principal)];if(document.getElementById('ist-tr-parceiro-presente')?.value==='sim'){const parceiro=dadosLaudoTR('ist-tr-c',false);if(!parceiro.nome){showToast('Informe os dados do parceiro(a).');return}paginas.push(paginaLaudoTR(parceiro))}abrirLaudosTR(paginas)}
 function resumoCamposModulo(p){const cfg=MODULOS_CLINICOS[p],linhas=[];(cfg?.campos||[]).forEach(([id,l])=>{const v=val(`${p}-${id}`);if(v)linhas.push(`${l}: ${v}`)});return linhas.join('\n')}
 function gerarSoapGenerico(p){
+  if(p==='smu')return gerarSoapSaudeMulher();
   if(p==='vd')return gerarSoapVisitaDomiciliar();
   if(p==='ger'&&validarDemandaEspontanea(true).length)return;
   const cfg=MODULOS_CLINICOS[p],pri=avaliarPrioridadeModulo(p),queixas=val(`${p}-complaints`),alertas=val(`${p}-alerts`),dados=resumoCamposModulo(p),guia=coletarGuiaClinico(p),vitais=[['PA',val(`${p}-pa`)||val(`${p}-pa-atual`)],['FC',val(`${p}-fc`)],['FR',val(`${p}-fr`)],['SpO2',val(`${p}-sat`)],['Temperatura',val(`${p}-temp`)],['Dor',val(`${p}-dor-escala`)]].filter(x=>x[1]).map(x=>x.join(': ')).join(' | '),tr=p==='ist'?resumoTestesRapidosIST():null;
@@ -11590,6 +11639,24 @@ function gerarSoapGenerico(p){
   const orientacaoPaciente=document.getElementById(`${p}-orientacao-paciente`);if(orientacaoPaciente)orientacaoPaciente.value=[orientacoes,retorno?`Retorno: ${retorno}.`:'' ].filter(Boolean).join('\n');showToast('SOAP técnico e orientação gerados. Revise antes de salvar.');
 }
 function montarPrioridadeExistentes(){PLANO_MODULOS.filter(([p])=>!MODULOS_CLINICOS[p]).forEach(([p,alvo])=>{const a=document.getElementById(alvo);if(!a||document.getElementById(`${p}-prioridade-comum`))return;const c=document.createElement('div');c.className='card';c.id=`${p}-prioridade-comum`;c.innerHTML=`<div class="ct"><span class="dot dr"></span>Classificação de prioridade do atendimento</div>${prioridadeModuloHtml(p)}`;a.appendChild(c)})}
+
+function gerarSoapSaudeMulher(){
+  const p='smu',get=id=>val(p+'-'+id),campos=MODULOS_CLINICOS.smu.campos;
+  const linhas=ids=>ids.map(id=>{const v=get(id);return v?`${campos.find(c=>c[0]===id)?.[1]||id}: ${v}`:''}).filter(Boolean).join('\n');
+  const guia=coletarGuiaClinico(p),diagnostico=get('criterios-confirmados')==='Sim'?get('diagnostico-confirmado'):'';
+  const vitais=[['pa','PA'],['fc','FC'],['fr','FR'],['sat','SpO2'],['temp','Temperatura'],['dor-escala','Dor']].filter(([id])=>get(id)).map(([id,label])=>`${label}: ${get(id)}`).join(' | ');
+  const secoes={
+    s:[get('queixa-principal'),get('complaints'),linhas(['historia-atual','dum','vida-sexual','gestante','lactante','alergia-medicamentos','corrimento-caracteristicas','antecedentes-gineco','medicamentos','comorbidades','violencia']),guia.anamnese].filter(Boolean).join('\n'),
+    o:[vitais,linhas(['exame-especular','achados-exame']),get('exame-complementar'),guia.exame].filter(Boolean).join('\n'),
+    a:[diagnostico&&!diagnostico.startsWith('Não definido')?`Diagnóstico registrado pelo profissional: ${diagnostico}`:'',get('alerts')?`Alertas selecionados: ${get('alerts')}`:'',guia.alertas].filter(Boolean).join('\n'),
+    p:linhas(['conduta','orientacoes','encaminhamento','retorno','sinais-alerta-orientados'])
+  };
+  // Sugestões de protocolo permanecem no painel: não equivalem a uma conduta realizada.
+  pularFinalizadorSoapAutomatico(p);
+  for(const [k,texto]of Object.entries(secoes)){const el=document.getElementById(p+'-'+k);el.value=texto?`${k.toUpperCase()}:\n${texto}`:'';el.dispatchEvent(new Event('input',{bubbles:true}));}
+  document.getElementById('smu-orientacao-paciente').value=[get('orientacoes'),get('retorno')].filter(Boolean).join('\n');
+  renderCondutaProtocoladaModulo(p);showToast('SOAP gerado com os dados registrados. Revise avaliação e conduta antes de salvar.');
+}
 
 // Central protocolar transversal: todas as consultas cruzam os dados com todos os
 // protocolos assistenciais cadastrados, além dos motores especializados de cada linha.

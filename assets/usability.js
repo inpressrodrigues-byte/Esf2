@@ -47,6 +47,7 @@
       if (v && typeof v === 'object' && 'checked' in v) e.checked = !!v.checked;
       else if (typeof v === 'string' || typeof v === 'number') e.value = v;
     });
+    window.ESFCiap?.restoreFromPage(prefix(page));
   }
   function beforeRestore(page) {
     if (!page) return;
@@ -122,6 +123,7 @@
   function clearConsultation() {
     const page = pageNow(), p = prefix(page); if (!p) return;
     if (!confirm('Limpar a avaliação, os resultados selecionados e o SOAP deste atendimento? A identificação do paciente será mantida.')) return;
+    window.ESFCiap?.restore(p,[]);
     const keep = /-(nome|cpf|cns|nasc|telefone|cep|logradouro|numero|bairro|municipio|uf)$/;
     page.querySelectorAll('input,select,textarea').forEach(e => {
       if (keep.test(e.id) || ['button','submit','hidden','file'].includes(e.type)) return;
