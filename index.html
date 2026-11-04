@@ -899,6 +899,9 @@ body.sidebar-collapsed .dev-nav{display:none}
 </style>
 <link rel="stylesheet" href="assets/usability.css">
 <link rel="stylesheet" href="assets/prumo.css">
+<link rel="stylesheet" href="assets/saude-mulher.css">
+<script defer src="assets/saude-mulher-regras.js"></script>
+<script defer src="assets/saude-mulher.js"></script>
 <script defer src="assets/usability.js?v=prumo-1"></script>
 <script defer src="assets/unidades-toledo.js"></script>
 <script defer src="assets/unidades.js"></script>
@@ -8944,6 +8947,7 @@ function aplicarTextoCompletoAISoap(prefix,novoSOAP,pendencias){
 async function gerarSoapPorIA(){
   if(!exigirPermissao('usar_ia_soap','Seu perfil não possui permissão para usar a IA SOAP.'))return;
   const prefix=prefixoPaginaAtual();if(!prefix)return showToast('Abra uma consulta antes de usar a IA SOAP.');
+  if(prefix==='smu'&&window.ESFSaudeMulher&&!window.ESFSaudeMulher.validateForAI())return;
   const cfg=carregarConfiguracaoIASOAP();
   if(!cfg.ativa)return mostrarMensagemIA('IA SOAP não está ativada.');
   if(!cfg.endpoint)return mostrarMensagemIA('Endpoint da IA SOAP não configurado.');
@@ -9213,6 +9217,7 @@ async function salvarAtendimentoModulo(tipo){
   if(!escopoDadosClinicos().permitido)return showToast('Peça à administração para definir sua UBS antes de salvar atendimentos.');
   const escopoSalvar=escopoDadosClinicos().chave;
   const cfgSalvar=MODULOS_ATENDIMENTO[tipo],prefixSalvar=cfgSalvar?.prefix;
+  if(prefixSalvar==='smu'&&window.ESFSaudeMulher&&!window.ESFSaudeMulher.validateForAI())return;
   if(prefixSalvar){
     validarEntradaPreSoap(prefixSalvar);
     renderAlertasVermelhosSoap(prefixSalvar);renderInconsistenciasSoap(prefixSalvar);
@@ -11597,9 +11602,9 @@ function avaliarPrioridadeModulo(p){
   if(pas>=180||pad>=120)motivos.push('PA muito elevada');else if(pas>=160||pad>=100)motivos.push('PA elevada');
   if(sat&&sat<92)motivos.push('Saturação baixa');if(glic&&glic<54)motivos.push('Hipoglicemia importante');if(glic>=300)motivos.push('Glicemia muito elevada');
   if(p==='hip'&&val('hip-ultima-medica')&&diasDesde(val('hip-ultima-medica'))>180)motivos.push('Falta de acompanhamento há mais de 6 meses');
-  const respostasAlerta=Array.from(pg.querySelectorAll('select,input,textarea')).filter(e=>{const v=normalizarTextoProtocolo(e.value);return v!=='nao reagente'&&/sim|reagente|imediat|intensa|forte|necrose|purulent|alterad/i.test(v)}).map(e=>`${e.id}: ${e.value}`);
+  const respostasAlerta=p==='smu'?[]:Array.from(pg.querySelectorAll('select,input,textarea')).filter(e=>{const v=normalizarTextoProtocolo(e.value);return v!=='nao reagente'&&/sim|reagente|imediat|intensa|forte|necrose|purulent|alterad/i.test(v)}).map(e=>`${e.id}: ${e.value}`);
   if(p==='smu'&&val('smu-violencia')==='Sim')motivos.push('Risco de violência');
-  if(p==='smu'&&val('smu-gestante')==='Sim')motivos.push('Possível gestação');
+  if(p==='smu'&&window.ESFSaudeMulher)motivos.push(...window.ESFSaudeMulher.treatmentState().e.urgent);
   if(p==='smu'&&Number(val('smu-temp'))>=38)motivos.push('Febre');
   const texto=[...motivos,...respostasAlerta,val(`${p}-gravidade`),val(`${p}-infeccao`),val(`${p}-sangramento`),val(`${p}-depressao`),guia.condutas||''].join(' ').toLowerCase();
   let grau='Rotina',classe='',acao='Manter acompanhamento e retorno programado.';

@@ -31,6 +31,7 @@
   function preventiveReason(){return document.querySelector('input[name="prev-motivo"]:checked')?.value||'';}
   function suggestModule(p){
     const codes=new Set(suggest(source(p)).map(c=>c.code));
+    if(p==='smu')for(const code of window.ESFSaudeMulher?.ciapCodes()||[])codes.add(code);
     if(p==='prev'){
       const reason=preventiveReason();
       if(reason==='rastr')codes.add('A98');
@@ -70,6 +71,7 @@
     });card.append(grid,button('Gerar rascunho deste problema',()=>draft(p,i)),button('Copiar SOAP deste CIAP',()=>copiarTextoSeguro(soapFor(capture(p)[i]),'SOAP por problema copiado.')),button('Remover código',()=>{states.get(p).splice(i,1);renderSelected(p);persist(p);}));out.append(card);
   });}
   function apply(p){
+    if(p==='smu'&&window.ESFSaudeMulher&&!window.ESFSaudeMulher.validate())return;
     const items=capture(p),ids=SOAP_IDS_MODULO[p];if(!items.length||!ids)return showToast('Selecione ao menos um CIAP-2.');
     if(items.some(i=>!i.s.trim()||!i.a.trim()||!i.p.trim()))return showToast('Preencha relato, avaliação e plano específicos de cada problema.');
     if(Object.values(ids).some(id=>byId(id)?.value)&&!confirm('Substituir o SOAP atual pelos blocos revisados de cada CIAP?'))return;
@@ -102,7 +104,7 @@
     const data=aggregate(records);if(!data.length)box.append(document.createTextNode('Nenhum CIAP-2 confirmado neste recorte.'));
     else{const table=document.createElement('table');for(const row of [['CIAP-2','Descrição','Atendimentos'],...data.map(x=>[x.ciap,x.descricao,x.atendimentos])]){const tr=document.createElement('tr');for(const cell of row){const td=document.createElement('td');td.textContent=cell;tr.append(td);}table.append(tr);}box.append(table,button('Exportar contagem CIAP-2',()=>exportarLinhasCSV('ciap2-toledo',data)));}
   }
-  window.ESFCiap={capture,restore,restoreFromPage,suggest,suggestModule,aggregate,soapFor,mount};
+  window.ESFCiap={capture,restore,restoreFromPage,suggest,suggestModule,aggregate,soapFor,mount,refreshSuggestions};
   async function init(){
     try{const res=await fetch('assets/ciap2.json');if(!res.ok)throw Error('HTTP '+res.status);const data=await res.json();catalog=data.concept.filter(c=>/^[A-Z][0-9]{2}$/.test(c.code));}catch{catalogError='Catálogo CIAP-2 indisponível. Recarregue para tentar novamente.';}
     mount();owner=CURRENT_AUTH_USER_ID;

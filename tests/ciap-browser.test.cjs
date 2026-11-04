@@ -25,13 +25,15 @@ const server=http.createServer((req,res)=>{const file=path.resolve(root,'.'+(req
  const clinical=await page.evaluate(()=>{
    go('saude-mulher');const set=(id,v)=>document.getElementById('smu-'+id).value=v;
    const treatment=()=>condutaSaudeMulher('',FONTES_PROTOCOLARES_MODULOS.smu);
+   for(const id of ['dor','mobilizacao','sangra','perdaliquido'])set('corr-'+id,'Não');set('corr-interacoes','Sim');set('violencia','Não');set('temp','36.5');
    set('diagnostico-confirmado','Candidíase vulvovaginal');set('criterios-confirmados','Sim');set('exame-especular','Sim');set('achados-exame','Achados fictícios para teste');set('lactante','Não');set('alergia-medicamentos','Não');set('gestante','Não informado');
    const unknown=treatment();set('gestante','Não');const incomplete=treatment();set('caso-complicado','Não');const allowed=treatment();
    set('gestante','Sim');const pregnant=treatment();set('gestante','Não');set('alergia-medicamentos','Sim');const allergy=treatment();set('alergia-medicamentos','Não');set('lactante','Sim');const lactation=treatment();set('lactante','Não');set('alerts','Sangramento intenso');const alert=treatment();set('alerts','');set('temp','38.5');const fever=treatment();set('temp','36.5');set('violencia','Não');const priority=avaliarPrioridadeModulo('smu');
    set('queixa-principal','Prurido relatado');set('historia-atual','Início há três dias');set('dum','2026-10-10');set('antecedentes-gineco','Antecedente fictício');set('conduta','Orientação registrada para teste');gerarSoapGenerico('smu');
    return {unknown,incomplete,allowed,pregnant,allergy,lactation,alert,fever,priority,s:val('smu-s'),o:val('smu-o'),a:val('smu-a'),p:val('smu-p')};
  });
- assert.match(clinical.allowed.medicacao,/Miconazol/);for(const key of ['unknown','incomplete','pregnant','allergy','lactation','alert','fever'])assert.doesNotMatch(clinical[key].medicacao,/Miconazol/);
+ assert.match(clinical.allowed.medicacao,/Miconazol/);for(const key of ['unknown','incomplete','pregnant','allergy','alert','fever'])assert.doesNotMatch(clinical[key].medicacao,/Miconazol/);
+ assert.match(clinical.lactation.medicacao,/Miconazol/);assert.doesNotMatch(clinical.lactation.medicacao,/Fluconazol|Itraconazol/);
  assert.doesNotMatch(clinical.priority.grau,/alta|Urgência/);assert.match(clinical.s,/três dias/);assert.match(clinical.s,/2026-10-10/);assert.match(clinical.s,/Antecedente fictício/);assert.match(clinical.o,/Achados fictícios/);assert.match(clinical.a,/Candidíase/);assert.match(clinical.p,/Orientação registrada/);assert.doesNotMatch(clinical.p,/Miconazol/);
  await page.evaluate(()=>go('preventivo'));
  assert.deepEqual(await page.evaluate(()=>ESFCiap.suggestModule('prev').map(c=>c.code)),[]);

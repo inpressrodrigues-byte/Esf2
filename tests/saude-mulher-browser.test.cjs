@@ -1,0 +1,40 @@
+const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),assert=require('node:assert/strict');
+const {chromium}=require(process.env.ESF_PLAYWRIGHT_PATH||'playwright');
+const root=path.resolve(__dirname,'..');
+const server=http.createServer((req,res)=>{const file=path.resolve(root,'.'+(req.url==='/'?'/index.html':req.url.split('?')[0]));if(!file.startsWith(root+path.sep))return res.writeHead(403).end();try{res.setHeader('Content-Type',file.endsWith('.js')?'text/javascript':file.endsWith('.json')?'application/json':file.endsWith('.css')?'text/css':'text/html');res.end(fs.readFileSync(file));}catch{res.writeHead(404).end();}});
+(async()=>{let browser;try{
+ await new Promise(r=>server.listen(0,'127.0.0.1',r));const base='http://127.0.0.1:'+server.address().port;
+ browser=await chromium.launch({headless:true,channel:process.env.ESF_BROWSER_CHANNEL||'chrome'});const page=await browser.newPage({viewport:{width:1440,height:1050}}),errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());await page.route('**/*',r=>r.request().url().startsWith(base)?r.continue():r.abort());await page.goto(base);await page.waitForSelector('#smu-ciap-painel',{state:'attached'});
+ await page.evaluate(()=>{CURRENT_AUTH_USER_ID='synthetic-smu';PERMISSOES_ATUAIS={...PERMISSOES_PADRAO,ver_historico:true,ver_admin:true};_sb=null;document.getElementById('auth-screen').classList.remove('visible');go('saude-mulher');});
+ assert.equal(await page.locator('#smu-corr-result').count(),1);assert.equal(await page.locator('#smu-contra-result').count(),1);
+ await page.locator('[aria-controls="smu-corrimento"]').click();
+ await page.locator('#smu-corr-cor').selectOption('esverdeado');await page.waitForTimeout(160);assert.equal(await page.locator('[data-smu-diagnosis]').count(),0);
+ await page.locator('#smu-corr-aspecto').selectOption('grumoso');await page.locator('#smu-corr-prurido').selectOption('Sim');await page.waitForTimeout(160);await page.locator('[data-smu-diagnosis="cand"]').click();
+ assert.equal(await page.locator('#smu-criterios-confirmados').inputValue(),'Não');assert.equal(await page.locator('[data-smu-regimen="cand-top"]').isDisabled(),true);
+ await page.evaluate(()=>{const set=(id,value)=>document.getElementById('smu-'+id).value=value;
+  for(const [id,value]of Object.entries({gestante:'Sim',ig:'20',lactante:'Não','alergia-medicamentos':'Não','caso-complicado':'Não','exame-especular':'Sim','achados-exame':'Corrimento grumoso e eritema observados','criterios-confirmados':'Sim',temp:'36.5',violencia:'Não','corr-dor':'Não','corr-mobilizacao':'Não','corr-sangra':'Não','corr-perdaliquido':'Não','corr-interacoes':'Sim','corr-duracao':'10','queixa-principal':'Prurido e corrimento','historia-atual':'Há três dias'}))set(id,value);ESFSaudeMulher.refresh();});
+ assert.equal(await page.locator('[data-smu-regimen="cand-top"]').isEnabled(),true);assert.equal(await page.locator('[data-smu-regimen="cand-flu"]').count(),0);
+ await page.locator('[data-smu-regimen="cand-top"]').click();assert.equal(await page.evaluate(()=>ESFSaudeMulher.records().length),1);
+ await page.evaluate(()=>gerarSoapGenerico('smu'));assert.match(await page.locator('#smu-p').inputValue(),/Miconazol.*10 dias/);assert.doesNotMatch(await page.locator('#smu-p').inputValue(),/Fluconazol|Itraconazol/);assert.equal(await page.evaluate(()=>ESFSaudeMulher.validateForAI()),true);
+ assert.equal(await page.evaluate(()=>ESFCiap.capture('smu')[0].code),'X72');
+ const saved=await page.evaluate(()=>coletarDadosModulo('smu'));await page.evaluate(data=>restaurarDadosModulo('smu',data),saved);assert.equal(await page.evaluate(()=>ESFSaudeMulher.stale()),false);
+ await page.locator('#smu-corr-dor').selectOption('Sim');await page.waitForTimeout(160);assert.equal(await page.evaluate(()=>ESFSaudeMulher.validateForAI()),false);assert.equal(await page.locator('[data-smu-regimen="cand-top"]').isDisabled(),true);
+ await page.evaluate(()=>quickLimpar());assert.deepEqual(await page.evaluate(()=>ESFSaudeMulher.records()),[]);assert.deepEqual(await page.evaluate(()=>ESFCiap.capture('smu')),[]);
+ await page.evaluate(()=>{
+  const set=(id,value)=>document.getElementById('smu-'+id).value=value;
+  for(const [id,value]of Object.entries({'nasc':'1996-01-15','nome':'Teste sintético','gestante':'Não','lactante':'Não','alergia-medicamentos':'Não','violencia':'Não','motivo-consulta':'iniciar','pa':'120/80','contra-peso':'60','contra-altura':'165','contra-nulipara':'Não','contra-fuma':'Não','contra-posparto':'nenhum','contra-exclusao':'DUM e ausência de exposição revisadas para teste','contra-dia-ciclo':'2','contra-metodo':'combinada','contra-escolha':'Sim','contra-revisao':'Sim','contra-orientada':'Sim','contra-preferencias':'Prefere comprimido diário'}))set(id,value);
+  SaudeMulherRegras.risks.forEach(([id])=>set('contra-'+id,'Não'));ESFSaudeMulher.refresh();
+ });
+ await page.locator('[aria-controls="smu-contracepcao"]').click();assert.equal(await page.locator('#smu-confirmar-metodo').isEnabled(),true);
+ assert.ok(await page.evaluate(()=>ESFCiap.suggestModule('smu').some(x=>x.code==='W11')));
+ await page.locator('#smu-confirmar-metodo').click();assert.equal(await page.evaluate(()=>ESFSaudeMulher.validateForAI()),false);
+ await page.evaluate(()=>gerarSoapGenerico('smu'));assert.equal(await page.evaluate(()=>ESFSaudeMulher.validateForAI()),true);assert.match(await page.locator('#smu-p').inputValue(),/21 dias.*7 dias/);assert.equal(await page.evaluate(()=>ESFCiap.capture('smu')[0].code),'W11');
+ assert.doesNotMatch((await page.evaluate(()=>avaliarPrioridadeModulo('smu'))).grau,/alta|Urgência/,'Confirmações e JSON do registro não são sinais de alarme');
+ const contraception=await page.evaluate(()=>coletarDadosModulo('smu'));await page.evaluate(data=>restaurarDadosModulo('smu',data),contraception);assert.equal(await page.evaluate(()=>ESFSaudeMulher.stale()),false);
+ await page.locator('#smu-contra-aura').selectOption('Sim');await page.waitForTimeout(160);assert.equal(await page.locator('#smu-confirmar-metodo').isDisabled(),true);assert.equal(await page.evaluate(()=>ESFSaudeMulher.stale()),true);
+ await page.locator('[aria-controls="smu-soap"]').click();assert.match(await page.locator('#smu-registros-list').textContent(),/avaliação mudou/);await page.locator('[data-smu-remove="contracepcao"]').click();assert.deepEqual(await page.evaluate(()=>ESFCiap.capture('smu')),[]);
+ await page.locator('[aria-controls="smu-exames-mulher"]').click();await page.locator('#smu-exames-ist').selectOption('solicitar');await page.locator('#smu-exames-detalhes').fill('Solicitados HIV, sífilis, hepatite B e C após aconselhamento.');await page.locator('#smu-confirmar-exames').click();await page.evaluate(()=>gerarSoapGenerico('smu'));assert.match(await page.locator('#smu-p').inputValue(),/Solicitados.*IST/);
+ await page.locator('[aria-controls="smu-contracepcao"]').click();if(process.env.ESF_SMU_SCREENSHOTS){fs.mkdirSync(process.env.ESF_SMU_SCREENSHOTS,{recursive:true});await page.screenshot({path:path.join(process.env.ESF_SMU_SCREENSHOTS,'contracepcao-desktop.png')});}
+ await page.setViewportSize({width:390,height:844});await page.evaluate(()=>{if(!document.body.classList.contains('sidebar-collapsed'))alternarMenuLateral();});await page.locator('#smu-contra-detalhe').scrollIntoViewIfNeeded();assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false);if(process.env.ESF_SMU_SCREENSHOTS)await page.screenshot({path:path.join(process.env.ESF_SMU_SCREENSHOTS,'contracepcao-mobile.png')});
+ assert.deepEqual(errors,[]);console.log('PASS Saúde da Mulher: corrimento gestante, contraindicações, prescrição contraceptiva, CIAP/SOAP, exames, restauração, revisão por mudança e layout móvel.');
+ }finally{await browser?.close();server.close();}})().catch(e=>{console.error(e);process.exitCode=1;});
