@@ -34,6 +34,10 @@ Identificação e avaliação → corrimento e/ou anticoncepção → exames e s
 
 As solicitações de exames são confirmadas com indicação. O SOAP local utiliza o que foi registrado e confirmado; a IA revisa esse texto pelo serviço já existente. Os CIAP são registrados por problema e continuam sujeitos à revisão profissional. Nenhuma transmissão ao SIGSS/e-SUS foi acrescentada.
 
+## Corrimento integrado ao pré-natal
+
+A Abertura de Pré-Natal (Anamnese) e a Consulta de Pré-Natal (Queixas) têm o bloco “Corrimento / leucorreia na gestação”. O atendimento utiliza as mesmas regras de Saúde da Mulher, com contexto gestacional fixo e IG da própria consulta. Perda de líquido, sangramento e outros alertas obstétricos selecionados também são considerados. A confirmação do esquema registra o CIAP do problema; o gerador do pré-natal mantém o SOAP obstétrico e acrescenta os achados e a conduta do corrimento. Mudanças posteriores exigem revisão antes de salvar ou utilizar a IA. Os registros de cada módulo permanecem independentes.
+
 ## Verificação
 
 Testes de regras cobrem dados faltantes, contraindicações cumulativas, PA, aura, tabagismo, pós-parto, lactação, gestação, alergias, sinais de alarme e diferenciais do corrimento. Testes em navegador usam dados sintéticos para confirmar os fluxos, SOAP/CIAP, exames, restauração, limpeza e revisão após mudança da avaliação. Esses testes verificam o software; não substituem validação clínica institucional.

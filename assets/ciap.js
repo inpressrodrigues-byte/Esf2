@@ -32,6 +32,7 @@
   function suggestModule(p){
     const codes=new Set(suggest(source(p)).map(c=>c.code));
     if(p==='smu')for(const code of window.ESFSaudeMulher?.ciapCodes()||[])codes.add(code);
+    for(const code of window.ESFCorrimentoPN?.ciapCodes(p)||[])codes.add(code);
     if(p==='prev'){
       const reason=preventiveReason();
       if(reason==='rastr')codes.add('A98');
@@ -71,6 +72,7 @@
     });card.append(grid,button('Gerar rascunho deste problema',()=>draft(p,i)),button('Copiar SOAP deste CIAP',()=>copiarTextoSeguro(soapFor(capture(p)[i]),'SOAP por problema copiado.')),button('Remover código',()=>{states.get(p).splice(i,1);renderSelected(p);persist(p);}));out.append(card);
   });}
   function apply(p){
+    if(window.ESFCorrimentoPN&&!window.ESFCorrimentoPN.validate(p))return;
     if(p==='smu'&&window.ESFSaudeMulher&&!window.ESFSaudeMulher.validate())return;
     const items=capture(p),ids=SOAP_IDS_MODULO[p];if(!items.length||!ids)return showToast('Selecione ao menos um CIAP-2.');
     if(items.some(i=>!i.s.trim()||!i.a.trim()||!i.p.trim()))return showToast('Preencha relato, avaliação e plano específicos de cada problema.');

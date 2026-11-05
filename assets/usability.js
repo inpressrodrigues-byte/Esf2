@@ -453,7 +453,7 @@
     document.body.classList.add('ux-compact','ux-prumo');
     const homeBackground=make('div');homeBackground.id='ux-home-background';homeBackground.setAttribute('aria-hidden','true');document.body.prepend(homeBackground);
     document.querySelectorAll('.pg').forEach(page=>{
-      const controls=[...page.querySelectorAll('input,select,textarea')];legacy.set(page.id,controls);
+      const controls=[...page.querySelectorAll('input,select,textarea')];legacy.set(page.id,controls.filter(e=>!e.closest('.pn-corr')));
       controls.forEach((e,i)=>{if(!e.id&&!['file','password'].includes(e.type))e.id=`ux-field-${page.id}-${i}`;});
       page.querySelectorAll('.clinical-chip,.complaint-chip,.alert-chip,.quick-care').forEach((e,i)=>e.dataset.uxKey=`${page.id}:${i}`);
       initial.set(page.id,collectValues(page));

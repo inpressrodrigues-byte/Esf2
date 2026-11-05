@@ -902,6 +902,7 @@ body.sidebar-collapsed .dev-nav{display:none}
 <link rel="stylesheet" href="assets/saude-mulher.css">
 <script defer src="assets/saude-mulher-regras.js"></script>
 <script defer src="assets/saude-mulher.js"></script>
+<script defer src="assets/corrimento-prenatal.js"></script>
 <script defer src="assets/usability.js?v=prumo-1"></script>
 <script defer src="assets/unidades-toledo.js"></script>
 <script defer src="assets/unidades.js"></script>
@@ -11723,7 +11724,8 @@ function decisoesCentralProtocolar(prefix){
   const t=textoConsultaCentral(prefix),out=[],push=(titulo,d)=>{if(d?.protocolada&&d.conduta&&!out.some(x=>x.d.texto===d.texto))out.push({titulo,d})};
   const istRx=/candidiase|vaginose|tricomon|cervicite|uretrite|sifilis|herpes|condiloma|hpv|cancroide|linfogranuloma|lgv|donovanose|hiv.*reagente|hbsag.*reagente|anti.?hcv.*reagente/;
   const hipRx=/has mal controlada|tres medicacoes em dose plena|dm sem controle|1 unidade\/kg|tfg menor que 30|isglt2|insuficiencia cardiaca|arritmia|hipotireoidismo|hipertireoidismo|nodulo de tireoide|bocio multinodular|obesidade secundaria|cirurgia bariatrica|hiperprolactinemia|sindrome coronariana/;
-  if(istRx.test(t))push('Protocolo IST Toledo',condutaProtocoladaModulo('ist',`${t} ${prefix==='pna'||prefix==='pnc'?'CONTEXTO_GESTANTE':''} ${prefix==='puerp'?'CONTEXTO_LACTANTE':''}`));
+  if(window.ESFCorrimentoPN?.isActive(prefix))push('Corrimento na gestação — Saúde da Mulher 2026',window.ESFCorrimentoPN.centralDecision(prefix));
+  else if(istRx.test(t))push('Protocolo IST Toledo',condutaProtocoladaModulo('ist',`${t} ${prefix==='pna'||prefix==='pnc'?'CONTEXTO_GESTANTE':''} ${prefix==='puerp'?'CONTEXTO_LACTANTE':''}`));
   if(hipRx.test(t))push('Cardiologia / Endocrinologia',condutaProtocoladaModulo('hip',t));
   if(/lesao de pele|lesão de pele|ferida|ulcera|necrose|dermatoscopia|teledermato/.test(t))push('Teledermatologia',condutaProtocoladaModulo('fer',t));
   if(prefix==='puerp')push('Assistência puerperal',condutaProtocoladaModulo('puerp',t));
@@ -12327,7 +12329,7 @@ async function gerarPacoteDiabetesGestacionalPN(){
     if(!isG1P0A0(prefix))add(s,line('Intervalo interpartal',valAny([`${prefix}-iip`])));
     add(s,line('Gestação planejada',valAny([`${prefix}-planejada`])));
     add(s,line('Aceitação da gestação',valAny([`${prefix}-aceitacao`,`${prefix}-aceita`])));
-    if(queixas)add(s,/nega|sem queixa/i.test(queixas)?'Nega queixas no momento.':`Refere ${queixas.toLowerCase()}.`);
+    if(queixas)add(s,`Queixas registradas: ${queixas}`);
     if(queixasMarcadas.length)add(s,`Queixas/sinais referidos ou selecionados: ${queixasMarcadas.join('; ')}.`);
     add(s,line('Antecedentes/comorbidades registrados',comorb));
     add(s,line('Antecedentes familiares relevantes',fam));

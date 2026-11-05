@@ -1,20 +1,20 @@
-#pg-saude-mulher .smu-card{margin-block:14px;padding:20px}
-#pg-saude-mulher .smu-card h3{font-size:17px;margin:0 0 14px}
-#pg-saude-mulher .smu-card p{line-height:1.6;margin:10px 0}
-#pg-saude-mulher .smu-grid,#pg-saude-mulher .smu-methods{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-#pg-saude-mulher .smu-grid .f{min-width:0}
-#pg-saude-mulher .smu-grid input,#pg-saude-mulher .smu-grid select,#pg-saude-mulher .smu-grid textarea{width:100%;box-sizing:border-box}
-#pg-saude-mulher .smu-option{padding:16px;margin-block:12px;border:1px solid var(--bd,#ddd);border-radius:10px;overflow-wrap:anywhere}
-#pg-saude-mulher .smu-option h4{margin:0 0 10px;font-size:15px}
-#pg-saude-mulher .smu-option h4 small{display:block;font-weight:normal;margin-top:5px}
-#pg-saude-mulher .smu-option pre{white-space:pre-wrap;font:inherit;line-height:1.6}
-#pg-saude-mulher .smu-pending{padding:12px;border-left:4px solid #ac6b10;margin:12px 0;background:var(--sf2,#faf5ec)}
-#pg-saude-mulher .smu-card li{margin-block:6px;line-height:1.5}
-#pg-saude-mulher .smu-status{display:inline-block;padding:6px 10px;background:var(--sf2,#eee);border-radius:6px}
-#pg-saude-mulher .smu-ready{border-left:4px solid #218450;padding-left:12px}
-#pg-saude-mulher .smu-table-wrap{overflow-x:auto}
-#pg-saude-mulher .smu-card table{width:100%;border-collapse:collapse}
-#pg-saude-mulher .smu-card td,#pg-saude-mulher .smu-card th{padding:10px;text-align:left;border-bottom:1px solid var(--bd,#ddd)}
-#pg-saude-mulher .smu-card button{white-space:normal;margin-top:10px}
-#pg-saude-mulher .smu-card button:disabled{opacity:.5;cursor:not-allowed}
-@media(max-width:760px){#pg-saude-mulher .smu-grid,#pg-saude-mulher .smu-methods{grid-template-columns:1fr}#pg-saude-mulher .smu-card{padding:14px}}
+:is(#pg-saude-mulher,.pn-corr) .smu-card{margin-block:14px;padding:20px}
+:is(#pg-saude-mulher,.pn-corr) .smu-card h3{font-size:17px;margin:0 0 14px}
+:is(#pg-saude-mulher,.pn-corr) .smu-card p{line-height:1.6;margin:10px 0}
+:is(#pg-saude-mulher,.pn-corr) .smu-grid,:is(#pg-saude-mulher,.pn-corr) .smu-methods{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+:is(#pg-saude-mulher,.pn-corr) .smu-grid .f{min-width:0}
+:is(#pg-saude-mulher,.pn-corr) .smu-grid input,:is(#pg-saude-mulher,.pn-corr) .smu-grid select,:is(#pg-saude-mulher,.pn-corr) .smu-grid textarea{width:100%;box-sizing:border-box}
+:is(#pg-saude-mulher,.pn-corr) .smu-option{padding:16px;margin-block:12px;border:1px solid var(--bd,#ddd);border-radius:10px;overflow-wrap:anywhere}
+:is(#pg-saude-mulher,.pn-corr) .smu-option h4{margin:0 0 10px;font-size:15px}
+:is(#pg-saude-mulher,.pn-corr) .smu-option h4 small{display:block;font-weight:normal;margin-top:5px}
+:is(#pg-saude-mulher,.pn-corr) .smu-option pre{white-space:pre-wrap;font:inherit;line-height:1.6}
+:is(#pg-saude-mulher,.pn-corr) .smu-pending{padding:12px;border-left:4px solid #ac6b10;margin:12px 0;background:var(--sf2,#faf5ec)}
+:is(#pg-saude-mulher,.pn-corr) .smu-card li{margin-block:6px;line-height:1.5}
+:is(#pg-saude-mulher,.pn-corr) .smu-status{display:inline-block;padding:6px 10px;background:var(--sf2,#eee);border-radius:6px}
+:is(#pg-saude-mulher,.pn-corr) .smu-ready{border-left:4px solid #218450;padding-left:12px}
+:is(#pg-saude-mulher,.pn-corr) .smu-table-wrap{overflow-x:auto}
+:is(#pg-saude-mulher,.pn-corr) .smu-card table{width:100%;border-collapse:collapse}
+:is(#pg-saude-mulher,.pn-corr) .smu-card td,:is(#pg-saude-mulher,.pn-corr) .smu-card th{padding:10px;text-align:left;border-bottom:1px solid var(--bd,#ddd)}
+:is(#pg-saude-mulher,.pn-corr) .smu-card button{white-space:normal;margin-top:10px}
+:is(#pg-saude-mulher,.pn-corr) .smu-card button:disabled{opacity:.5;cursor:not-allowed}
+@media(max-width:760px){:is(#pg-saude-mulher,.pn-corr) .smu-grid,:is(#pg-saude-mulher,.pn-corr) .smu-methods{grid-template-columns:1fr}:is(#pg-saude-mulher,.pn-corr) .smu-card{padding:14px}}
