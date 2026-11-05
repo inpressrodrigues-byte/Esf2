@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "test": "node --test tests/ai-transport.test.cjs tests/gemini-api.test.cjs tests/permission-repair.test.cjs tests/unidades.test.cjs tests/ubs-access.test.cjs tests/saude-mulher.test.cjs",
-    "test:browser": "node tests/api-browser.test.cjs && node tests/usability-browser.test.cjs && node tests/unidades-browser.test.cjs && node tests/ciap-browser.test.cjs && node tests/ubs-browser.test.cjs && node tests/saude-mulher-browser.test.cjs && node tests/corrimento-prenatal-browser.test.cjs"
+    "test:browser": "node tests/api-browser.test.cjs && node tests/usability-browser.test.cjs && node tests/unidades-browser.test.cjs && node tests/ciap-browser.test.cjs && node tests/ubs-browser.test.cjs && node tests/saude-mulher-browser.test.cjs && node tests/corrimento-prenatal-browser.test.cjs && node tests/clinical-review-browser.test.cjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.8",

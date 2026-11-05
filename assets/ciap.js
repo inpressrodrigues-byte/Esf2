@@ -69,7 +69,7 @@
     const grid=document.createElement('div');grid.className='soap-grid';
     [['s','S — relato desta queixa'],['o','O — achados deste problema'],['a','A — avaliação deste problema'],['p','P — conduta realizada/pactuada para este problema']].forEach(([key,label])=>{
       const wrap=document.createElement('div');wrap.className='f';const l=document.createElement('label'),input=document.createElement('textarea');input.id=p+'-ciap-'+item.code+'-'+key;l.htmlFor=input.id;l.textContent=label;input.value=item[key];input.oninput=()=>{states.get(p)[i][key]=input.value;persist(p);};wrap.append(l,input);grid.append(wrap);
-    });card.append(grid,button('Gerar rascunho deste problema',()=>draft(p,i)),button('Copiar SOAP deste CIAP',()=>copiarTextoSeguro(soapFor(capture(p)[i]),'SOAP por problema copiado.')),button('Remover código',()=>{states.get(p).splice(i,1);renderSelected(p);persist(p);}));out.append(card);
+    });card.append(grid,button('Gerar rascunho deste problema',()=>draft(p,i)),button('Copiar SOAP deste CIAP',()=>{if(window.ESFCorrimentoPN&&!ESFCorrimentoPN.validate(p))return;if(p==='smu'&&window.ESFSaudeMulher&&!ESFSaudeMulher.validate())return;copiarTextoSeguro(soapFor(capture(p)[i]),'SOAP por problema copiado.');}),button('Remover código',()=>{states.get(p).splice(i,1);renderSelected(p);persist(p);}));out.append(card);
   });}
   function apply(p){
     if(window.ESFCorrimentoPN&&!window.ESFCorrimentoPN.validate(p))return;

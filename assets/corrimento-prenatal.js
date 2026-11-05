@@ -31,7 +31,7 @@
     const d=data(p),e=R.discharge(d),r=record(p);e.pending.push(...obstetricAlerts(p));
     const denies=[get(p,'queixas'),...selected(p)].some(s=>/nega[^.!?;\n]*(corrimento|queixas)|sem (queixas|corrimento)/.test(norm(s)));
     if(active(p)&&denies)e.pending.push('Concilie a negativa de queixas/corrimento registrada na anamnese com esta avaliação');
-    if(d.diagnostico==='cand'&&!(Number(d.duracao)>=10&&Number(d.duracao)<=14))e.pending.push('Definir duração vaginal de 10 a 14 dias (protocolo municipal: mínimo 10)');
+    if(d.diagnostico==='cand'&&!(Number.isInteger(Number(d.duracao))&&Number(d.duracao)>=10&&Number(d.duracao)<=14))e.pending.push('Registrar duração em dias inteiros: mínimo 10 pelo protocolo. Este assistente permite 10 a 14 dias; outras durações exigem registro e revisão individual');
     e.pending=[...new Set(e.pending)];return {d,e,r,stale:!!r&&(!active(p)||r.fingerprint!==fingerprint(p))};
   }
   function summary(p,keys){return keys.filter(k=>val(p,k)).map(k=>{const el=byId(p+'-corr-'+k),value=el.tagName==='SELECT'?el.selectedOptions[0]?.textContent:el.value;return `${labels.get(k)}: ${value}`;}).join('\n');}

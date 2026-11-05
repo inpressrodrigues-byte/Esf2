@@ -29,7 +29,7 @@
   function saveRecords(items){$('protocolo-registros').value=JSON.stringify(items);$('protocolo-registros').dispatchEvent(new Event('input',{bubbles:true}));}
   function stale(){const f=fingerprint();return records().some(r=>r.fingerprint!==f);}
   function validate(){if(stale()){showToast('A avaliação mudou. Remova ou confirme novamente as condutas no painel de registros antes de gerar o SOAP.');return false;}return true;}
-  function validateForAI(){if(!validate())return false;if(records().length&&v('soap-base')!==fingerprint()+v('protocolo-registros')){showToast('Gere novamente o SOAP local para incluir as condutas confirmadas antes de continuar.');return false;}return true;}
+  function validateForAI(){if(!validate())return false;if((records().length||v('soap-base'))&&v('soap-base')!==fingerprint()+v('protocolo-registros')){showToast('Gere novamente o SOAP local para incluir as condutas confirmadas antes de continuar.');return false;}return true;}
   function record(r){
     const previous=records().find(x=>x.id===r.id);if(previous?.ciap&&previous.ciap!==r.ciap&&window.ESFCiap)ESFCiap.restore('smu',ESFCiap.capture('smu').filter(c=>!(c.code===previous.ciap&&c.p===previous.plan)));
     const items=records().filter(x=>x.id!==r.id);items.push({...r,fingerprint:fingerprint()});saveRecords(items);syncCiap();refresh();showToast('Conduta confirmada. Será incluída no SOAP local e no CIAP deste problema.');
@@ -54,7 +54,7 @@
   function treatmentState(){
     const data=dischargeData(),e=R.discharge(data);
     if(v('alerts')||document.querySelector('#pg-saude-mulher [data-priority]:checked'))e.pending.push('Revisar os alertas/prioridade selecionados');
-    if(data.gestante==='Sim'&&data.diagnostico==='cand'&&!(Number(v('corr-duracao'))>=10&&Number(v('corr-duracao'))<=14))e.pending.push('Definir duração vaginal de 10 a 14 dias conforme avaliação (protocolo: mínimo 10)');
+    if(data.gestante==='Sim'&&data.diagnostico==='cand'&&!(Number.isInteger(Number(v('corr-duracao')))&&Number(v('corr-duracao'))>=10&&Number(v('corr-duracao'))<=14))e.pending.push('Registrar duração em dias inteiros: mínimo 10 pelo protocolo. Este assistente permite 10 a 14 dias; outras durações exigem registro e revisão individual');
     return {data,e};
   }
   function renderDischarge(){

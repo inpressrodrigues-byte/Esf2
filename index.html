@@ -6140,7 +6140,7 @@ function condutaProtocoladaModulo(p,contexto=''){
   }
   if(p==='ist'){
     const hivReagentes=(t.match(/(?:duo-hiv2?|hiv2?|tr.?[12])[^:;]{0,30}:\s*reagente/g)||[]).length;
-    if(/contexto_(gestante|lactante)/.test(t)&&/candidiase|vaginose|tricomon|herpes/.test(t))return decisaoProtocolar(fonte,'Aplicar o fluxo específico do pré-natal/puerpério. O protocolo IST municipal não autoriza usar automaticamente o esquema de não gestante neste contexto.','Não sugerida automaticamente para gestante/lactante.','Definir conforme protocolo obstétrico e avaliação responsável.',true,'Gestação com herpes genital deve ser encaminhada para avaliação médica. Para candidíase, vaginose e tricomoníase, consultar o Protocolo de Assistência ao Pré-Natal de Toledo.');
+    if(/contexto_(gestante|lactante)/.test(t)&&/candidiase|vaginose|tricomon|herpes|cervicite|uretrite|corrimento (branco|grumoso|cinza|amarelad|esverdead|espumoso|uretral)|prurido vulvovaginal|ardencia vulvar|material mucopurulento|gonococo|clamidia|estranguria|eritema de meato|dor uretral/.test(t))return decisaoProtocolar(fonte,'Aplicar o fluxo específico do pré-natal/puerpério. O protocolo IST municipal não autoriza usar automaticamente o esquema de não gestante neste contexto.','Não sugerida automaticamente para gestante/lactante.','Definir conforme protocolo obstétrico e avaliação responsável.',true,'Gestação com herpes genital deve ser encaminhada para avaliação médica. Para corrimento/cervicite, usar a avaliação estruturada de Saúde da Mulher 2026 integrada ao pré-natal; para uretrite, revisar o esquema específico para gestação/lactação antes de prescrever.');
     if(/candidiase complicada|candidiase.*recorrente/.test(t))return decisaoProtocolar(fonte,'Encaminhar para avaliação médica. Investigar causas sistêmicas predisponentes.','Definir após avaliação médica.','Definir após avaliação médica.',true,'Aplica-se à recorrência em menos de 30 dias ou quatro ou mais episódios/ano. Investigar diabetes, imunodepressão/HIV e uso de corticoides.');
     if(/candidiase|corrimento branco|corrimento grumoso|prurido vulvovaginal|ardencia vulvar/.test(t))return decisaoProtocolar(fonte,'Quadro compatível com candidíase vulvovaginal: confirmar avaliação clínica antes de registrar tratamento. CVV complicada, recorrência em menos de 30 dias ou quatro ou mais episódios/ano exige avaliação médica.','Primeira escolha: miconazol creme vaginal 2%. Segunda escolha: fluconazol VO ou itraconazol VO.','Miconazol: 1 aplicador cheio à noite por 7 dias. Fluconazol: 150 mg VO, dose única. Itraconazol: 100 mg, 2 comprimidos VO, 2x/dia por 1 dia.',true,'Parcerias não precisam ser tratadas, exceto se sintomáticas. Investigar diabetes, imunodepressão/HIV e uso de corticoides nos casos recorrentes/difíceis.');
     if(/diagnostico clinico.*candidiase|diagnostico confirmado.*candidiase/.test(t))return decisaoProtocolar(fonte,'Tratar candidíase vulvovaginal após diagnóstico clínico registrado. CVV complicada, recorrência em menos de 30 dias ou quatro ou mais episódios/ano exige avaliação médica.','Primeira escolha: miconazol creme vaginal 2%. Segunda escolha: fluconazol VO ou itraconazol VO.','Miconazol: 1 aplicador cheio à noite por 7 dias. Fluconazol: 150 mg VO, dose única. Itraconazol: 100 mg, 2 comprimidos VO, 2x/dia por 1 dia.',true,'Parcerias não precisam ser tratadas, exceto se sintomáticas. Investigar causas sistêmicas nos casos recorrentes ou de difícil controle: diabetes, imunodepressão/HIV e uso de corticoides.');
@@ -8645,7 +8645,12 @@ function sanitizarRegrasSAEProtocoladas(p,regras){
   return regras.map(r=>({...r,intervencoes:sanitizarTextoSAEProtocolado(p,r.intervencoes),orientacoes:sanitizarTextoSAEProtocolado(p,r.orientacoes),cuidados:(r.cuidados||[]).filter(x=>!/(procur(?:a|ar).*urg[eê]ncia|procura.*atendimento|medica[cç][aã]o|encaminh)/i.test(x))}));
 }
 function aplicarSugestaoSAE(p,chave){const s=SAE_SUGESTOES[chave];if(!s)return;const regras=sanitizarRegrasSAEProtocoladas(p,[s]);preencherCamposSAE(p,regras);renderizarPreviewSAE(p,regras);showToast('Sugestão SAE aplicada. Revise e valide antes de salvar.')}
-function coletarTextoSAE(p,textoExtra=''){const pg=document.getElementById('pg-'+(moduloPorPrefixo(p)?.page||'')),campos=pg?Array.from(pg.querySelectorAll('input:not([type=file]),select,textarea')).map(e=>`${e.id} ${e.value||''}`).join(' '):'',chips=pg?Array.from(pg.querySelectorAll('.clinical-chip.selected,.complaint-chip.selected,.alert-chip.selected')).map(x=>x.textContent).join(' '):'',guia=typeof coletarGuiaClinico==='function'?coletarGuiaClinico(p):{};return[textoExtra,campos,chips,guia.anamnese,guia.exame,guia.alertas,guia.condutas].join(' ')}
+function campoClinicoDerivavel(e){
+  if(e.hidden||e.type==='hidden'||e.type==='file'||e.closest('[data-ciap]'))return false;
+  if((e.type==='checkbox'||e.type==='radio')&&!e.checked)return false;
+  return !Object.values(SOAP_IDS_MODULO).some(ids=>Object.values(ids).includes(e.id));
+}
+function coletarTextoSAE(p,textoExtra=''){const pg=document.getElementById('pg-'+(moduloPorPrefixo(p)?.page||'')),campos=pg?Array.from(pg.querySelectorAll('input:not([type=file]),select,textarea')).filter(campoClinicoDerivavel).map(e=>`${e.id} ${e.value||''}`).join(' '):'',chips=pg?Array.from(pg.querySelectorAll('.clinical-chip.selected,.complaint-chip.selected,.alert-chip.selected')).map(x=>x.textContent).join(' '):'',guia=typeof coletarGuiaClinico==='function'?coletarGuiaClinico(p):{};return[textoExtra,campos,chips,guia.anamnese,guia.exame,guia.alertas,guia.condutas].join(' ')}
 function renderizarPreviewSAE(p,regras){const out=document.getElementById(`${p}-sae-preview`);if(!out)return;out.className='sae-preview on';out.innerHTML=`<div class="sae-preview-head"><span class="clinical-seal suggestion">Sugestão</span> <span class="clinical-seal validate">Validar pelo enfermeiro</span> SAE sugerida a partir dos dados registrados</div><div class="sae-preview-grid">${regras.map(r=>`<div class="sae-preview-item"><strong>${r.diagnostico}</strong><b>Problema:</b> ${r.problema}<br><b>NOC compatível:</b> ${r.resultado}<br><b>NIC compatível:</b> ${r.intervencoes}</div>`).join('')}</div><div class="sae-source">Sugestões para apoio ao Processo de Enfermagem, com títulos baseados na <a href="${SAE_NANDA_FONTE_URL}" target="_blank" rel="noopener">NANDA-I 2018–2020</a>. O diagnóstico de enfermagem, os resultados e as intervenções devem ser avaliados, ajustados e validados pelo enfermeiro responsável.</div>`}
 function gerarSAE(p,silencioso=false,textoExtra=''){const texto=coletarTextoSAE(p,textoExtra);let regras=SAE_REGRAS.filter(x=>x.rx.test(texto)).slice(0,5);if(!regras.length)regras.push({problema:'Necessidade de promoção e manutenção da saúde',diagnostico:'Disposição para melhora da gestão da saúde',objetivo:'Fortalecer autocuidado, prevenção e continuidade do acompanhamento.',resultado:'Conhecimento e autogestão da saúde melhorados.',intervencoes:'Realizar educação em saúde, identificar necessidades, pactuar cuidados e retorno.',orientacoes:'Manter acompanhamento, vacinação e cuidados pactuados.',cuidados:['Comparecer ao retorno agendado','Manter vacinação atualizada']});regras=sanitizarRegrasSAEProtocoladas(p,regras);preencherCamposSAE(p,regras,true);renderizarPreviewSAE(p,regras);if(!silencioso)showToast(`${regras.length} sugestão(ões) SAE gerada(s). Revise e valide clinicamente.`);return regras}
 function limparSAE(p){['problema','diagnostico','objetivo','resultado','intervencoes','orientacoes','prescricao','prazo','responsavel','evolucao'].forEach(k=>{const e=document.getElementById(`${p}-pc-${k}`);if(e)e.value=''});document.querySelectorAll(`#${p}-plano-cuidados .quick-care.selected`).forEach(x=>x.classList.remove('selected'));const out=document.getElementById(`${p}-sae-preview`);if(out){out.className='sae-preview';out.innerHTML=''}showToast('SAE limpa.')}
@@ -8844,9 +8849,10 @@ function textoRespostaAISoap(json){
 }
 function extrairSoapTextoIA(texto){
   const raw=String(texto||'').replace(/\r/g,'').replace(/[–—−]/g,'-').trim();
-  const header=l=>`${l}[ \\t]*(?::|-[^\\n]*)`;
+  const nomes={S:'SUBJETIVO',O:'OBJETIVO',A:'AVALIA(?:Ç|C)(?:Ã|A)O',P:'PLANO(?:[ \\t]*/[ \\t]*CONDUTA)?'};
+  const header=l=>`${l}[ \\t]*(?::|-[ \\t]*(?:(?:${nomes[l]})[ \\t]*:?)?)`;
   const sec=(letra,next)=>{
-    const prox=next==='$'?'$':`(?=\\n[ \\t]*(?:${next.split('|').map(header).join('|')})[ \\t]*(?:\\n|$))`;
+    const prox=next==='$'?'$':`(?=\\n[ \\t]*(?:${next.split('|').map(header).join('|')}))`;
     const rx=new RegExp(`(?:^|\\n)[ \\t]*${header(letra)}[ \\t]*\\n?([\\s\\S]*?)${prox}`,'i');
     return (raw.match(rx)?.[1]||'').trim();
   };
@@ -8932,11 +8938,9 @@ function aplicarTextoCompletoAISoap(prefix,novoSOAP,pendencias){
   const ids=SOAP_IDS_MODULO[prefix];if(!ids)return false;
   const s=document.getElementById(ids.s),o=document.getElementById(ids.o),a=document.getElementById(ids.a),p=document.getElementById(ids.p);if(!s||!o||!a||!p)return false;
   novoSOAP=normalizarTextoSoapRetornado(novoSOAP);
-  const partes=extrairSoapTextoIA(novoSOAP),temPartes=!!(partes.s||partes.o||partes.a||partes.p);
-  if(!temPartes){
-    s.value=String(novoSOAP||'').trim();
-    o.value='';a.value='';p.value='';
-  }else{
+  const partes=extrairSoapTextoIA(novoSOAP);
+  if(!['s','o','a','p'].every(k=>partes[k]?.trim())){showToast('SOAP IA incompleto: revise as quatro seções S, O, A e P. A evolução local foi preservada.');return false;}
+  {
     s.value=`DESCRIÇÃO DA CONSULTA\n${(partes.descricao||extrairDescricaoSoapAtual(novoSOAP)||'Consulta de enfermagem realizada na APS/ESF.').trim()}\n\nS:${partes.s?`\n${partes.s.trim()}`:''}`;
     o.value=`O:${partes.o?`\n${partes.o.trim()}`:''}`;
     a.value=`A:${partes.a?`\n${partes.a.trim()}`:''}`;
@@ -11716,7 +11720,7 @@ function textoConsultaCentral(prefix){
   const cfg=CENTRAL_PROTOCOLAR_MODULOS[prefix],page=cfg&&document.getElementById(paginaDoModulo(prefix));
   if(!page)return'';
   const soapIds=new Set(Object.values(SOAP_IDS_MODULO).flatMap(x=>Object.values(x)));
-  const campos=Array.from(page.querySelectorAll('input,select,textarea')).filter(e=>!soapIds.has(e.id)&&!/^lab-livre-texto-/.test(e.id||'')&&e.type!=='hidden'&&e.type!=='file'&&((e.type==='checkbox'||e.type==='radio')?e.checked:String(e.value||'').trim())).map(e=>`${e.id||e.name}: ${(e.type==='checkbox'||e.type==='radio')?(e.closest('label')?.textContent||e.value):e.value}`);
+  const campos=Array.from(page.querySelectorAll('input,select,textarea')).filter(e=>campoClinicoDerivavel(e)&&!soapIds.has(e.id)&&!/^lab-livre-texto-/.test(e.id||'')&&e.type!=='hidden'&&e.type!=='file'&&((e.type==='checkbox'||e.type==='radio')?e.checked:String(e.value||'').trim())).map(e=>`${e.id||e.name}: ${(e.type==='checkbox'||e.type==='radio')?(e.closest('label')?.textContent||e.value):e.value}`);
   const chips=Array.from(page.querySelectorAll('.clinical-chip.selected,.complaint-chip.selected,.alert-chip.selected')).map(e=>e.textContent.trim());
   return normalizarTextoProtocolo([...campos,...chips,resumoExamesParaCentral(prefix)].join(' | '));
 }
@@ -11724,7 +11728,12 @@ function decisoesCentralProtocolar(prefix){
   const t=textoConsultaCentral(prefix),out=[],push=(titulo,d)=>{if(d?.protocolada&&d.conduta&&!out.some(x=>x.d.texto===d.texto))out.push({titulo,d})};
   const istRx=/candidiase|vaginose|tricomon|cervicite|uretrite|sifilis|herpes|condiloma|hpv|cancroide|linfogranuloma|lgv|donovanose|hiv.*reagente|hbsag.*reagente|anti.?hcv.*reagente/;
   const hipRx=/has mal controlada|tres medicacoes em dose plena|dm sem controle|1 unidade\/kg|tfg menor que 30|isglt2|insuficiencia cardiaca|arritmia|hipotireoidismo|hipertireoidismo|nodulo de tireoide|bocio multinodular|obesidade secundaria|cirurgia bariatrica|hiperprolactinemia|sindrome coronariana/;
-  if(window.ESFCorrimentoPN?.isActive(prefix))push('Corrimento na gestação — Saúde da Mulher 2026',window.ESFCorrimentoPN.centralDecision(prefix));
+  if(window.ESFCorrimentoPN?.isActive(prefix)){
+    push('Corrimento na gestação — Saúde da Mulher 2026',window.ESFCorrimentoPN.centralDecision(prefix));
+    const fonte={nome:'Saúde da Mulher — Toledo 2026, seções 2.2.1 e 2.3',url:'https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2026-09/protocolo_municipal_de_enf_cuidado_em_saude_da_mulher_2026.pdf#page=20'};
+    const testes=[['Sífilis',/(?:sifilis|vdrl)\s*[:=-]?\s*(?:reagente|positivo)\b/,'Revisar história de tratamento, solicitar/avaliar VDRL e classificar o estágio clínico para definir a conduta e o seguimento gestacional.'],['HIV',/hiv(?:\s*(?:tr)?[12])?\s*[:=-]?\s*(?:reagente|positivo)\b/,'Acolher, aconselhar e conferir o algoritmo diagnóstico; um teste isolado não confirma o diagnóstico. Seguir o fluxo municipal de confirmação e encaminhamento.'],['Hepatites',/(?:hbsag|anti.?hcv|hepatite [bc])\s*[:=-]?\s*(?:reagente|positivo)\b/,'Acolher, aconselhar e seguir o fluxo municipal de confirmação, avaliação e encaminhamento no pré-natal.']];
+    for(const [nome,rx,conduta]of testes)if(t.split(/[|;\n.!?]/).some(c=>!/(?:\bnega\b|\bsem\b|\bnao\b|\bhistorico\b|\bantecedente\b)/.test(c)&&rx.test(c)))push('Teste reagente — '+nome,decisaoProtocolar(fonte,conduta,'Definir após avaliação específica; não inferir tratamento pelo corrimento.','Não definida automaticamente.'));
+  }
   else if(istRx.test(t))push('Protocolo IST Toledo',condutaProtocoladaModulo('ist',`${t} ${prefix==='pna'||prefix==='pnc'?'CONTEXTO_GESTANTE':''} ${prefix==='puerp'?'CONTEXTO_LACTANTE':''}`));
   if(hipRx.test(t))push('Cardiologia / Endocrinologia',condutaProtocoladaModulo('hip',t));
   if(/lesao de pele|lesão de pele|ferida|ulcera|necrose|dermatoscopia|teledermato/.test(t))push('Teledermatologia',condutaProtocoladaModulo('fer',t));
@@ -12527,19 +12536,30 @@ async function gerarPacoteDiabetesGestacionalPN(){
       @media(max-width:800px){.ia-compare-grid{grid-template-columns:1fr}.ia-compare-grid textarea{min-height:260px}}
     `;document.head.appendChild(st);
   }
-  function mostrarComparadorIASoap(prefix,local,ia,pendencias=[]){
+  function contextoConsultaIA(prefix){
+    const page=document.getElementById(paginaDoModulo(prefix));
+    return JSON.stringify({prefix:prefixoPaginaAtual(),owner:CURRENT_AUTH_USER_ID,campos:[...(page?.querySelectorAll('input,select,textarea')||[])].filter(e=>e.type!=='button'&&e.type!=='file').map(e=>[e.id||e.name,e.value,e.checked]),chips:[...(page?.querySelectorAll('.clinical-chip.selected,.complaint-chip.selected,.alert-chip.selected')||[])].map(e=>e.textContent)});
+  }
+  function revisaoIAAtual(prefix){
+    const last=window.__ultimoSoapIA;
+    if(!last||last.ownerId!==CURRENT_AUTH_USER_ID){showToast('A sessão mudou. Gere novamente após entrar.');return false;}
+    if(last.prefix!==prefix||last.contexto!==contextoConsultaIA(prefix)){showToast('A consulta mudou. Gere novamente o SOAP local e solicite uma nova revisão da IA.');return false;}
+    return true;
+  }
+  window.copiarSOAPIARevisado=function(){const p=window.__ultimoSoapIA?.prefix;if(!revisaoIAAtual(p))return;return copiarTextoSeguro(document.getElementById('ia-soap-text-review')?.value,'SOAP IA copiado.');};
+  function mostrarComparadorIASoap(prefix,local,ia,pendencias=[],contexto){
     ensureIaCompareStyles();
     document.getElementById('ia-soap-compare')?.remove();
     const div=document.createElement('div');div.id='ia-soap-compare';div.className='ia-compare-backdrop';
-    div.innerHTML=`<div class="ia-compare-modal"><h3 style="margin:0 0 6px">Comparar SOAP local x SOAP IA</h3><div class="alert alert-i" style="margin-bottom:12px">A IA não substituiu automaticamente. Revise e aplique somente se estiver correto.</div><div class="ia-compare-grid"><div><strong>SOAP local</strong><textarea readonly>${escTR(local)}</textarea></div><div><strong>SOAP IA</strong><textarea id="ia-soap-text-review">${escTR(ia)}</textarea></div></div><div class="ia-compare-actions"><button class="btn btn-s" onclick="document.getElementById('ia-soap-compare').remove()">Manter local</button><button class="btn btn-s" onclick="copiarTextoSeguro(document.getElementById('ia-soap-text-review').value,'SOAP IA copiado.')">Copiar SOAP IA</button><button class="btn btn-p" onclick="aplicarSOAPIARevisado('${prefix}')">Aplicar SOAP IA revisado</button></div></div>`;
+    div.innerHTML=`<div class="ia-compare-modal"><h3 style="margin:0 0 6px">Comparar SOAP local x SOAP IA</h3><div class="alert alert-i" style="margin-bottom:12px">A IA não substituiu automaticamente. Revise e aplique somente se estiver correto.</div><div class="ia-compare-grid"><div><strong>SOAP local</strong><textarea readonly>${escTR(local)}</textarea></div><div><strong>SOAP IA</strong><textarea id="ia-soap-text-review">${escTR(ia)}</textarea></div></div><div class="ia-compare-actions"><button class="btn btn-s" onclick="document.getElementById('ia-soap-compare').remove()">Manter local</button><button class="btn btn-s" onclick="copiarSOAPIARevisado()">Copiar SOAP IA</button><button class="btn btn-p" onclick="aplicarSOAPIARevisado('${prefix}')">Aplicar SOAP IA revisado</button></div></div>`;
     document.body.appendChild(div);
-    window.__ultimoSoapIA={prefix,ia,pendencias,ownerId:CURRENT_AUTH_USER_ID};
+    window.__ultimoSoapIA={prefix,ia,pendencias,ownerId:CURRENT_AUTH_USER_ID,contexto};
   }
   window.aplicarSOAPIARevisado=function(prefix){
-    if(window.__ultimoSoapIA?.ownerId!==CURRENT_AUTH_USER_ID)return showToast('A sessão mudou. Gere novamente após entrar.');
+    if(!revisaoIAAtual(prefix))return;
     const txt=document.getElementById('ia-soap-text-review')?.value||window.__ultimoSoapIA?.ia||'';
     if(!txt.trim())return showToast('SOAP IA vazio.');
-    aplicarTextoCompletoAISoap?.(prefix,txt,window.__ultimoSoapIA?.pendencias||[]);
+    if(!aplicarTextoCompletoAISoap?.(prefix,txt,window.__ultimoSoapIA?.pendencias||[]))return;
     document.getElementById('ia-soap-compare')?.remove();
     showToast('SOAP IA aplicado após revisão.');
   };
@@ -12557,11 +12577,12 @@ async function gerarPacoteDiabetesGestacionalPN(){
       mostrarMensagemIA?.('Gerando SOAP com IA...');
       const tipoConsulta=tipoConsultaAISoap?.(prefix)||'consulta';
       const dadosConsulta=montarDadosConsultaParaIA(tipoConsulta);
-      const dono=CURRENT_AUTH_USER_ID;
+      const dono=CURRENT_AUTH_USER_ID,contexto=contextoConsultaIA(prefix);
       const data=await chamarIASoap(cfg,{tipoAcao:'gerar_soap',tipoConsulta,dadosConsulta});
       if(dono!==CURRENT_AUTH_USER_ID)throw new Error('A sessão mudou. Gere novamente após entrar.');
+      if(contexto!==contextoConsultaIA(prefix))throw new Error('A consulta mudou durante a geração. Gere novamente o SOAP local antes de solicitar a IA.');
       if(data.bloqueado)throw new Error('A IA indicou bloqueio. '+(data.pendencias||[]).join(' '));
-      mostrarComparadorIASoap(prefix,soapLocal,data.soap,data.pendencias||[]);
+      mostrarComparadorIASoap(prefix,soapLocal,data.soap,data.pendencias||[],contexto);
       mostrarMensagemIA?.(data.bloqueado?'IA SOAP retornou bloqueio/pendências para revisão.':'SOAP IA gerado. Revise antes de aplicar.');
     }catch(e){
       mostrarMensagemIA?.(explicarFalhaAISoap(e,cfg));
@@ -12673,7 +12694,7 @@ async function gerarPacoteDiabetesGestacionalPN(){
   function page(prefix){const map={pna:'pg-pn-abertura',pnc:'pg-pn-consulta',pu:'pg-puericultura',prev:'pg-preventivo',id:'pg-idoso',sm:'pg-saude-mental',ger:'pg-consulta-geral',hip:'pg-hiperdia',fer:'pg-feridas',puerp:'pg-puerperio',ist:'pg-ist',vd:'pg-visita-domiciliar'};return el(map[prefix]||'')}
   function textoPagina(prefix){
     const pg=page(prefix);if(!pg)return'';
-    const campos=Array.from(pg.querySelectorAll('input,select,textarea')).filter(c=>c.type!=='hidden'&&c.type!=='file').map(c=>{
+    const campos=Array.from(pg.querySelectorAll('input,select,textarea')).filter(campoClinicoDerivavel).map(c=>{
       if((c.type==='checkbox'||c.type==='radio')&&!c.checked)return'';
       const label=c.closest('label')?.textContent||pg.querySelector(`label[for="${c.id}"]`)?.textContent||c.id||c.name||'';
       return `${label}: ${(c.type==='checkbox'||c.type==='radio')?'marcado':c.value}`;
