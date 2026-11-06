@@ -37,6 +37,7 @@
       riskSignature = '';
     }
     syncExam(prefix(page));
+    window.ESFExames?.render(prefix(page)); window.ESFConsultaGuiada?.refresh(prefix(page));
     refreshChips(page);
     onNavigate(page);
   }
@@ -52,6 +53,7 @@
   function beforeRestore(page) {
     if (!page) return;
     restoreValues(page,initial.get(page.id));
+    window.ESFConsultaGuiada?.reset(prefix(page));
     page.querySelectorAll('[data-ux-key]').forEach(e=>e.classList.remove('selected'));
     if (page.id==='pg-pn-abertura' && byId('ux-risk-reviewed')) byId('ux-risk-reviewed').checked=false;
     saved.delete(stateKey(page));dirty.delete(stateKey(page));riskSignature='';
@@ -137,6 +139,7 @@
     if (typeof AI_SOAP_PENDENCIAS !== 'undefined') delete AI_SOAP_PENDENCIAS[p];
     if (typeof ATENDIMENTO_EM_EDICAO !== 'undefined') ATENDIMENTO_EM_EDICAO = null;
     riskSignature = ''; saved.delete(stateKey(page)); touch(page); recalculate(page); saveDraft(page);
+    window.ESFExames?.render(p);window.ESFConsultaGuiada?.refresh(p);
     closeMenus(); showToast('Avaliação e seleções limpas. Identificação do paciente mantida.');
   }
 
@@ -453,7 +456,7 @@
     document.body.classList.add('ux-compact','ux-prumo');
     const homeBackground=make('div');homeBackground.id='ux-home-background';homeBackground.setAttribute('aria-hidden','true');document.body.prepend(homeBackground);
     document.querySelectorAll('.pg').forEach(page=>{
-      const controls=[...page.querySelectorAll('input,select,textarea')];legacy.set(page.id,controls.filter(e=>!e.closest('.pn-corr')));
+      const controls=[...page.querySelectorAll('input,select,textarea')].filter(e=>!e.closest('.exam-kits')&&e.id!=='smu-contra-continua');legacy.set(page.id,controls.filter(e=>!e.closest('.pn-corr')));
       controls.forEach((e,i)=>{if(!e.id&&!['file','password'].includes(e.type))e.id=`ux-field-${page.id}-${i}`;});
       page.querySelectorAll('.clinical-chip,.complaint-chip,.alert-chip,.quick-care').forEach((e,i)=>e.dataset.uxKey=`${page.id}:${i}`);
       initial.set(page.id,collectValues(page));

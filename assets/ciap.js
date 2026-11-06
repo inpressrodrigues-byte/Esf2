@@ -69,9 +69,10 @@
     const grid=document.createElement('div');grid.className='soap-grid';
     [['s','S — relato desta queixa'],['o','O — achados deste problema'],['a','A — avaliação deste problema'],['p','P — conduta realizada/pactuada para este problema']].forEach(([key,label])=>{
       const wrap=document.createElement('div');wrap.className='f';const l=document.createElement('label'),input=document.createElement('textarea');input.id=p+'-ciap-'+item.code+'-'+key;l.htmlFor=input.id;l.textContent=label;input.value=item[key];input.oninput=()=>{states.get(p)[i][key]=input.value;persist(p);};wrap.append(l,input);grid.append(wrap);
-    });card.append(grid,button('Gerar rascunho deste problema',()=>draft(p,i)),button('Copiar SOAP deste CIAP',()=>{if(window.ESFCorrimentoPN&&!ESFCorrimentoPN.validate(p))return;if(p==='smu'&&window.ESFSaudeMulher&&!ESFSaudeMulher.validate())return;copiarTextoSeguro(soapFor(capture(p)[i]),'SOAP por problema copiado.');}),button('Remover código',()=>{states.get(p).splice(i,1);renderSelected(p);persist(p);}));out.append(card);
+    });card.append(grid,button('Gerar rascunho deste problema',()=>draft(p,i)),button('Copiar SOAP deste CIAP',()=>{if(window.ESFExames&&!ESFExames.validate(p))return;if(window.ESFCorrimentoPN&&!ESFCorrimentoPN.validate(p))return;if(p==='smu'&&window.ESFSaudeMulher&&!ESFSaudeMulher.validate())return;copiarTextoSeguro(soapFor(capture(p)[i]),'SOAP por problema copiado.');}),button('Remover código',()=>{states.get(p).splice(i,1);renderSelected(p);persist(p);}));out.append(card);
   });}
   function apply(p){
+    if(window.ESFExames&&!ESFExames.validate(p))return;
     if(window.ESFCorrimentoPN&&!window.ESFCorrimentoPN.validate(p))return;
     if(p==='smu'&&window.ESFSaudeMulher&&!window.ESFSaudeMulher.validate())return;
     const items=capture(p),ids=SOAP_IDS_MODULO[p];if(!items.length||!ids)return showToast('Selecione ao menos um CIAP-2.');
@@ -79,7 +80,7 @@
     if(Object.values(ids).some(id=>byId(id)?.value)&&!confirm('Substituir o SOAP atual pelos blocos revisados de cada CIAP?'))return;
     pularFinalizadorSoapAutomatico(p);
     for(const k of ['s','o','a','p']){const el=byId(ids[k]);el.value=items.map(i=>'CIAP-2 '+i.code+' — '+catalog.find(c=>c.code===i.code)?.display+'\n'+(i[k]||'Não registrado para este problema.')).join('\n\n');el.dispatchEvent(new Event('input',{bubbles:true}));}
-    showToast('SOAP organizado por problema. Revise antes de salvar.');
+    window.ESFExames?.appendSoap(p);showToast('SOAP organizado por problema. Revise antes de salvar.');
   }
   function mount(){
     for(const cfg of Object.values(MODULOS_ATENDIMENTO)){

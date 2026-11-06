@@ -102,7 +102,7 @@
       anchor.append(root);
       const shortcut=document.createElement('button');shortcut.type='button';shortcut.className='btn btn-s';shortcut.id=p+'-corr-abrir';shortcut.textContent='Abrir avaliação de corrimento na gestação';shortcut.onclick=()=>{byId(p+'-corr-ativo').value='Sim';byId(p+'-corr-ativo').dispatchEvent(new Event('change',{bubbles:true}));render(p);root.scrollIntoView({block:'start',behavior:'smooth'});};byId(p+'-queixas')?.closest('.f')?.after(shortcut);
       let timer;const refresh=()=>{clearTimeout(timer);timer=setTimeout(()=>render(p),60);};
-      for(const event of ['input','change'])page(p).addEventListener(event,e=>{if(!e.target.closest('[data-ciap]')&&!Object.values(SOAP_IDS_MODULO[p]).includes(e.target.id))refresh();});
+      for(const event of ['input','change'])page(p).addEventListener(event,e=>{if(!e.target.closest('[data-ciap],.exam-kits,.consultation-guide')&&!Object.values(SOAP_IDS_MODULO[p]).includes(e.target.id))refresh();});
       page(p).addEventListener('click',e=>{
         const b=e.target.closest('button');
         if(b?.dataset.pnCorrDiagnosis){byId(p+'-corr-diagnostico').value=b.dataset.pnCorrDiagnosis;byId(p+'-corr-confirmado').value='Não';byId(p+'-corr-diagnostico').dispatchEvent(new Event('change',{bubbles:true}));showToast('Hipótese selecionada. Confirme os achados e critérios clínicos antes do tratamento.');}

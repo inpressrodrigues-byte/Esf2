@@ -903,11 +903,16 @@ body.sidebar-collapsed .dev-nav{display:none}
 <script defer src="assets/saude-mulher-regras.js"></script>
 <script defer src="assets/saude-mulher.js"></script>
 <script defer src="assets/corrimento-prenatal.js"></script>
+<link rel="stylesheet" href="assets/exames.css">
+<script defer src="assets/exames-regras.js"></script>
+<script defer src="assets/exames.js"></script>
 <script defer src="assets/usability.js?v=prumo-1"></script>
 <script defer src="assets/unidades-toledo.js"></script>
 <script defer src="assets/unidades.js"></script>
 <script defer src="assets/ciap.js"></script>
 <script defer src="assets/escopo.js"></script>
+<link rel="stylesheet" href="assets/consulta-guiada.css">
+<script defer src="assets/consulta-guiada.js"></script>
 </head>
 <body>
 
@@ -6145,10 +6150,7 @@ function condutaProtocoladaModulo(p,contexto=''){
     if(/candidiase|corrimento branco|corrimento grumoso|prurido vulvovaginal|ardencia vulvar/.test(t))return decisaoProtocolar(fonte,'Quadro compatível com candidíase vulvovaginal: confirmar avaliação clínica antes de registrar tratamento. CVV complicada, recorrência em menos de 30 dias ou quatro ou mais episódios/ano exige avaliação médica.','Primeira escolha: miconazol creme vaginal 2%. Segunda escolha: fluconazol VO ou itraconazol VO.','Miconazol: 1 aplicador cheio à noite por 7 dias. Fluconazol: 150 mg VO, dose única. Itraconazol: 100 mg, 2 comprimidos VO, 2x/dia por 1 dia.',true,'Parcerias não precisam ser tratadas, exceto se sintomáticas. Investigar diabetes, imunodepressão/HIV e uso de corticoides nos casos recorrentes/difíceis.');
     if(/diagnostico clinico.*candidiase|diagnostico confirmado.*candidiase/.test(t))return decisaoProtocolar(fonte,'Tratar candidíase vulvovaginal após diagnóstico clínico registrado. CVV complicada, recorrência em menos de 30 dias ou quatro ou mais episódios/ano exige avaliação médica.','Primeira escolha: miconazol creme vaginal 2%. Segunda escolha: fluconazol VO ou itraconazol VO.','Miconazol: 1 aplicador cheio à noite por 7 dias. Fluconazol: 150 mg VO, dose única. Itraconazol: 100 mg, 2 comprimidos VO, 2x/dia por 1 dia.',true,'Parcerias não precisam ser tratadas, exceto se sintomáticas. Investigar causas sistêmicas nos casos recorrentes ou de difícil controle: diabetes, imunodepressão/HIV e uso de corticoides.');
     if(/vaginose bacteriana recorrente/.test(t))return decisaoProtocolar(fonte,'Encaminhar para consulta médica.','Definir após consulta médica.','Definir após consulta médica.',true,'O protocolo municipal encaminha os casos recorrentes para consulta médica.');
-    if(/vaginose|corrimento cinza|odor f[eé]tido|odor de peixe|whiff positivo/.test(t))return decisaoProtocolar(fonte,'Quadro compatível com vaginose bacteriana sintomática: confirmar avaliação clínica antes de registrar tratamento. Casos recorrentes devem ser encaminhados para consulta médica.','Primeiras opções: metronidazol VO ou gel vaginal. Segunda opção: clindamicina VO.','Metronidazol 250 mg: 2 comprimidos VO, 2x/dia por 7 dias; OU 400 mg: 1 comprimido VO, 8/8h por 7 dias; OU 400 mg: 5 comprimidos VO em dose única, total 2 g; OU gel vaginal 100 mg/g, 1 aplicador à noite por 5 dias. Clindamicina 300 mg VO, 2x/dia por 7 dias.',true,'Não tratar parcerias de rotina. Evitar álcool durante metronidazol; suspender relações sexuais; manter tratamento durante menstruação.');
-    if(/diagnostico clinico.*vaginose|diagnostico confirmado.*vaginose/.test(t))return decisaoProtocolar(fonte,'Tratar vaginose bacteriana sintomática com diagnóstico registrado. Casos recorrentes devem ser encaminhados para consulta médica.','Primeiras opções: metronidazol VO ou gel vaginal. Segunda opção: clindamicina VO.','Metronidazol 250 mg: 2 comprimidos VO, 2x/dia por 7 dias; OU 400 mg: 1 comprimido VO, 8/8h por 7 dias; OU 400 mg: 5 comprimidos VO em dose única, total 2 g; OU gel vaginal 100 mg/g, 1 aplicador à noite por 5 dias. Clindamicina 300 mg VO, 2x/dia por 7 dias.',true,'Não tratar parcerias. No esquema metronidazol 2 g, orientar possível intolerância gástrica. Evitar álcool durante o tratamento; suspender relações sexuais; manter o tratamento durante a menstruação.');
-    if(/tricomon|corrimento amarelad|corrimento esverdead|corrimento espumoso/.test(t))return decisaoProtocolar(fonte,'Quadro compatível com tricomoníase: confirmar avaliação clínica antes de registrar tratamento; tratar a pessoa e parcerias sexuais com o mesmo esquema quando confirmado.','Metronidazol VO.','Metronidazol 400 mg: 5 comprimidos VO em dose única, total 2 g; OU metronidazol 250 mg: 2 comprimidos VO, 2x/dia por 7 dias.',true,'Tratar parcerias com o mesmo esquema. Evitar relações desprotegidas até tratamento completo e avaliar outras IST/testagem.');
-    if(/diagnostico clinico.*tricomon|diagnostico confirmado.*tricomon/.test(t))return decisaoProtocolar(fonte,'Tratar a pessoa e todas as parcerias sexuais com o mesmo esquema. Ofertar avaliação presencial, orientação e exames para outras IST às parcerias.','Metronidazol VO.','Metronidazol 400 mg: 5 comprimidos VO em dose única, total 2 g; OU metronidazol 250 mg: 2 comprimidos VO, 2x/dia por 7 dias.',true,'Tratar parcerias com o mesmo esquema. Se citologia apresentar alterações morfológicas associadas à tricomoníase, tratar e repetir a citologia após seis meses.');
+    if(/vaginose|corrimento cinza|odor f[eé]tido|odor de peixe|whiff positivo|tricomon|corrimento amarelad|corrimento esverdead|corrimento espumoso/.test(t))return decisaoProtocolar(FONTES_PROTOCOLARES_MODULOS.smu,'Avaliar a queixa em Saúde da Mulher → Corrimento / leucorreia. Registrar achados, gestação e sinais de alarme para comparar as hipóteses.','Selecionar o esquema após avaliação e confirmação no fluxo municipal de 2026.','Consultar a apresentação, via e duração do esquema no painel de corrimento.',true,'Ver protocolo Saúde da Mulher 2026, seção 2.1.1. Avaliar outras IST e parcerias conforme o diagnóstico.');
     if(/cervicite|material mucopurulento|dor a mobilizacao do colo|dor à mobilização do colo|sangramento ao toque|gonococo|clamidia/.test(t))return decisaoProtocolar(fonte,'Quadro compatível com cervicite/gonococo + clamídia: confirmar sinais clínicos e tratar/captar parcerias quando confirmado.','Ceftriaxona IM associada a azitromicina VO.','Ceftriaxona 500 mg IM, dose única + azitromicina 500 mg, 2 comprimidos VO, dose única.',true,'Solicitar/testar sífilis, HIV e hepatites B/C. Registrar dor à mobilização do colo, material mucopurulento e sangramento ao toque.');
     if(/diagnostico clinico.*cervicite|diagnostico confirmado.*cervicite/.test(t))return decisaoProtocolar(fonte,'Tratar cervicite gonocócica não complicada associada à infecção por clamídia e avaliar/tratar as parcerias presencialmente.','Ceftriaxona IM associada a azitromicina VO.','Ceftriaxona 500 mg IM, dose única + azitromicina 500 mg, 2 comprimidos VO, dose única.',true,'Solicitar exames de outras IST para as parcerias e identificar/captar outras parcerias sexuais.');
     if(/uretrite|corrimento uretral|dor uretral|estranguria|eritema de meato/.test(t))return decisaoProtocolar(fonte,'Quadro compatível com uretrite: confirmar avaliação clínica, investigar agente quando possível e tratar/captar parcerias quando confirmado. Alergia grave a cefalosporina exige avaliação médica.','Primeira opção: ceftriaxona IM + azitromicina VO. Segunda opção: ceftriaxona IM + doxiciclina VO.','Primeira opção: ceftriaxona 500 mg IM, dose única + azitromicina 500 mg, 2 comprimidos VO, dose única. Segunda opção: ceftriaxona 500 mg IM, dose única + doxiciclina 100 mg VO, 2x/dia por 7 dias.',true,'Paciente e parcerias devem evitar relações desprotegidas até tratamento completo ou 7 dias após dose única.');
@@ -6575,7 +6577,7 @@ function paginaDoModulo(prefix){return prefix==='pna'?'pg-pn-abertura':prefix===
 function validarCoerenciaSoap(prefix){
   const txt=soapTextoModulo(prefix),avisos=[],add=x=>{if(x&&!avisos.includes(x))avisos.push(x)};
   const pagina=document.querySelector('.pg.on')||document.getElementById(paginaDoModulo(prefix));
-  const textoPagina=pagina?Array.from(pagina.querySelectorAll('input,select,textarea')).map(e=>String(e.value||'')).join(' ').toLowerCase():'';
+  const textoPagina=pagina?Array.from(pagina.querySelectorAll('input,select,textarea')).filter(campoClinicoDerivavel).map(e=>String(e.value||'')).join(' ').toLowerCase():'';
   if(/\b(paciente teste|ana teste|dado fict[ií]cio|registro fict[ií]cio|valida[cç][aã]o do m[oó]dulo|mock|teste-\d+|cpf:\s*12345678909)\b/i.test(`${txt} ${textoPagina}`))add('Aviso: há possível dado de teste/fictício na consulta. Revise antes de copiar para prontuário real.');
   if(/ex:\s|placeholder|nome, dose, frequ[eê]ncia|dado fict[ií]cio preenchido/i.test(`${txt} ${textoPagina}`))add('Aviso: há texto de exemplo ou placeholder preenchido como dado clínico. Revise antes de finalizar.');
   if(/vacina|vacinal|pni/i.test(textoPagina)&&/mv\+|brnf|abdome|ausculta|beg|eupneic/i.test(textoPagina))add('Possível campo misturado: achado de exame físico aparece junto de campo vacinal. Revisar antes de salvar.');
@@ -6609,7 +6611,7 @@ function validarCoerenciaSoap(prefix){
 function textoCamposPagina(prefix){
   const page=document.getElementById(paginaDoModulo(prefix));
   if(!page)return'';
-  return Array.from(page.querySelectorAll('input,select,textarea')).filter(e=>e.type!=='hidden'&&e.type!=='file').map(e=>{
+  return Array.from(page.querySelectorAll('input,select,textarea')).filter(campoClinicoDerivavel).map(e=>{
     const label=e.closest('.f')?.querySelector('label')?.textContent||e.id||e.name||'campo';
     const v=(e.type==='checkbox'||e.type==='radio')?(e.checked?(e.closest('label')?.textContent||e.value):''):e.value;
     return v?`${label}: ${v}`:'';
@@ -6618,7 +6620,7 @@ function textoCamposPagina(prefix){
 function localizarCamposSuspeitos(prefix,regex){
   const page=document.getElementById(paginaDoModulo(prefix));
   if(!page)return'';
-  const achados=Array.from(page.querySelectorAll('input,select,textarea')).filter(e=>e.type!=='hidden'&&e.type!=='file').map(e=>{
+  const achados=Array.from(page.querySelectorAll('input,select,textarea')).filter(campoClinicoDerivavel).map(e=>{
     const valor=(e.type==='checkbox'||e.type==='radio')?(e.checked?(e.closest('label')?.textContent||e.value):''):e.value;
     const texto=normalizarTextoProtocolo(valor||'');
     if(!texto||!regex.test(texto))return'';
@@ -8646,7 +8648,7 @@ function sanitizarRegrasSAEProtocoladas(p,regras){
 }
 function aplicarSugestaoSAE(p,chave){const s=SAE_SUGESTOES[chave];if(!s)return;const regras=sanitizarRegrasSAEProtocoladas(p,[s]);preencherCamposSAE(p,regras);renderizarPreviewSAE(p,regras);showToast('Sugestão SAE aplicada. Revise e valide antes de salvar.')}
 function campoClinicoDerivavel(e){
-  if(e.hidden||e.type==='hidden'||e.type==='file'||e.closest('[data-ciap]'))return false;
+  if(e.hidden||e.type==='hidden'||e.type==='file'||e.closest('[data-ciap],.exam-kits,.consultation-guide'))return false;
   if((e.type==='checkbox'||e.type==='radio')&&!e.checked)return false;
   return !Object.values(SOAP_IDS_MODULO).some(ids=>Object.values(ids).includes(e.id));
 }
@@ -8946,6 +8948,7 @@ function aplicarTextoCompletoAISoap(prefix,novoSOAP,pendencias){
     a.value=`A:${partes.a?`\n${partes.a.trim()}`:''}`;
     p.value=`P:${partes.p?`\n${partes.p.trim()}`:''}`;
   }
+  if(window.ESFExames?.order(prefix))window.ESFExames.appendSoap(prefix);
   renderPendenciasIASoap(prefix,pendencias||[]);renderAlertasVermelhosSoap(prefix);renderPendenciasSoap(prefix);renderInconsistenciasSoap(prefix);atualizarIndicadorPreenchimento();
   return true;
 }
@@ -12104,14 +12107,14 @@ async function gerarPacoteDiabetesGestacionalPN(){
   function paParts(v){const m=String(v||'').match(/(\d{2,3})\D+(\d{2,3})/);return m?{sis:Number(m[1]),dia:Number(m[2])}:null}
   function paElevada(v){const p=paParts(v);return p&&(p.sis>=140||p.dia>=90)}
   function paMuitoAlta(v){const p=paParts(v);return p&&(p.sis>=160||p.dia>=110)}
-  function selectedLabels(selector){return Array.from(document.querySelectorAll(selector+':checked')).map(e=>clean(e.closest('label')?.textContent||e.value)).filter(Boolean)}
+  function selectedLabels(selector){return Array.from(document.querySelectorAll(selector)).filter(e=>e.checked).map(e=>clean(e.closest('label')?.textContent||e.value)).filter(Boolean)}
   function prefixPageEl(prefix){
     const id={pna:'pg-pn-abertura',pnc:'pg-pn-consulta',pu:'pg-puericultura',prev:'pg-preventivo',id:'pg-idoso',sm:'pg-saude-mental',ist:'pg-ist'}[prefix];
     return document.getElementById(id)||document.querySelector('.pg.on');
   }
   function valuesInPage(prefix){
     const p=prefixPageEl(prefix);if(!p)return '';
-    return Array.from(p.querySelectorAll('input,select,textarea')).map(e=>{
+    return Array.from(p.querySelectorAll('input,select,textarea')).filter(campoClinicoDerivavel).map(e=>{
       if(e.type==='checkbox'||e.type==='radio')return e.checked?clean(e.closest('label')?.textContent||e.value):'';
       return clean(e.value);
     }).filter(Boolean).join(' | ');
@@ -12126,6 +12129,7 @@ async function gerarPacoteDiabetesGestacionalPN(){
     return c.map(x=>clean(x.motivo||x.label||x.texto||'')).filter(Boolean);
   }
   function gps(prefix){
+    if(prefix==='pnc')return ''; // Os campos obstétricos da abertura não são o P do SOAP de seguimento.
     const g=valAny([`${prefix}-g`]),p=valAny([`${prefix}-p`]),a=valAny([`${prefix}-a`]);
     return (g||p||a)?`G${g||0} P${p||0} A${a||0}`:'';
   }
@@ -12401,7 +12405,7 @@ async function gerarPacoteDiabetesGestacionalPN(){
       add(p,condutaRisco);
       if(peAlto)add(p,'Avaliar prevenção de pré-eclâmpsia conforme critérios clínicos, protocolo municipal e prescrição médica, quando indicada.');
     }
-    add(p,pnaPlanoExamesSoap?.(parseNumber(valAny([`${prefix}-ig`])))||'Solicitar ou conferir exames de rotina conforme protocolo municipal.');
+    add(p,window.ESFExames?'Revisar exames por trimestre e indicação no painel de kits; somente solicitações confirmadas são registradas abaixo.':pnaPlanoExamesSoap?.(parseNumber(valAny([`${prefix}-ig`])))||'Solicitar ou conferir exames de rotina conforme protocolo municipal.');
     if(pnSifilisReagente(prefix)){
       add(p,'Diante de sífilis reagente, ativar fluxo protocolar de sífilis na gestação, realizar aconselhamento pós-teste, registrar tratamento/seguimento, avaliar/tratar parceria sexual e verificar notificação/SINAN conforme fluxo municipal.');
       prepararSinanSifilis(prefix);
@@ -12409,8 +12413,8 @@ async function gerarPacoteDiabetesGestacionalPN(){
     add(p,pnaPlanoVacinalSoap?.(parseNumber(valAny([`${prefix}-ig`])))||'Conferir carteira vacinal e atualizar conforme calendário vigente.');
     add(p,line('Odontologia',valAny([`${prefix}-odonto`])));
     add(p,line('Pré-natal do parceiro',valAny([`${prefix}-pnparc`])));
-    add(p,'Orientada sobre sinais de alerta na gestação: sangramento vaginal, perda de líquido, dor abdominal intensa, cefaleia persistente, alterações visuais, dor epigástrica/HCD, febre, dispneia e redução ou ausência de movimentos fetais.');
-    add(p,'Orientada sobre alimentação, hidratação, suplementação conforme rotina/protocolo, prevenção de IST, aleitamento materno, retorno programado e importância do comparecimento às consultas.');
+    add(p,'Orientar sobre sinais de alerta na gestação: sangramento vaginal, perda de líquido, dor abdominal intensa, cefaleia persistente, alterações visuais, dor epigástrica/HCD, febre, dispneia e redução ou ausência de movimentos fetais.');
+    add(p,'Orientar sobre alimentação, hidratação, suplementação conforme rotina/protocolo, prevenção de IST, aleitamento materno, retorno programado e importância do comparecimento às consultas.');
     add(p,line('Retorno programado',valAny([`${prefix}-retorno`])));
     add(p,tr?.conduta);
     add(p,manual.p);

@@ -22,17 +22,20 @@
     const d=Object.fromEntries([...labels.keys()].filter(k=>k.startsWith('contra-')).map(k=>[k.slice(7),v(k)]));
     return {...d,gestante:v('gestante'),lactante:v('lactante'),idade:idadePorNascimento(v('nasc')),pa:v('pa')};
   }
-  function fingerprint(){
-    return JSON.stringify({patient:[v('cpf'),v('nome'),v('nasc')],corr:dischargeData(),contra:contraceptionData(),exams:[...labels.keys()].filter(k=>k.startsWith('exames-')).map(k=>[k,v(k)]),allergy:v('alergia-medicamentos'),medicines:v('medicamentos'),conditions:v('comorbidades'),alerts:v('alerts'),priority:[...document.querySelectorAll('#pg-saude-mulher [data-priority]:checked')].map(e=>e.dataset.priority)});
+  function fingerprint(kind){
+    const state={patient:[v('cpf'),v('nome'),v('nasc')],corr:dischargeData(),contra:contraceptionData(),exams:[...labels.keys()].filter(k=>k.startsWith('exames-')).map(k=>[k,v(k)]),allergy:v('alergia-medicamentos'),medicines:v('medicamentos'),conditions:v('comorbidades'),alerts:v('alerts'),priority:[...document.querySelectorAll('#pg-saude-mulher [data-priority]:checked')].map(e=>e.dataset.priority)};
+    if(!state.contra.continua)delete state.contra.continua;
+    if(kind){state.motivo=v('motivo-consulta');if(kind!=='exames')delete state.exams;}
+    return JSON.stringify(state);
   }
   function records(){try{const a=JSON.parse(v('protocolo-registros')||'[]');return Array.isArray(a)?a.filter(x=>x&&typeof x.id==='string'&&typeof x.plan==='string'):[];}catch{return [];}}
   function saveRecords(items){$('protocolo-registros').value=JSON.stringify(items);$('protocolo-registros').dispatchEvent(new Event('input',{bubbles:true}));}
-  function stale(){const f=fingerprint();return records().some(r=>r.fingerprint!==f);}
+  function stale(){return records().some(r=>r.fingerprint!==fingerprint(r.version===2?r.id:null));}
   function validate(){if(stale()){showToast('A avaliação mudou. Remova ou confirme novamente as condutas no painel de registros antes de gerar o SOAP.');return false;}return true;}
   function validateForAI(){if(!validate())return false;if((records().length||v('soap-base'))&&v('soap-base')!==fingerprint()+v('protocolo-registros')){showToast('Gere novamente o SOAP local para incluir as condutas confirmadas antes de continuar.');return false;}return true;}
   function record(r){
     const previous=records().find(x=>x.id===r.id);if(previous?.ciap&&previous.ciap!==r.ciap&&window.ESFCiap)ESFCiap.restore('smu',ESFCiap.capture('smu').filter(c=>!(c.code===previous.ciap&&c.p===previous.plan)));
-    const items=records().filter(x=>x.id!==r.id);items.push({...r,fingerprint:fingerprint()});saveRecords(items);syncCiap();refresh();showToast('Conduta confirmada. Será incluída no SOAP local e no CIAP deste problema.');
+    const items=records().filter(x=>x.id!==r.id);items.push({...r,version:2,fingerprint:fingerprint(r.id)});saveRecords(items);syncCiap();refresh();showToast('Conduta confirmada. Será incluída no SOAP local e no CIAP deste problema.');
   }
   function pendingCommon(){
     const out=[];
@@ -47,7 +50,9 @@
     const data=contraceptionData(),e=R.eligibility(data),m=e.methods.find(m=>m.id===v('contra-metodo'));if(!m)return {data,e,m,pending:[]};
     const pending=[...m.blockers,...pendingCommon()];
     if(m.category===2&&!v('contra-justificativa').trim())pending.push('Categoria 2: justificar por que não há método mais seguro adequado à escolha');
-    if(['combinada','mensal'].includes(m.id)&&!(Number(v('contra-dia-ciclo'))>=1&&Number(v('contra-dia-ciclo'))<=5))pending.push('Registrar dia do ciclo entre 1 e 5 para início conforme protocolo');
+    const maintenance=v('motivo-consulta')==='acompanhar';
+    if(maintenance&&v('contra-continua')!=='Sim')pending.push('Confirmar continuidade do mesmo método com uso regular. Para início, reinício ou troca, selecionar o motivo correspondente e avaliar o esquema.');
+    if(!maintenance&&['combinada','mensal'].includes(m.id)&&!(Number(v('contra-dia-ciclo'))>=1&&Number(v('contra-dia-ciclo'))<=5))pending.push('Registrar dia do ciclo entre 1 e 5 para início conforme protocolo');
     if(m.id==='mensal'&&!R.monthly.includes(v('contra-apresentacao')))pending.push('Selecionar apresentação do injetável mensal');
     return {data,e,m,pending:[...new Set(pending)]};
   }
@@ -85,15 +90,15 @@
   }
   function confirmMethod(){
     const {m,pending}=methodState();if(!m||pending.length)return showToast('Revise as pendências do método antes de confirmar.');
-    record({id:'contracepcao',title:m.name,ciap:m.ciap,s:`Motivo: ${v('motivo-consulta')?display('motivo-consulta'):'Planejamento contraceptivo'}.\nPreferências/experiências: ${v('contra-preferencias')||'não registradas'}.`,o:contraceptionSummary(),a:`Método escolhido com a usuária: ${m.name}. Categoria ${m.category} conforme condições registradas.${m.category===2?' Justificativa: '+v('contra-justificativa'):''}`,plan:`Prescrição revisada: ${m.id==='mensal'?v('contra-apresentacao'):m.drug}. ${m.dose}\nOrientações confirmadas: ${m.start} ${m.miss} ${m.effects}\nDupla proteção com preservativo. Retorno anual ou antes, conforme necessidade clínica.\nFonte: protocolo municipal Toledo 2026, seções 3–5, p. ${m.page}.`});
+    record({id:'contracepcao',title:m.name,ciap:m.ciap,s:`Motivo: ${v('motivo-consulta')?display('motivo-consulta'):'Planejamento contraceptivo'}.\nPreferências/experiências: ${v('contra-preferencias')||'não registradas'}.`,o:contraceptionSummary(),a:`Método escolhido com a usuária: ${m.name}. Categoria ${m.category} conforme condições registradas.${m.category===2?' Justificativa: '+v('contra-justificativa'):''}`,plan:`Prescrição revisada: ${m.id==='mensal'?v('contra-apresentacao'):m.drug}. ${m.dose}\nOrientações confirmadas: ${v('motivo-consulta')==='acompanhar'?'Continuidade do método em uso após revisão.':m.start} ${m.miss} ${m.effects}\nDupla proteção com preservativo. Retorno anual ou antes, conforme necessidade clínica.\nFonte: protocolo municipal Toledo 2026, seções 3–5, p. ${m.page}.`});
   }
   function dischargeSummary(){return [...labels].filter(([k])=>k.startsWith('corr-')&&v(k)).map(([k,l])=>`${l}: ${display(k)}`).concat(v('achados-exame')?['Exame registrado: '+v('achados-exame')]:[]).join('\n');}
   function contraceptionSummary(){return [`PA: ${v('pa')||'não registrada'}`,...[...labels].filter(([k])=>k.startsWith('contra-')&&v(k)).map(([k,l])=>`${l}: ${display(k)}`)].join('\n');}
   function renderRecords(){
     const out=$('registros-list');if(!out)return;
-    out.innerHTML=records().length?records().map(r=>`<article class="smu-option"><h4>${escape(r.title)} · CIAP ${escape(r.ciap)}</h4><p>${r.fingerprint===fingerprint()?'Confirmado com a avaliação atual.':'A avaliação mudou: confirmar novamente no fluxo ou remover este registro.'}</p><pre>${escape(r.plan)}</pre><button class="btn btn-s" type="button" data-smu-remove="${escape(r.id)}">Remover registro</button></article>`).join(''):'<p>Nenhuma prescrição ou solicitação confirmada neste assistente.</p>';
+    out.innerHTML=records().length?records().map(r=>`<article class="smu-option"><h4>${escape(r.title)} · CIAP ${escape(r.ciap)}</h4><p>${r.fingerprint===fingerprint(r.version===2?r.id:null)?'Confirmado com a avaliação atual.':'A avaliação mudou: confirmar novamente no fluxo ou remover este registro.'}</p><pre>${escape(r.plan)}</pre><button class="btn btn-s" type="button" data-smu-remove="${escape(r.id)}">Remover registro</button></article>`).join(''):'<p>Nenhuma prescrição ou solicitação confirmada neste assistente.</p>';
   }
-  function refresh(){renderDischarge();renderContraception();renderRecords();window.ESFCiap?.refreshSuggestions?.('smu');}
+  function refresh(){const ongoing=v('motivo-consulta')==='acompanhar';if($('contra-continua'))$('contra-continua').closest('.f').hidden=!ongoing;if($('contra-dia-ciclo'))$('contra-dia-ciclo').closest('.f').hidden=ongoing;renderDischarge();renderContraception();renderRecords();window.ESFCiap?.refreshSuggestions?.('smu');}
   function confirmedCiap(){
     const codes=[];if(v('motivo-consulta')==='emergencia')codes.push('W10');
     if(['iniciar','trocar','acompanhar'].includes(v('motivo-consulta')))codes.push(R.methods.find(m=>m.id===v('contra-metodo'))?.ciap||'W14');
@@ -140,7 +145,7 @@
       card('Consulta de enfermagem · avaliação',`<p>Para início, troca ou acompanhamento, avaliar preferências e condições clínicas. A consulta pode ocorrer sem queixas ginecológicas. ${ref(57)}</p>`+grid(
         field('contra-preferencias','Preferências, experiências anteriores, adesão e dúvidas','textarea')+field('contra-menarca','Menarca, sexarca, padrão menstrual e dismenorreia','textarea')+field('contra-exclusao','Como a gestação foi excluída? DUM, história, teste e data quando indicado','textarea')+
         field('contra-peso','Peso (kg)','number')+field('contra-altura','Altura (cm)','number')+field('contra-cintura','Circunferência abdominal (cm), quando indicada','number')+field('contra-nulipara','Nulípara')+
-        field('contra-posparto','Período após parto','select',[['nenhum','Não está no pós-parto'],['lt6','Menos de 6 semanas'],['6a6','6 semanas a 6 meses'],['gt6','Mais de 6 meses']])+field('contra-diasparto','Dias desde o parto','number')+field('contra-exclusiva','Amamentação exclusiva')+field('contra-fuma','Tabagismo atual')+field('contra-cigarros','Cigarros por dia','number')+field('contra-dia-ciclo','Dia do ciclo para iniciar o método','number')+field('contra-pelvico','Exame pélvico: indicação, realização, recusa e achados','textarea'))+'<p>Registre PA na Avaliação. Exame pélvico/genital quando necessário: DIU, diafragma, encaminhamento para laqueadura ou queixa ginecológica. Não presumir exame normal.</p>')+
+        field('contra-posparto','Período após parto','select',[['nenhum','Não está no pós-parto'],['lt6','Menos de 6 semanas'],['6a6','6 semanas a 6 meses'],['gt6','Mais de 6 meses']])+field('contra-diasparto','Dias desde o parto','number')+field('contra-exclusiva','Amamentação exclusiva')+field('contra-fuma','Tabagismo atual')+field('contra-cigarros','Cigarros por dia','number')+field('contra-continua','Continuidade do mesmo método, com uso regular, sem interrupção nem troca?')+field('contra-dia-ciclo','Dia do ciclo para iniciar o método','number')+field('contra-pelvico','Exame pélvico: indicação, realização, recusa e achados','textarea'))+'<p>Registre PA na Avaliação. Exame pélvico/genital quando necessário: DIU, diafragma, encaminhamento para laqueadura ou queixa ginecológica. Não presumir exame normal.</p>')+
       card('Critérios de elegibilidade · condições clínicas',`<p>Responda cada item após investigar a história. ${ref(60)} · ${ref(62)}</p>`+grid(R.risks.map(([id,label])=>field('contra-'+id,label)).join('')))+
       card('Comparação dos métodos','<div id="smu-contra-result"></div>')+
       card('Escolha compartilhada e conduta',grid(field('contra-metodo','Método escolhido para avaliação','select',R.methods.map(m=>[m.id,m.name]))+field('contra-apresentacao','Apresentação do injetável mensal','select',R.monthly)+field('contra-justificativa','Categoria 2: justificativa e alternativas mais seguras discutidas','textarea')+field('contra-revisao','Medicamentos, interações, apresentação e bula conferidos')+field('contra-orientada','Orientados eficácia, uso, esquecimentos, efeitos adversos, dupla proteção e retorno; compreensão confirmada')+field('contra-escolha','Escolha da usuária confirmada após aconselhamento'))+'<div id="smu-contra-detalhe"></div>')+
@@ -169,7 +174,7 @@
         record({id:'exames',title:'Solicitações de exames',plan:'Solicitados: '+selected.join('; ')+'.\nIndicação/detalhes: '+v('exames-detalhes')+'\nFonte: protocolo municipal 2026, seções 2.1 e 4.3–4.4.'});
       }
     });
-    let timer;for(const event of ['input','change'])page.addEventListener(event,e=>{if(e.target.closest('[data-ciap]')||/^smu-(s|o|a|p|protocolo-registros)$/.test(e.target.id))return;clearTimeout(timer);timer=setTimeout(refresh,80);});
+    let timer;for(const event of ['input','change'])page.addEventListener(event,e=>{if(e.target.closest('[data-ciap],.exam-kits,.consultation-guide')||/^smu-(s|o|a|p|protocolo-registros)$/.test(e.target.id))return;clearTimeout(timer);timer=setTimeout(refresh,80);});
     const oldRestore=window.restaurarDadosModulo;window.restaurarDadosModulo=function(p,data){const r=oldRestore.apply(this,arguments);if(p==='smu')refresh();return r;};
     const oldGo=window.go;window.go=function(page){const r=oldGo.apply(this,arguments);if(page==='saude-mulher')refresh();return r;};
     window.gerarSoapSaudeMulher=soap;
