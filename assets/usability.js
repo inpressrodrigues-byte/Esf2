@@ -198,12 +198,12 @@
     const bar = document.querySelector('.bar'), nav = document.querySelector('.bar-nav'); if (!bar || !nav) return;
     nav.id = 'ux-navigation'; nav.setAttribute('aria-label','Módulos do sistema');
     const groups = [
-      ['Atendimentos',['inicio','pn-abertura','pn-consulta','puericultura','preventivo','idoso','saude-mental','consulta-geral','hiperdia','feridas','puerperio','ist','visita-domiciliar']],
+      ['Atendimentos',['inicio','pn-abertura','pn-consulta','puericultura','preventivo','saude-mulher','idoso','saude-mental','consulta-geral','hiperdia','feridas','puerperio','ist','visita-domiciliar']],
       ['Acompanhamento',['pacientes','historico','sinan','pni','busca-ativa']],
       ['Gestão e apoio',['indicadores','territorio','relatorios','editor','auditoria-clinica','reportes']]
     ];
     const buttons = [...nav.querySelectorAll('.nb')];
-    const icons={inicio:'house','pn-abertura':'pregnant','pn-consulta':'stethoscope',puericultura:'baby',preventivo:'flower',idoso:'elder','saude-mental':'brain','consulta-geral':'cross',hiperdia:'heart',feridas:'cross',puerperio:'baby',ist:'flask','visita-domiciliar':'house',pacientes:'users',historico:'clipboard',sinan:'report',pni:'syringe','busca-ativa':'search',indicadores:'report',territorio:'house',relatorios:'doc',editor:'gear','auditoria-clinica':'shield',reportes:'chat'};
+    const icons={inicio:'house','pn-abertura':'pregnant','pn-consulta':'stethoscope',puericultura:'baby',preventivo:'flower','saude-mulher':'flower',idoso:'elder','saude-mental':'brain','consulta-geral':'cross',hiperdia:'heart',feridas:'cross',puerperio:'baby',ist:'flask','visita-domiciliar':'house',pacientes:'users',historico:'clipboard',sinan:'report',pni:'syringe','busca-ativa':'search',indicadores:'report',territorio:'house',relatorios:'doc',editor:'gear','auditoria-clinica':'shield',reportes:'chat'};
     const favorites = make('section','ux-nav-favorites'); favorites.id='ux-nav-favorites';
     favorites.append(make('div','ux-nav-heading','Favoritos'),make('div','ux-favorite-list'));nav.append(favorites);
     groups.forEach(([title,ids],index) => {
@@ -430,8 +430,8 @@
     const regenerate=make('button','quick-action-btn','Gerar / atualizar SOAP');regenerate.type='button';regenerate.onclick=()=>{closeMenus();quickGerarSoap();setTimeout(updateActions,180);};
     const modeLabel=make('label','','Formato do SOAP');modeLabel.htmlFor='quick-soap-mode';mode.setAttribute('aria-label','Formato do SOAP');
     const clear=make('button','quick-action-btn ux-clear','Limpar atendimento');clear.type='button';clear.onclick=()=>quickLimpar();
-    ai.textContent='Melhorar redação com IA';moreBody.append(modeLabel,mode,regenerate,ai,completion,clear);
-    bar.replaceChildren(status,more,copy,primary);
+    ai.textContent='Gerar SOAP com IA';moreBody.append(modeLabel,mode,regenerate,completion,clear);
+    bar.replaceChildren(status,more,ai,copy,primary);
     bar.querySelectorAll('details').forEach(d=>d.addEventListener('toggle',()=>{if(d.open)bar.querySelectorAll('details').forEach(other=>{if(other!==d)other.open=false;});}));
     document.addEventListener('click',e=>{if(!e.target.closest('#quick-actions'))closeMenus();});
     document.querySelectorAll('.pg .save-atend-btn').forEach(b=>b.classList.add('ux-duplicate-action'));
@@ -442,7 +442,7 @@
     if(!ready)return;const page=pageNow(),review=reviewing(page),primary=byId('ux-primary');
     if(primary)primary.textContent=review?'Salvar atendimento':'Revisar registro';
     const copy=document.querySelector('.ux-copy-menu');if(copy)copy.hidden=!review;
-    const ai=document.querySelector('#quick-actions .ai');if(ai){ai.hidden=!review;if(!ai.disabled)ai.textContent='Melhorar redação com IA';}
+    const ai=document.querySelector('#quick-actions .ai');if(ai){ai.hidden=!review||!temPermissao('usar_ia_soap');if(!ai.disabled)ai.textContent='Gerar SOAP com IA';}
     document.body.classList.toggle('ux-reviewing',review);updateSaveState();
   }
   function onNavigate(page) {

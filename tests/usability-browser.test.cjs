@@ -78,6 +78,12 @@ async function main(){try{
  await check('Rascunho de outra conta não é oferecido',async()=>{
   await page.evaluate(()=>{CURRENT_AUTH_USER_ID='other-synthetic-user';ESFUsability.offerDraft('pg-pn-abertura');});assert.equal(await page.getByRole('button',{name:'Retomar rascunho',exact:true}).count(),0);await page.evaluate(()=>CURRENT_AUTH_USER_ID='synthetic-usability');
  });
+ await check('Saúde da Mulher aparece uma vez em Atendimentos junto ao Preventivo',async()=>{
+  const link=page.locator('.ux-nav-group [data-ux-page="saude-mulher"]');
+  assert.equal(await link.count(),1);assert.equal(await link.getAttribute('data-ux-group'),'Atendimentos');
+  assert.equal(await link.evaluate(b=>b.previousElementSibling?.dataset.uxPage),'preventivo');
+  assert.equal(await page.locator('.bar-nav > button[onclick*="saude-mulher"]').count(),0);
+ });
  await check('Barra destaca revisão e salvamento; copiar tem um único seletor',async()=>{
   await page.evaluate(()=>{document.querySelector('[aria-controls="pna-4"]').click();});assert.equal(await page.locator('#ux-primary').textContent(),'Revisar registro');
   await page.locator('#ux-primary').click();assert.equal(await page.locator('#ux-primary').textContent(),'Salvar atendimento');assert.equal(await page.locator('.ux-copy-menu').isVisible(),true);

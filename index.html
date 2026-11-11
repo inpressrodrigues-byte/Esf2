@@ -8727,7 +8727,11 @@ function atualizarIndicadorPreenchimento(){
   if(titulo)titulo.textContent=`${itens.length-faltam.length} de ${itens.length} itens de apoio preenchidos`;if(det)det.textContent=faltam.length?`Faltando: ${faltam.join(', ')}`:'Campos essenciais preenchidos';if(bar)bar.style.width=`${pct}%`;
 }
 function botaoAcaoPagina(rx){const pg=document.querySelector('.pg.on');return Array.from(pg?.querySelectorAll('button')||[]).find(b=>rx.test(`${b.textContent} ${b.getAttribute('onclick')||''}`)&&!b.closest('#quick-actions'))}
-function quickGerarSoap(){const b=botaoAcaoPagina(/gerar.*(soap|evolu)/i);b?b.click():showToast('Este módulo ainda não possui gerador SOAP conectado.')}
+function botaoGeradorSoapLocal(button){
+  const action=button?.getAttribute('onclick')||'';
+  return /^\s*gerarSoap(?!PorIA)\w*\s*\(/i.test(action);
+}
+function quickGerarSoap(){const b=[...document.querySelectorAll('.pg.on button[onclick]')].find(botaoGeradorSoapLocal);b?b.click():showToast('Este módulo ainda não possui gerador SOAP conectado.')}
 function bloquearGeracaoSoapSeCritico(prefix){
   const bloqueios=validarEntradaPreSoap(prefix);
   if(!bloqueios.length)return false;
@@ -8750,7 +8754,7 @@ document.addEventListener('click',e=>{
 const AI_SOAP_CONFIG_KEY='esf_ai_soap_config_v1';
 let AI_SOAP_PENDENCIAS={};
 const AI_SOAP_ENDPOINT_PADRAO='https://mcmletzjgykhwknshacg.supabase.co/functions/v1/clever-processor';
-function configAISoapPadrao(){return{enabled:false,endpoint:AI_SOAP_ENDPOINT_PADRAO,model:'gemini-2.5-flash',apiKey:'',temperature:'0.2',extra:''}}
+function configAISoapPadrao(){return{enabled:true,endpoint:AI_SOAP_ENDPOINT_PADRAO,model:'gemini-2.5-flash',apiKey:'',temperature:'0.2',extra:''}}
 function normalizarConfigAISoap(cfg){
   cfg={...configAISoapPadrao(),...(cfg||{})};
   if(endpointSupabaseAISoap(cfg)){cfg.endpoint=AI_SOAP_ENDPOINT_PADRAO;cfg.apiKey='';}
@@ -9006,7 +9010,7 @@ async function gerarSoapPorIA(){
     const st=document.getElementById('ai-soap-status');if(st)st.textContent=explicarFalhaAISoap(e,cfg);
     showToast(explicarFalhaAISoap(e,cfg));
   }finally{
-    if(btn){btn.disabled=false;btn.textContent='IA SOAP'}
+    if(btn){btn.disabled=false;btn.textContent='Gerar SOAP com IA'}
   }
 }
 async function cabecalhosIASegura(){
@@ -11795,8 +11799,14 @@ function anexarCentralAoSoap(prefix){
 let centralProtocolTimer;
 document.addEventListener('input',e=>{const pg=e.target.closest?.('.pg');if(!pg)return;clearTimeout(centralProtocolTimer);centralProtocolTimer=setTimeout(()=>{for(const p of Object.keys(CENTRAL_PROTOCOLAR_MODULOS))if(pg.contains(document.getElementById(`central-protocol-${p}`))||pg.id===paginaDoModulo(p))renderCentralProtocolar(p)},120)});
 document.addEventListener('change',e=>{const p=QUICK_PAGE_PREFIX[e.target.closest?.('.pg')?.id];if(p)setTimeout(()=>renderCentralProtocolar(p),0);});
-document.addEventListener('click',e=>{const b=e.target.closest?.('button');if(!b||!/gerar.*(soap|evolu|evolução)/i.test(`${b.textContent} ${b.getAttribute('onclick')||''}`))return;setTimeout(()=>{const p=prefixoPaginaAtual();if(p&&e.target.closest('.pg')?.id===paginaDoModulo(p))anexarCentralAoSoap(p)},250)});
-document.addEventListener('click',e=>{const b=e.target.closest?.('button');if(!b||!/gerar.*(soap|evolu|evolução)/i.test(`${b.textContent} ${b.getAttribute('onclick')||''}`))return;setTimeout(()=>{const p=prefixoPaginaAtual();if(p&&!devePularFinalizadorSoapAutomatico(p))finalizarSoapModulo(p)},520)});
+document.addEventListener('click',e=>{
+  const button=e.target.closest?.('.pg.on button');
+  if(!botaoGeradorSoapLocal(button))return;
+  const p=prefixoPaginaAtual();
+  if(!p||!textoSoapAtual(false).trim())return;
+  anexarCentralAoSoap(p);
+  if(!devePularFinalizadorSoapAutomatico(p))finalizarSoapModulo(p);
+});
 
 // Automações básicas compartilhadas: antropometria/IMC e endereço por CEP.
 const AUTOMACAO_PREFIXOS=['pna','pnc','pu','prev','id','sm','ger','acol','hip','fer','puerp','ist','vd'];
@@ -12605,9 +12615,9 @@ async function gerarPacoteDiabetesGestacionalPN(){
     if(!exigirPermissao('usar_ia_soap','Seu perfil não possui permissão para usar a IA SOAP.'))return;
     const prefix=prefixoPaginaAtual();if(!prefix)return showToast('Abra uma consulta antes de usar a IA SOAP.');
     const cfg=carregarConfiguracaoIASOAP?.()||lerConfigAISoap();
-    if(!cfg.ativa&&!cfg.enabled)return mostrarMensagemIA?.('IA SOAP não está ativada.');
+    if(!cfg.ativa&&!cfg.enabled)return mostrarMensagemIA?.('A IA foi desativada neste navegador. Para reativar, acesse Administração → IA SOAP.');
     if(!cfg.endpoint)return mostrarMensagemIA?.('Endpoint da IA SOAP não configurado.');
-    if(!obterSOAPLocalAtual?.().trim()){quickGerarSoap?.();await new Promise(r=>setTimeout(r,650))}
+    if(!obterSOAPLocalAtual?.().trim())quickGerarSoap();
     const soapLocal=obterSOAPLocalAtual?.()||textoSoapAtual(false);
     if(!soapLocal.trim())return mostrarMensagemIA?.('Gere o SOAP local antes de usar a IA SOAP.');
     const btn=document.querySelector('#quick-actions .quick-action-btn.ai');if(btn){btn.disabled=true;btn.textContent='Gerando...'}
@@ -12624,7 +12634,7 @@ async function gerarPacoteDiabetesGestacionalPN(){
       mostrarMensagemIA?.(data.bloqueado?'IA SOAP retornou bloqueio/pendências para revisão.':'SOAP IA gerado. Revise antes de aplicar.');
     }catch(e){
       mostrarMensagemIA?.(explicarFalhaAISoap(e,cfg));
-    }finally{if(btn){btn.disabled=false;btn.textContent='IA SOAP'}}
+    }finally{if(btn){btn.disabled=false;btn.textContent='Gerar SOAP com IA'}}
   };
 
   window.auditarSiteComIA=async function(){

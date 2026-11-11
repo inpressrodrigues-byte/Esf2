@@ -18,7 +18,7 @@ async function main(){try{
   document.getElementById('admin-screen').classList.add('visible');adminTab(null,'ia-soap');
  });
  const check=async(name,fn)=>{await fn();results.push({name,passed:true});console.log('PASS '+name);};
- const mock=async(data,status=200)=>page.evaluate(({data,status})=>{window.sent=[];window.fetch=async(url,options)=>{sent.push({url,headers:options.headers,body:JSON.parse(options.body)});return new Response(JSON.stringify(data),{status});};},{data,status});
+ const mock=async(data,status=200,delay=0)=>page.evaluate(({data,status,delay})=>{window.sent=[];window.fetch=async(url,options)=>{sent.push({url,headers:options.headers,body:JSON.parse(options.body)});if(delay)await new Promise(resolve=>setTimeout(resolve,delay));return new Response(JSON.stringify(data),{status});};},{data,status,delay});
  await check('Botão real envia sessão e exemplo fictício; mostra resposta Gemini',async()=>{
   await mock(success);await page.getByRole('button',{name:'Testar conexão',exact:true}).click();await page.waitForFunction(()=>document.getElementById('ai-soap-status').textContent.includes('Teste de geração concluído'));
   const r=await page.evaluate(()=>({sent:sent[0],status:document.getElementById('ai-soap-status').textContent}));assert.equal(r.sent.headers.Authorization,'Bearer synthetic-token');assert.ok(r.sent.headers.apikey);assert.equal(r.sent.body.tipoAcao,'testar_conexao');assert.match(r.sent.body.dadosConsulta.soapLocal,/fictício/);assert.match(r.status,/gemini-2.5-flash/);
@@ -55,8 +55,20 @@ async function main(){try{
   const r=await page.evaluate(async()=>{const timer=window.setTimeout;window.setTimeout=(fn,ms,...args)=>timer(fn,ms===45000?25:ms,...args);let aborted=false;window.fetch=async(url,options)=>{options.signal.addEventListener('abort',()=>aborted=true);return{ok:true,status:200,json:()=>new Promise(()=>{})};};try{await chamarIASoap({endpoint:AI_SOAP_ENDPOINT_PADRAO},{tipoAcao:'testar_conexao'});}catch(e){return{name:e.name,aborted,message:explicarFalhaAISoap(e)};}finally{window.setTimeout=timer;}});assert.equal(r.name,'TimeoutError');assert.equal(r.aborted,true);assert.match(r.message,/Tempo de resposta/);
  });
  await page.evaluate(()=>{
-  fecharAdmin();go('pn-abertura');const ids=SOAP_IDS_MODULO[prefixoPaginaAtual()];for(const [key,id]of Object.entries(ids))if(document.getElementById(id))document.getElementById(id).value=key.toUpperCase()+': Texto fictício para teste.';
-  localStorage.setItem(AI_SOAP_CONFIG_KEY,JSON.stringify({...configAISoapPadrao(),enabled:true}));window.localBefore=obterSOAPLocalAtual();
+  fecharAdmin();aplicarPermissoesInterface();go('pn-abertura');const ids=SOAP_IDS_MODULO[prefixoPaginaAtual()];for(const [key,id]of Object.entries(ids))if(document.getElementById(id))document.getElementById(id).value=key.toUpperCase()+': Texto fictício para teste.';
+  localStorage.removeItem(AI_SOAP_CONFIG_KEY);window.localBefore=obterSOAPLocalAtual();
+ });
+ await check('Primeiro acesso autorizado permite gerar pela etapa SOAP e respeita desativação explícita',async()=>{
+  assert.equal(await page.evaluate(()=>lerConfigAISoap().enabled),true);
+  await page.locator('#ux-primary').click();
+  const button=page.getByRole('button',{name:'Gerar SOAP com IA',exact:true});
+  assert.equal(await button.isVisible(),true);
+  await page.evaluate(()=>localStorage.setItem(AI_SOAP_CONFIG_KEY,JSON.stringify({enabled:false})));
+  await mock(success);await button.click();assert.equal(await page.evaluate(()=>sent.length),0);
+  await page.evaluate(()=>localStorage.removeItem(AI_SOAP_CONFIG_KEY));
+  await mock({...success,data:{...success.data,modoTeste:false}},200,850);await button.click();
+  await page.locator('#ia-soap-compare').waitFor();assert.equal(await page.evaluate(()=>sent.length),1);
+  await page.getByRole('button',{name:'Manter local'}).click();
  });
  await check('Gerar SOAP usa transporte autenticado e aguarda revisão antes de aplicar',async()=>{
   await mock({...success,data:{...success.data,modoTeste:false}});await page.evaluate(()=>gerarSoapPorIA());const r=await page.evaluate(()=>({sent:sent[0],local:obterSOAPLocalAtual(),before:localBefore,compare:!!document.getElementById('ia-soap-compare')}));assert.equal(r.sent.body.tipoAcao,'gerar_soap');assert.deepEqual(Object.keys(r.sent.body.dadosConsulta),['soapLocal']);assert.equal(r.sent.headers.Authorization,'Bearer synthetic-token');assert.equal(r.local,r.before);assert.ok(r.compare);
@@ -78,6 +90,16 @@ async function main(){try{
  });
  await check('Resposta incompleta não apaga seções do SOAP local',async()=>{for(const soap of ['S: Apenas relato','S: Relato\nO: Exame\nA:\nP: Plano']){await mock({...success,data:{...success.data,soap,modoTeste:false}});await page.evaluate(()=>gerarSoapPorIA());const r=await page.evaluate(()=>{const before=obterSOAPLocalAtual();aplicarSOAPIARevisado(prefixoPaginaAtual());return{before,after:obterSOAPLocalAtual(),compare:!!document.getElementById('ia-soap-compare')};});assert.equal(r.after,r.before);assert.equal(r.compare,true);await page.evaluate(()=>document.getElementById('ia-soap-compare')?.remove());}});
  await check('Bloqueio do servidor e erro de cota preservam o SOAP local',async()=>{for(const response of [{...success,data:{...success.data,bloqueado:true,pendencias:['Dados insuficientes']}},{erro:'Cota indisponível'}]){await mock(response);await page.evaluate(()=>gerarSoapPorIA());assert.equal(await page.evaluate(()=>obterSOAPLocalAtual()),await page.evaluate(()=>localBefore));assert.equal(await page.locator('#ia-soap-compare').count(),0);}});
+ await check('Saúde da Mulher gera o SOAP local do atendimento e abre a revisão pela IA',async()=>{
+  await page.locator('[data-ux-page="saude-mulher"]').click();
+  await page.evaluate(()=>{document.getElementById('smu-queixa-principal').value='Consulta fictícia sobre planejamento reprodutivo';});
+  await page.locator('#ux-primary').click();
+  await mock({...success,data:{...success.data,modoTeste:false}});
+  await page.getByRole('button',{name:'Gerar SOAP com IA',exact:true}).click();
+  await page.locator('#ia-soap-compare').waitFor();assert.match(await page.evaluate(()=>sent[0].body.dadosConsulta.soapLocal),/planejamento reprodutivo/);
+  await page.getByRole('button',{name:'Aplicar SOAP IA revisado'}).click();
+  assert.match(await page.locator('#smu-p').inputValue(),/Revisar/);
+ });
  await check('Nenhuma exceção JavaScript nos percursos testados',async()=>assert.deepEqual(errors,[]));
 }finally{if(browser)await browser.close();await new Promise(r=>server.close(r));fs.mkdirSync(path.join(root,'test-results'),{recursive:true});fs.writeFileSync(path.join(root,'test-results/api-browser.json'),JSON.stringify({time:new Date().toISOString(),environment:'Dados fictícios, serviços simulados e rede externa bloqueada',tests:results,pageErrors:errors},null,2));}console.log(results.length+'/'+results.length+' grupos aprovados');}
 main().catch(e=>{console.error(e);process.exitCode=1;});
