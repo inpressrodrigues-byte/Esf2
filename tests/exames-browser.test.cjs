@@ -7,6 +7,34 @@ const root=path.resolve(__dirname,'..'),server=http.createServer((req,res)=>{con
  await page.evaluate(()=>{CURRENT_AUTH_USER_ID='synthetic-exams';PERMISSOES_ATUAIS={...PERMISSOES_PADRAO,ver_admin:true};_sb=null;document.getElementById('auth-screen').classList.remove('visible');window.setFields=o=>Object.entries(o).forEach(([id,v])=>{const e=document.getElementById(id);if(!e)throw Error('Missing '+id);e.value=v;});go('saude-mulher');});
  assert.equal(await page.locator('.consultation-protocol').count(),13);
  assert.equal(await page.locator('.consultation-guide:visible').count(),0);
+ for(const [route,p,stage,reason] of [
+   ['pn-abertura','pna','3','Disúria'],['pn-consulta','pnc','2','Disúria'],['puericultura','pu','2','Disúria'],
+   ['preventivo','prev','2','Otalgia'],['idoso','id','2','Constipação'],['saude-mental','sm','2','Sofrimento mental'],
+   ['saude-mulher','smu','aval','Otalgia'],['consulta-geral','ger','aval','Dor torácica'],['hiperdia','hip','aval','Otalgia'],
+   ['feridas','fer','aval','Febre'],['puerperio','puerp','aval','Otalgia'],['ist','ist','aval','Otalgia'],['visita-domiciliar','vd','aval','Disúria']
+ ]){
+   await page.evaluate(({route,p})=>{go(route);restaurarDadosModulo(p,{});},{route,p});
+   await page.locator('[aria-controls="'+p+'-'+stage+'"]').click();
+   const pane=page.locator('#'+p+'-'+stage),panel=page.locator('#'+p+'-protocolo-atual');
+   const native=p==='ger'?pane.locator('.complaint-chip').filter({hasText:/^Dor torácica$/}):p==='pnc'?pane.getByRole('checkbox',{name:'Disúria / ITU'}):null;
+   const pick=async()=>{if(native){await native.click();return;}await pane.locator('.protocol-picker>summary').click();await pane.locator('.protocol-picker [data-reason="'+reason+'"]').click();};
+   if(p==='vd')await page.locator('#vd-queixa').fill('Revisão de cuidados');
+   await pick();await panel.getByRole('heading',{name:reason==='Disúria'?/urinári/i:reason,exact:false}).first().waitFor({timeout:4000});
+   assert.ok(await panel.evaluate((el,id)=>el.closest('.tp')?.id===id,p+'-'+stage),p+' protocolo na própria etapa');
+   assert.match(await panel.innerText(),/Exames e avaliação/);
+   if(p==='pna'||p==='pnc')assert.match(await panel.innerText(),/gestação[\s\S]*urocultura/i);
+   if(p==='pu')assert.match(await panel.innerText(),/pediátrica/);
+   assert.equal(await page.evaluate(p=>ESFExames.order(p),p),null);
+   if(p==='vd'){
+     const stored=await page.evaluate(()=>coletarDadosModulo('vd'));assert.match(stored['vd-queixa'],/Revisão de cuidados\nDisúria/);
+     await page.locator('[aria-controls="vd-prio"]').click();await panel.getByRole('heading',{name:/urinári/i}).waitFor();
+     await page.locator('[aria-controls="vd-aval"]').click();
+   }
+   await pick();await panel.getByRole('heading',{name:reason==='Disúria'?/urinári/i:reason}).first().waitFor({state:'hidden',timeout:4000});
+   if(p==='vd')assert.equal(await page.locator('#vd-queixa').inputValue(),'Revisão de cuidados');
+   console.log('PASS '+route+' → '+reason+' → orientação na avaliação → desmarcação');
+ }
+ await page.evaluate(()=>go('saude-mulher'));
  await page.evaluate(()=>{restaurarDadosModulo('smu',{'smu-guide-motivo':'iniciar','smu-motivo-consulta':'iniciar'});});
  assert.match(await page.locator('#smu-protocolo-atual').innerText(),/Anticoncepção/);
  await page.evaluate(()=>restaurarDadosModulo('smu',{'smu-nome':'Registro legado fictício'}));assert.equal(await page.inputValue('#smu-guide-motivo'),'');

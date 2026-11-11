@@ -13,12 +13,19 @@
     hip:{'dor-toracica':'Dor torácica','falta-ar':'Dispneia',cefaleia:'Cefaleia',edema:'Edema','pe-diabetico':'Pé diabético',feridas:'Ferida'},
     puerp:{febre:'Febre',fissuras:'Aleitamento: fissura mamilar',ingurgitamento:'Aleitamento: ingurgitamento mamário'}
   };
-  function inputText(p,page){
+  const assessment={pna:'3',pnc:'2',pu:'2',prev:'2',id:'2',sm:'2',vd:'aval',ist:'aval',smu:'aval',fer:'aval',hip:'aval',puerp:'aval'};
+  function findings(p,page){
+    if(!page)return '';
     const structured=[...page.querySelectorAll('.complaint-chip.selected,.clinical-chip.selected,[id$="-queixas-clin"] input:checked,[id$="-queixas-gin"] input:checked')].map(e=>e.dataset.text||e.closest('label')?.textContent||e.textContent);
-    const codes=(window.ESFCiap?.capture(p)||[]).map(item=>ciapTerms[item.code]||window.ESFCiap.description(item.code)).filter(Boolean);
-    const content=[...kinds.map(key=>value(p,key)),...structured,...codes].filter(Boolean);
+    const content=[...kinds.map(key=>value(p,key)),...structured].filter(Boolean);
     for(const [key,label] of Object.entries(binaryFindings[p]||{}))if(value(p,key)==='Sim')content.push(label);
+    if(p==='puerp')content.push(value(p,'dor'),value(p,'sangramento'));
     if(p==='fer'&&value(p,'tipo'))content.push('Ferida '+value(p,'tipo'),value(p,'tecido'));
+    return content.filter(Boolean).join('\n');
+  }
+  function inputText(p,page){
+    const codes=(window.ESFCiap?.capture(p)||[]).map(item=>ciapTerms[item.code]||window.ESFCiap.description(item.code)).filter(Boolean);
+    const content=[findings(p,page),...codes].filter(Boolean);
     if(!content.length&&value(p,'guide-motivo'))content.push(legacyReasons[value(p,'guide-motivo')]||'');
     return content.join('\n');
   }
@@ -97,6 +104,32 @@
     const node=document.createElement(name);if(cls)node.className=cls;if(text)node.textContent=text;return node;
   }
   function line(node,label,text){if(!text)return;const row=tag('p');row.append(tag('strong','',label+' '),document.createTextNode(text));node.append(row);}
+  function mountPicker(p,model){
+    const pane=byId(p+'-'+assessment[p]);if(!pane)return;
+    const field=['queixa','queixas','queixa-principal','sintomas','manual-queixa'].map(k=>byId(p+'-'+k)).find(e=>e?.matches('textarea,input[type=text]'));
+    if(!field)return;
+    const existing=[...pane.querySelectorAll('.complaint-chip,[id$="-queixas-clin"] label,[id$="-queixas-gin"] label')].map(e=>R.norm(e.textContent.trim()));
+    const options=R.rules.filter(r=>!existing.some(label=>r.rx.test(label)));
+    const picker=tag('details','protocol-picker'),summary=tag('summary','',existing.length?'Outras queixas do protocolo':'Selecionar queixa do protocolo');
+    const list=tag('div','protocol-options');picker.append(summary,list);
+    const lines=()=>field.value.split(/\r?\n/);
+    picker.addEventListener('toggle',()=>{
+      if(!picker.open)return;
+      if(!list.childElementCount)for(const {title} of options){
+        const b=tag('button','btn btn-s',title==='Disúria'?'Disúria / suspeita de ITU':title);
+        b.type='button';b.dataset.reason=title;list.append(b);
+      }
+      const selected=lines();for(const b of list.children)b.setAttribute('aria-pressed',String(selected.includes(b.dataset.reason)));
+    });
+    list.addEventListener('click',event=>{
+      const title=event.target.closest('button')?.dataset.reason;if(!title)return;
+      const previous=lines();
+      field.value=previous.includes(title)?previous.filter(line=>line!==title).join('\n'):[field.value,title].filter(Boolean).join('\n');
+      field.dispatchEvent(new Event('input',{bubbles:true}));picker.open=false;picker.after(model.box);refresh(p);summary.focus({preventScroll:true});
+      const rect=summary.getBoundingClientRect();if(rect.bottom<0||rect.top>innerHeight)summary.scrollIntoView({block:'center'});
+    });
+    if(pane.contains(field)&&!field.closest('details,.extra-record')&&field.closest('.f'))field.closest('.f').before(picker);else pane.prepend(picker);
+  }
   function navigate(p,id){
     if(id==='corrimento'&&p!=='smu'){
       byId(p+'-corr-abrir')?.click();return;
@@ -181,7 +214,7 @@
     const historic=byId('smu-confirmar-exames')?.closest('.old-orders');
     if(p==='smu'&&historic)historic.hidden=![...historic.querySelectorAll('textarea,select')].some(e=>e.value)&&!window.ESFSaudeMulher?.records().some(r=>r.id==='exames');
   }
-  function refresh(p){const m=pages.get(p);if(!m)return;if(!m.box.isConnected)m.home.after(m.box);syncLegacy(p);display(p);}
+  function refresh(p){const m=pages.get(p);if(!m)return;if(!m.box.isConnected||m.page.classList.contains('on')&&m.box.parentElement&&!m.box.parentElement.getClientRects().length)m.home.after(m.box);syncLegacy(p);display(p);}
   function reset(p){const m=pages.get(p);if(!m)return;clearTimeout(m.timer);m.stamp='';m.home.after(m.box);m.box.replaceChildren();m.box.hidden=true;for(const id of ['motivo','completo']){const e=byId(p+'-guide-'+id);if(e){e.value='';e.checked=false;}}}
   function mount(){
     for(const [id,p] of Object.entries(QUICK_PAGE_PREFIX)){
@@ -190,13 +223,13 @@
       const box=tag('aside','consultation-protocol');box.id=p+'-protocolo-atual';box.setAttribute('aria-label','Orientação do protocolo');box.setAttribute('aria-live','polite');box.hidden=true;home.after(box);
       const old=tag('div');old.hidden=true;
       for(const k of ['motivo','completo']){const input=tag('input');input.id=p+'-guide-'+k;input.type=k==='completo'?'checkbox':'text';old.append(input);}old.className='consultation-guide legacy-guide';page.append(old);
-      pages.set(p,{page,box,home,stamp:'',timer:0});clean(page,p);
+      pages.set(p,{page,box,home,stamp:'',timer:0});clean(page,p);if(assessment[p])mountPicker(p,pages.get(p));
       const change=e=>{
-        if(e.target.closest('.consultation-protocol'))return;
+        if(e.target.closest('.consultation-protocol,.protocol-picker'))return;
         const model=pages.get(p),target=e.target;
         if(Object.values(SOAP_IDS_MODULO[p]||{}).includes(target.id))return;
         const relevant=target.closest('.clinical-chip,.complaint-chip,.alert-chip,[data-priority],[id$="-queixas-clin"],[id$="-queixas-gin"]')||kinds.some(k=>target.id===p+'-'+k)||[...Object.keys(binaryFindings[p]||{}),'tipo','tecido','gestante','motivo-consulta'].some(k=>target.id===p+'-'+k);
-        const place=relevant&&target.closest('.complaint-list,.alert-check-list,.clinical-group,.f,.g2,.cki,.rpills');
+        const place=relevant&&(target.closest('.cklist')||target.closest('.complaint-list,.alert-check-list,.clinical-group,.f,.g2,.cki,.rpills'));
         if(place&&!place.contains(box)&&!place.closest('[hidden]')&&place.getClientRects().length)place.after(box);
         clearTimeout(model.timer);
         const picked=e.type==='click'&&target.closest('.complaint-chip.selected');
@@ -216,5 +249,5 @@
     matchMedia('(max-width:760px)').addEventListener('change',e=>{if(e.matches)alternarMenuLateral(true);});
     refresh(prefixoPaginaAtual());
   }
-  window.ESFConsultaGuiada={refresh,reset};document.addEventListener('DOMContentLoaded',mount);
+  window.ESFConsultaGuiada={refresh,reset,findings};document.addEventListener('DOMContentLoaded',mount);
 })();

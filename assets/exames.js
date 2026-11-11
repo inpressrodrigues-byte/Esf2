@@ -24,7 +24,7 @@
     selected.push(...normalize(native(p,'alerts')).split(/;\s*/));
     const fromField=native(p,'gestante');
     const pregnantFlag=selected.includes('gestante')||native(p,'tr-condicao')==='gestante'||['pna','pnc'].includes(p);
-    const reported=window.ProtocoloConsulta?.positive(complaint(p))||[];
+    const reported=window.ProtocoloConsulta?.positive(window.ESFConsultaGuiada?.findings(p,pg)??complaint(p))||[];
     const reportedNegative=reported.some(s=>s.includes('perfil obstetrico negativo'));
     const reportedPregnancy=reported.some(s=>/\b(?:gestante|gravidez confirmada)\b/.test(s)&&!/suspeita|possibilidade|descartar/.test(s));
     c.pregnancyConflict=Boolean((pregnantFlag||reportedPregnancy||fromField==='Sim'||c.gestante==='Sim')&&(reportedNegative||fromField==='Não'||!fromField&&c.gestante==='Não'));
@@ -40,7 +40,7 @@
     if(c.child&&c.gestante!=='Sim')c.scope='crianca';
     if(c.male&&c.gestante!=='Sim'&&c.adult){c.ituSimples='Não';c.ituCultura=c.ituCultura==='falha'?'falha':'Sim';}
     const temp=Number(native(p,'temp').replace(',','.'));
-    const current=window.ProtocoloConsulta?.positive(complaint(p))||[];
+    const current=reported;
     const danger=/\b(febre|dor lombar|delirium|instabilidade|giordano positivo)\b/;
     const markedDanger=selected.some(text=>danger.test(text))||current.some(text=>danger.test(text));
     c.urgent=temp>=38||markedDanger||['dor','perdaliquido','sangra','mobilizacao'].some(k=>native(p,'corr-'+k)==='Sim')||c.alerta==='Sim';
