@@ -15,6 +15,15 @@ const server=http.createServer((req,res)=>{const file=path.resolve(root,'.'+(req
  await check('Corrimento não oculta testes reagentes concomitantes; negação não é positividade',async()=>{
   for(const status of ['reagente','não reagente']){const titles=await page.evaluate(status=>{document.getElementById('pna-corr-ativo').value='Sim';document.getElementById('pna-queixas').value='Sífilis: '+status+'; HIV: '+status+'; HBsAg: '+status;return decisoesCentralProtocolar('pna').map(x=>x.titulo);},status);assert.equal(titles.filter(t=>t.startsWith('Teste reagente')).length,status==='reagente'?3:0);}
  });
+ await check('Triagem de IST vincula cada resultado ao teste e distingue TR1 de TR2',async()=>{
+  const statuses=await page.evaluate(()=>[
+   'HBsAg: não reagente | Sífilis: reagente','HBsAg: não reagente | Anti-HCV: não reagente | Sífilis: não reagente',
+   'HIV TR1: reagente | HIV TR1: reagente','HIV TR1: reagente | HIV TR2: reagente','ist-tr-c-hepb-res: reagente'
+  ].map(s=>condutaProtocoladaModulo('ist',s)));
+  assert.match(statuses[0].conduta,/VDRL/);assert.equal(statuses[1].protocolada,false);
+  assert.doesNotMatch(statuses[2].conduta,/notifica/i);assert.match(statuses[3].conduta,/notifica/i);
+  assert.equal(statuses[4].protocolada,false);
+ });
  await check('Duração de candidíase gestante não aceita fração de dia',async()=>{for(const p of ['smu','pna','pnc']){const pending=await page.evaluate(p=>{if(p==='smu'){document.getElementById('smu-gestante').value='Sim';document.getElementById('smu-diagnostico-confirmado').value='Candidíase vulvovaginal';document.getElementById('smu-corr-duracao').value='10.5';return ESFSaudeMulher.treatmentState().e.pending;}document.getElementById(p+'-corr-diagnostico').value='cand';document.getElementById(p+'-corr-duracao').value='10.5';return ESFCorrimentoPN.state(p).e.pending;},p);assert.ok(pending.some(x=>/duração|dias inteiros/.test(x)),p);}});
  assert.deepEqual(errors,[]);assert.deepEqual(failures,[]);
  }finally{await browser?.close();server.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

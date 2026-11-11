@@ -25,14 +25,18 @@
     const fromField=native(p,'gestante');
     const pregnantFlag=selected.includes('gestante')||native(p,'tr-condicao')==='gestante'||['pna','pnc'].includes(p);
     const reported=window.ProtocoloConsulta?.positive(complaint(p))||[];
+    const reportedNegative=reported.some(s=>s.includes('perfil obstetrico negativo'));
     const reportedPregnancy=reported.some(s=>/\b(?:gestante|gravidez confirmada)\b/.test(s)&&!/suspeita|possibilidade|descartar/.test(s));
-    c.pregnancyConflict=Boolean((pregnantFlag||reportedPregnancy)&&(fromField==='Não'||!fromField&&c.gestante==='Não'));
-    c.gestante=c.pregnancyConflict?'':pregnantFlag||reportedPregnancy?'Sim':fromField||c.gestante;
-    c.nativePregnancy=!c.pregnancyConflict&&(pregnantFlag||reportedPregnancy||['Sim','Não'].includes(fromField));
+    c.pregnancyConflict=Boolean((pregnantFlag||reportedPregnancy||fromField==='Sim'||c.gestante==='Sim')&&(reportedNegative||fromField==='Não'||!fromField&&c.gestante==='Não'));
+    c.gestante=c.pregnancyConflict?'':pregnantFlag||reportedPregnancy?'Sim':reportedNegative?'Não':fromField||c.gestante;
+    c.nativePregnancy=!c.pregnancyConflict&&(pregnantFlag||reportedPregnancy||reportedNegative||['Sim','Não'].includes(fromField));
+    c.lactante=native(p,'lactante');
+    if(p==='smu'&&native(p,'ig').trim())c.ig=Number(native(p,'ig').replace(',','.'));
     const age=nasc&&Number(idadePorNascimento(nasc));
     c.child=p==='pu'||Boolean(nasc&&Number.isFinite(age)&&age<18);
     c.adult=Boolean(nasc&&Number.isFinite(age)&&age>=18);
     c.male=['m','masculino'].includes(normalize(native(p,'sexo')));
+    if(!c.scope&&c.adult&&['f','feminino'].includes(normalize(native(p,'sexo'))))c.scope='mulher';
     if(c.child&&c.gestante!=='Sim')c.scope='crianca';
     if(c.male&&c.gestante!=='Sim'&&c.adult){c.ituSimples='Não';c.ituCultura=c.ituCultura==='falha'?'falha':'Sim';}
     const temp=Number(native(p,'temp').replace(',','.'));
@@ -108,7 +112,7 @@
   function render(p){
     if(!el(p,'painel'))return;const c=context(p),rule=ruleLookup(c),id=v(p,'kit'),b=id?R.build(id,c):null;
     el(p,'sugestoes').innerHTML=R.suggests(complaint(p),c).map(k=>`<button class="btn btn-s" type="button" data-ex-suggest="${k}">${esc(R.kits.find(x=>x.id===k).name)}</button>`).join('')||'<span>Nenhum kit sugerido pela queixa atual. Você pode escolher abaixo.</span>';
-    const keys=new Set(['scope','gestante','alerta',...(id.startsWith('pn')?['diabetes','rh','coombs','toxo','totg','sifilis','dumDesconhecida','cito','ig']:id==='itu'&&c.gestante!=='Sim'?['ituSimples','ituCultura']:id==='dmgest'?['diabetes','compartilhado','ig']:id==='corrimento'?['duvida']:id==='contracepcao'?['cito']:id==='sifilis'?['sifilis']:[])]);
+    const keys=new Set(['ist-lesoes','parasitoses'].includes(id)?['alerta']:['scope','gestante','alerta',...(id.startsWith('pn')?['diabetes','rh','coombs','toxo','totg','sifilis','dumDesconhecida','cito','ig']:id==='itu'&&c.gestante!=='Sim'?['ituSimples','ituCultura']:id==='dmgest'?['diabetes','compartilhado','ig']:id==='corrimento'?['duvida']:id==='contracepcao'?['cito']:id==='sifilis'?['sifilis']:[])]);
     el(p,'painel').querySelectorAll('[data-exctx]').forEach(e=>{e.hidden=!keys.has(e.dataset.exctx)||e.dataset.exctx==='gestante'&&c.nativePregnancy||['pna','pnc'].includes(p)&&['scope','gestante','ig'].includes(e.dataset.exctx)||['smu','prev','puerp'].includes(p)&&e.dataset.exctx==='scope'||p==='smu'&&e.dataset.exctx==='gestante';});
     el(p,'contexto-info').textContent=`${c.gestante==='Sim'?'Gestação confirmada neste atendimento. ':''}${Number.isFinite(c.ig)?'IG: '+c.ig.toFixed(1)+' semanas. ':''}${c.diabetes==='Sim'?'Diabetes diagnosticado: rastreamento por TOTG/glicemia não será incluído.':''}`;
     el(p,'notas').innerHTML=b?[...b.pending,...b.notes].map(n=>`<p>${esc(n)}</p>`).join(''):'';

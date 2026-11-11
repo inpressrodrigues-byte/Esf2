@@ -56,3 +56,13 @@ test('Cada queixa municipal abre a orientação; negação e gestação conflita
  assert.ok(!protocol.urinary({gestante:'Sim',urgent:true}).treatment);
  assert.ok(!protocol.urinary({child:true}).treatment);
 });
+test('A orientação distingue pediculose, escabiose e a elegibilidade para esquema adulto',()=>{
+ const protocol=require('../assets/protocolo-consulta.js');
+ const adult={adult:true,gestante:'Não'};
+ assert.equal(protocol.match('Não gestante com ITU')[0].kit,'itu');
+ assert.equal(protocol.match('Nega febre e refere disúria')[0].kit,'itu');
+ assert.match(protocol.specificCare('Problemas de pele','pediculose',adult),/permetrina 1%/i);
+ assert.doesNotMatch(protocol.specificCare('Problemas de pele','escabiose',adult),/permetrina 1%/i);
+ assert.equal(protocol.specificCare('Herpes labial','herpes labial',{...adult,gestante:'Sim'}),'');
+ assert.match(protocol.urinary({pregnancyConflict:true,urgent:true}).priority,/prioritária/);
+});

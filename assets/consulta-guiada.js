@@ -5,50 +5,87 @@
   const byId=id=>document.getElementById(id);
   const value=(p,key)=>byId(p+'-'+key)?.value||'';
   const pages=new Map();
-  const kinds=['queixa','queixas','queixa-principal','complaints','historia-atual','hma','sintomas','manual-queixa','problemas','diagnostico','diagnostico-confirmado','condicao-protocolar'];
+  const kinds=['queixa','queixas','queixa-principal','complaints','historia-atual','hma','sintomas','manual-queixa','problemas','diagnostico','diagnostico-confirmado','condicao-protocolar','queixa-sindrome','diagnostico-sindromico'];
   const legacyReasons={itu:'Queixa urinária',corrimento:'Corrimento',iniciar:'Iniciar anticoncepcional',trocar:'Trocar anticoncepcional',acompanhar:'Acompanhar método'};
   const ciapTerms={U01:'Disúria',U71:'Infecção urinária',X14:'Corrimento vaginal',X72:'Candidíase vulvovaginal',X73:'Tricomoníase',N01:'Cefaleia',A03:'Febre',D12:'Constipação',D11:'Diarreia',R02:'Dispneia',L03:'Dor lombar'};
+  const binaryFindings={
+    ist:{'dor-pelvica':'Dor pélvica',disuria:'Disúria',corrimento:'Corrimento vaginal'},
+    hip:{'dor-toracica':'Dor torácica','falta-ar':'Dispneia',cefaleia:'Cefaleia',edema:'Edema','pe-diabetico':'Pé diabético',feridas:'Ferida'},
+    puerp:{febre:'Febre',fissuras:'Aleitamento: fissura mamilar',ingurgitamento:'Aleitamento: ingurgitamento mamário'}
+  };
   function inputText(p,page){
     const structured=[...page.querySelectorAll('.complaint-chip.selected,.clinical-chip.selected,[id$="-queixas-clin"] input:checked,[id$="-queixas-gin"] input:checked')].map(e=>e.dataset.text||e.closest('label')?.textContent||e.textContent);
     const codes=(window.ESFCiap?.capture(p)||[]).map(item=>ciapTerms[item.code]||window.ESFCiap.description(item.code)).filter(Boolean);
     const content=[...kinds.map(key=>value(p,key)),...structured,...codes].filter(Boolean);
+    for(const [key,label] of Object.entries(binaryFindings[p]||{}))if(value(p,key)==='Sim')content.push(label);
+    if(p==='fer'&&value(p,'tipo'))content.push('Ferida '+value(p,'tipo'),value(p,'tecido'));
     if(!content.length&&value(p,'guide-motivo'))content.push(legacyReasons[value(p,'guide-motivo')]||'');
     return content.join('\n');
   }
   function addRef(title,url){return {title,url};}
   function activeDecisions(p,text,ctx){
+    const current=R.positive(text).join(' | ');
+    const priority=value(p,'prioridade');
+    const immediate=priority==='Vermelho'||/anafilaxia|instabilidade hemodinamica|choque anafilatico/.test(current);
+    const alerts=[...pages.get(p).page.querySelectorAll('.alert-chip.selected,[data-priority]:checked')].map(e=>R.norm(e.dataset.priority||e.textContent)).join(' ');
+    const redFlag=immediate||/sangramento intenso|instabilidade|choque|violencia sexual|dor pelvica importante|perda de liquido/.test(alerts);
     const output=[],matches=R.match(text);
     for(const rule of matches){
-      if(rule.kit==='itu'){output.push(R.urinary(ctx));continue;}
-      const item={title:rule.title,care:rule.care,kit:rule.kit,carePage:rule.carePage,refs:[addRef('Avaliação · p. '+rule.page,R.demanda+'#page='+rule.page)]};
+      if(rule.kit==='itu'){output.push(R.urinary({...ctx,urgent:ctx.urgent||redFlag}));continue;}
+      const item={title:rule.title,treatment:(!redFlag&&R.specificCare(rule.title,current,ctx))||rule.treatment,exams:rule.assessment,kit:rule.kit,refs:[addRef('Protocolo municipal · manejo p. '+rule.carePage,R.demanda+'#page='+rule.carePage)]};
+      if(immediate){
+        item.kit=null;
+        item.priority='Atendimento imediato. Acionar a equipe e seguir o fluxo de urgência.';
+        item.treatment=rule.care;
+      }
       if(rule.kit==='corrimento'){
-        item.exams='Se houver dúvida diagnóstica ou persistência, considerar exame a fresco ou Gram. Avaliar testagem para IST conforme exposição.';
-        item.refs.unshift(addRef('Saúde da Mulher · corrimento',R.mulher+'#page=14'));
+        const women=window.SaudeMulherRegras;
+        const pattern={cand:/candidiase/,bv:/vaginose bacteriana/,tri:/tricomon[ií]ase/,cerv:/cervicite/};
+        const diseases=Object.entries(pattern).filter(([,rx])=>rx.test(current));
+        if(diseases.length===1&&women){
+          const id=diseases[0][0];
+          item.title=women.diseases[id].name+' · avaliação';
+          const data=p==='smu'?ESFSaudeMulher.dischargeData():['pna','pnc'].includes(p)?ESFCorrimentoPN.data(p):{};
+          const evaluation=women.discharge({...data,gestante:ctx.gestante,lactante:value(p,'lactante')||data.lactante,diagnostico:id});
+          const first=evaluation.regimens[0];
+          if(ctx.urgent||redFlag||evaluation.urgent.length)item.treatment='Priorizar avaliação médica por sinal de alarme antes de iniciar tratamento para corrimento.';
+          else if(ctx.child||ctx.pregnancyConflict||data.complicado==='Sim'||data.alergia==='Sim'||/candidiase (?:complicada|recorrente)|vaginose bacteriana recorrente/.test(current))item.treatment='Individualizar a conduta após avaliar faixa etária, gestação, alergia e recorrência.';
+          else if(first&&!ctx.adult&&ctx.gestante!=='Sim')item.treatment='Se confirmado: '+first.drug+'. Conferir idade, gestação/lactação e contraindicações para definir o esquema.';
+          else if(first){
+            item.treatment='Se a avaliação confirmar o diagnóstico: '+first.drug+'. '+(id==='cand'&&!['Sim','Não'].includes(ctx.gestante)?'Conferir gestação para definir a duração do tratamento vaginal.':first.dose)+' '+(first.note||'');
+          }
+          item.refs=[addRef('Saúde da Mulher · '+women.diseases[id].name,women.link(women.diseases[id].page))];
+        }else item.refs.unshift(addRef('Saúde da Mulher · corrimento',R.mulher+'#page=14'));
         if(p==='smu'||p==='pna'||p==='pnc')item.action='corrimento';
       }
-      if(rule.kit==='gestacao')item.exams='TIG ou β-hCG conforme indicação. Conferir o resultado e a necessidade de repetir a investigação.';
+
       output.push(item);
     }
-    const motive=value(p,'motivo-consulta');
+    const explicit=value(p,'motivo-consulta');
+    const motive=['iniciar','acompanhar','trocar','emergencia','preconcepcao'].includes(explicit)?explicit:/contracepcao de emergencia/.test(current)?'emergencia':/planejamento reprodutivo/.test(current)?'iniciar':'';
+    if(/dor pelvica/.test(current))output.push({title:'Dor pélvica',exams:'Investigar possibilidade de gestação, sangramento, corrimento e dor à mobilização do colo. Avaliar teste de gravidez conforme o quadro.',treatment:'Suspeita de gravidez ectópica, DIP ou complicação puerperal exige avaliação médica. Na dor cíclica estável, investigar dismenorreia e orientar tratamento conforme a causa.',refs:[addRef('Saúde da Mulher · dor pélvica',R.mulher+'#page=38')]});
+    if(/climaterio|menopausa/.test(current))output.push({title:'Climatério / menopausa',exams:'Após os 45 anos, sintomas típicos com alteração do ciclo permitem avaliação clínica. Exames laboratoriais dependem de indicação específica.',treatment:'Avaliar fogachos, sono e sintomas geniturinários. Orientar atividade física, alimentação e medidas para o sintoma predominante. Avaliar individualmente a indicação de terapia hormonal.',refs:[addRef('Saúde da Mulher · climatério',R.mulher+'#page=84')]});
     if(p==='smu'&&['iniciar','acompanhar','trocar','emergencia','preconcepcao'].includes(motive)){
       const emergency=motive==='emergencia',pre=motive==='preconcepcao';
-      output.push({title:pre?'Pré-concepção':emergency?'Contracepção de emergência':'Anticoncepção',care:pre?'Revisar condições clínicas, medicamentos, vacinação e plano reprodutivo.':emergency?'Avaliar tempo desde a exposição e risco de violência. Seguir o fluxo de acesso ao levonorgestrel e programar seguimento.':'Revisar preferência, gestação, PA, uso atual e critérios de elegibilidade. A etapa Anticoncepção apresenta métodos, taxas de falha e condutas por categoria.',exams:'Solicitar exames conforme a indicação individual e os resultados anteriores.',kit:pre?'gestacao':'contracepcao',action:pre||emergency?'exames-mulher':'contracepcao',refs:[addRef('Saúde da Mulher · '+(pre?'pré-concepção':emergency?'emergência':'elegibilidade'),R.mulher+'#page='+(pre?47:emergency?65:62))]});
+      output.push({title:pre?'Pré-concepção':emergency?'Contracepção de emergência':'Anticoncepção',care:pre?'Revisar condições clínicas, medicamentos, vacinação e plano reprodutivo.':emergency&&ctx.gestante==='Sim'?'Gestação confirmada: avaliar a demanda no pré-natal. A contracepção de emergência não interrompe uma gestação estabelecida.':emergency?'Avaliar tempo desde a exposição e risco de violência. O protocolo descreve levonorgestrel 0,75 mg, dois comprimidos por via oral, o mais cedo possível, preferencialmente nas primeiras 72 horas.':'Revisar preferência, gestação, PA, uso atual e critérios de elegibilidade. A etapa Anticoncepção apresenta métodos, taxas de falha e condutas por categoria.',exams:'Solicitar exames conforme a indicação individual e os resultados anteriores.',kit:pre?'gestacao':'contracepcao',action:pre||emergency?'exames-mulher':'contracepcao',refs:[addRef('Saúde da Mulher · '+(pre?'pré-concepção':emergency?'emergência':'elegibilidade'),R.mulher+'#page='+(pre?47:emergency?65:62))]});
     }
     // Somente sintomas/achados atuais acionam o cruzamento. Textos de orientações e SOAP ficam fora.
-    const current=R.positive(text).join(' | ');
     const specialized=[
-      ['ist',/uretrite|sifilis reagente|hiv reagente|condiloma|herpes genital|cervicite/,'IST'],
-      ['hip',/has mal controlada|diabetes.*sem controle|insuficiencia cardiaca|arritmia|hipotireoidismo|hipertireoidismo|nodulo de tireoide/,'Cardiologia / endocrinologia'],
+      ['ist',/uretrite|sifilis (?:recente|tardia|reagente)|hiv reagente|condiloma|neurossifilis|cancroide|linfogranuloma|donovanose/,'IST'],
+      ['hip',/hipertensao|diabetes|has mal controlada|\bdm2?\b|insuficiencia cardiaca|arritmia|hipotireoidismo|hipertireoidismo|nodulo de tireoide|bocio multinodular|obesidade secundaria|obesidade imc|hiperprolactinemia/,'Cardiologia / endocrinologia'],
       ['fer',/ferida|ulcera de pressao|necrose|pe diabetico/,'Feridas'],
       ['puerp',/amamentacao|aleitamento|puerperio/,'Puerpério']
     ];
     for(const [prefix,rx,title] of specialized){
       if(!rx.test(current)||prefix==='puerp'&&p!=='puerp')continue;
-      const context=current+(ctx.gestante==='Sim'?' CONTEXTO_GESTANTE':'')+(value(p,'lactante')==='Sim'?' CONTEXTO_LACTANTE':'');
+      const condition=p==='hip'&&value(p,'condicao-protocolar')!=='Sem condição adicional'?value(p,'condicao-protocolar'):'';
+      const diagnosis=p==='ist'?value(p,'diagnostico-sindromico'):'';
+      const specific=prefix==='hip'?condition:prefix==='ist'&&rx.test(R.norm(diagnosis))?diagnosis:'';
+      const context=(specific?R.norm(specific):current)+(ctx.gestante==='Sim'?' CONTEXTO_GESTANTE':'')+(value(p,'lactante')==='Sim'?' CONTEXTO_LACTANTE':'');
       const d=condutaProtocoladaModulo(prefix,context);if(!d?.protocolada)continue;
       // Esquemas específicos do adulto dependem de idade e situação obstétrica estabelecidas.
-      const drug=prefix==='ist'&&ctx.adult&&(ctx.gestante==='Não'||ctx.male)&&!ctx.urgent;
-      output.push({title,care:d.conduta,treatment:drug?[d.medicacao,d.dosagem].filter(Boolean).join(' '):'',refs:[addRef(d.fonte,d.url)]});
+      const drug=prefix==='ist'&&ctx.adult&&(ctx.gestante==='Não'||ctx.male)&&!ctx.urgent&&!redFlag;
+      output.push({title:specific||title,care:d.conduta,note:d.observacoes&&!d.observacoes.startsWith('Revisar critérios clínicos')?d.observacoes:'',treatment:drug?[d.medicacao,d.dosagem].filter(Boolean).join(' '):'',refs:[addRef(d.fonte,d.url)]});
     }
     if(['pna','pnc'].includes(p)&&Number.isFinite(ctx.ig)){
       const id=ctx.ig<14?'pn1':ctx.ig<28?'pn2':'pn3',built=ExamesRegras.build(id,ctx);
@@ -76,7 +113,7 @@
       const section=tag('article','care-item');
       section.append(tag('h3','',item.title));
       if(item.priority)section.append(tag('p','care-priority',item.priority));
-      line(section,'Exames',item.exams);line(section,'Conduta',item.care);line(section,'Tratamento',item.treatment);
+      line(section,'Conduta',item.care);line(section,'Tratamento / manejo',item.treatment);line(section,'Exames e avaliação',item.exams);
       if(item.note)section.append(tag('p','care-note',item.note));
       const links=tag('div','care-links');
       for(const ref of item.refs||[]){
@@ -84,16 +121,6 @@
         const link=tag('a','',ref.title);link.href=ref.url;link.target='_blank';link.rel='noopener';links.append(link);
       }
       section.append(links);
-      if(item.carePage){
-        const details=tag('details','protocol-source');
-        const url=R.demanda+'#page='+item.carePage;
-        const link=tag('a','','Abrir a página no leitor de PDF');link.href=url;link.target='_blank';link.rel='noopener noreferrer';
-        details.append(tag('summary','','Ver manejo no protocolo · p. '+item.carePage),link);
-        details.addEventListener('toggle',()=>{
-          if(!details.open||details.querySelector('iframe'))return;
-          const frame=tag('iframe');frame.title='Manejo municipal de '+item.title;frame.referrerPolicy='no-referrer';frame.src=url;details.append(frame);
-        });section.append(details);
-      }
       if(item.kit&&byId(p+'-exkit-painel')){
         const order=tag('button','btn btn-s','Revisar pedido de exames');order.type='button';
         order.onclick=()=>{
@@ -102,7 +129,7 @@
         };
         section.append(order);
       }
-      if(item.action){const b=tag('button','btn btn-s','Abrir avaliação específica');b.type='button';b.onclick=()=>navigate(p,item.action);section.append(b);}
+      if(item.action){const b=tag('button','btn btn-s',item.action==='corrimento'?'Avaliar corrimento':item.action==='contracepcao'?'Avaliar método contraceptivo':'Abrir exames e seguimento');b.type='button';b.onclick=()=>navigate(p,item.action);section.append(b);}
       if(index>0&&item.kit?.startsWith('pn')){const more=tag('details');more.append(tag('summary','',item.title),section);box.append(more);}else box.append(section);
     }
   }
@@ -168,10 +195,17 @@
         if(e.target.closest('.consultation-protocol'))return;
         const model=pages.get(p),target=e.target;
         if(Object.values(SOAP_IDS_MODULO[p]||{}).includes(target.id))return;
-        const relevant=target.closest('.clinical-chip,.complaint-chip,.alert-chip,[data-priority],[id$="-queixas-clin"],[id$="-queixas-gin"]')||kinds.some(k=>target.id===p+'-'+k)||['gestante','motivo-consulta'].some(k=>target.id===p+'-'+k);
+        const relevant=target.closest('.clinical-chip,.complaint-chip,.alert-chip,[data-priority],[id$="-queixas-clin"],[id$="-queixas-gin"]')||kinds.some(k=>target.id===p+'-'+k)||[...Object.keys(binaryFindings[p]||{}),'tipo','tecido','gestante','motivo-consulta'].some(k=>target.id===p+'-'+k);
         const place=relevant&&target.closest('.complaint-list,.alert-check-list,.clinical-group,.f,.g2,.cki,.rpills');
         if(place&&!place.contains(box)&&!place.closest('[hidden]')&&place.getClientRects().length)place.after(box);
-        clearTimeout(model.timer);model.timer=setTimeout(()=>refresh(p),e.type==='input'?100:0);
+        clearTimeout(model.timer);
+        const picked=e.type==='click'&&target.closest('.complaint-chip.selected');
+        model.timer=setTimeout(()=>{
+          refresh(p);
+          if(picked&&!box.hidden&&box.getBoundingClientRect().top>innerHeight-(byId('quick-actions')?.offsetHeight||0)-60){
+            box.scrollIntoView({block:'center',behavior:'instant'});
+          }
+        },e.type==='input'?100:0);
       };
       for(const event of ['change','input','click'])page.addEventListener(event,change);
     }

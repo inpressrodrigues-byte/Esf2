@@ -28,7 +28,7 @@
     ['Edema',58,59,'edema|inchaco','Examinar distribuição, simetria, início e sintomas associados. Direcionar investigação laboratorial para a causa clínica.'],
     ['Febre',60,61,'febre|febril','Investigar duração, foco, estado geral, hidratação e sinais de gravidade. Conferir o antitérmico aplicável à idade e ao peso.'],
     ['Herpes labial',63,65,'herpes labial','Avaliar extensão e início das lesões. Orientar cuidados locais e prevenção do contato. Conferir indicação de aciclovir e necessidade de avaliação médica.'],
-    ['Herpes genital',66,67,'herpes genital','Avaliar lesões, recorrência, gestação e exposição a IST. Orientar proteção, testagem e tratamento antiviral conforme situação clínica.'],
+    ['Herpes genital',66,67,'herpes genital','Avaliar lesões, recorrência, gestação e exposição a IST. Orientar proteção, testagem e tratamento antiviral conforme situação clínica.','ist-lesoes'],
     ['Herpes zoster',69,70,'herpes zoster|cobreiro','Avaliar distribuição, dor, imunossupressão e acometimento ocular. Encaminhar precocemente para avaliação do antiviral.'],
     ['Hemorroida/doenças orificiais',72,73,'hemorroidas?|doencas orificiais','Caracterizar dor e sangramento, examinar com privacidade e avaliar sinais de gravidade. Orientar hidratação, fibras e alívio sintomático indicado.'],
     ['Hiperglicemia',75,76,'hiperglicemia|glicemia elevada','Aferir glicemia e pesquisar sinais de descompensação aguda. No seguimento de diabetes, conferir HbA1c e estratificação metabólica.'],
@@ -37,9 +37,9 @@
     ['Mordedura/acidente com animais',83,84,'mordedura|mordida de animal|acidente com animais','Identificar animal e tipo de exposição, lavar o ferimento e avaliar profilaxias para raiva e tétano e notificação.'],
     ['Odinofagia/síndrome gripal',86,88,'odinofagia|sindrome gripal|dor de garganta','Avaliar via aérea, hidratação e sinais respiratórios. Oferecer medidas de suporte e avaliar tratamento sintomático conforme o público.'],
     ['Otalgia',90,91,'otalgia|dor de ouvido','Examinar ouvido, avaliar febre e secreção. O manejo de cerume depende do exame. Orientar evitar cotonetes e selecionar analgesia conforme avaliação.'],
-    ['Parasitoses intestinais',93,94,'parasitoses? intestinais?|verminose','Avaliar sintomas e exposição, solicitar parasitológico de fezes conforme investigação e direcionar tratamento ao agente e à faixa etária.'],
+    ['Parasitoses intestinais',93,94,'parasitoses? intestinais?|verminose|giardiase|ascaridiase|enterobiase','Avaliar sintomas e exposição, solicitar parasitológico de fezes conforme investigação e direcionar tratamento ao agente e à faixa etária.','parasitoses'],
     ['Pirose',96,98,'pirose|azia','Avaliar sintomas e sinais de alarme. Orientar medidas alimentares e posturais. Conferir indicação e contraindicações de antiácidos.'],
-    ['Problemas de pele',99,102,'problemas de pele|dermatite|lesao de pele','Examinar extensão e características das lesões e sinais sistêmicos. A tabela de tratamentos tópicos diferencia a indicação por diagnóstico.'],
+    ['Problemas de pele',99,102,'problemas de pele|dermatite|lesao de pele|escabiose|sarna|pediculose|piolhos?','Examinar extensão e características das lesões e sinais sistêmicos. A tabela de tratamentos tópicos diferencia a indicação por diagnóstico.'],
     ['Problemas oftalmológicos',104,105,'problemas oftalmologicos|dor ocular|olho vermelho','Avaliar visão, trauma e exposição química. Irrigação imediata quando indicada e avaliação médica de urgência em situações de risco ocular.'],
     ['Queimadura',106,107,'queimaduras?','Avaliar agente, extensão, profundidade e áreas críticas. Proteger a lesão, avaliar analgesia e necessidade de encaminhamento.'],
     ['Reação alérgica',108,110,'reacao alergica|urticaria|anafilaxia','Avaliar respiração, edema de língua/face e instabilidade. Suspeita de anafilaxia exige atendimento imediato. Conferir tratamento específico somente após classificar a gravidade.'],
@@ -47,30 +47,99 @@
     ['Síndrome pé-mão-boca',114,115,'sindrome pe.mao.boca|pe.mao.boca','Avaliar hidratação e aceitação alimentar. Orientar líquidos, dieta tolerada e alívio da dor/febre adequado à idade e ao peso.'],
     ['Sofrimento mental',116,117,'sofrimento mental|ideacao suicida|autoagressao','Avaliar risco imediato, plano, rede de apoio e segurança. Acionar a equipe e o fluxo de saúde mental conforme estratificação.']
   ];
-  const rules=entries.map(([title,page,carePage,terms,care,kit])=>({title,page,carePage,rx:new RegExp('\\b(?:'+terms+')\\b'),care,kit}));
+  // Elementos do manejo e da investigação, organizados pela queixa do acolhimento.
+  // A segunda coluna distingue exame clínico à beira do leito de pedido laboratorial/imagem.
+  const management={
+    'Atraso menstrual':['Se positivo, agendar abertura do pré-natal preferencialmente em uma semana. Se negativo e persistir amenorreia, investigar com o médico e discutir planejamento reprodutivo.','Priorizar TIG na UBS. Se indisponível, solicitar β-hCG. Ofertar testes rápidos para IST.'],
+    'Cefaleia':['Sem alarme, aferir PA antes da analgesia; o fluxo cita paracetamol ou dipirona e reavaliação da PA em 30 minutos. Na gestação, pico pressórico, edema ou alteração visual exigem avaliação médica imediata.','Aferir PA e glicemia capilar.'],
+    'Cólica menstrual':['Calor local e medidas de relaxamento. Na cólica menstrual habitual, a tabela inclui escopolamina, dipirona ou paracetamol conforme idade e contraindicações.','Avaliar relação com o ciclo, sangramento e possibilidade de gestação.'],
+    'Constipação':['Ajustar ingestão de líquidos e fibras conforme tolerância, estimular mobilidade e rotina após refeições. Distensão importante, vômitos ou parada de gases exigem avaliação de obstrução.','Avaliar abdome, hábito intestinal e medicamentos em uso.'],
+    'Crise convulsiva':['Acionar equipe e médico, cronometrar a crise, proteger a cabeça e lateralizar quando seguro. Não conter os membros nem introduzir objetos na boca.','Verificar glicemia capilar após estabilização e monitorar respiração e sinais vitais.'],
+    'Descompensação da pressão arterial':['Sintomas neurológicos, dor torácica ou dispneia exigem avaliação imediata. Em acompanhamento estável, conferir adesão e orientar registro da PA durante sete dias.','Repetir a medida da PA com técnica adequada e avaliar sinais de lesão de órgão-alvo.'],
+    'Diarreia e/ou náusea/vômito':['Ofertar soro de reidratação oral se tolerado. Na desidratação leve a moderada, observar na UBS e reavaliar a cada 30 minutos. Na grave, acionar médico e suporte de urgência.','Avaliar hidratação, perfusão, aceitação de líquidos e sinais vitais.'],
+    'Dispneia':['Avaliar respiração e acionar suporte imediato se houver desconforto intenso, hipóxia ou instabilidade.','Oximetria e frequência respiratória. Se houver suspeita de tuberculose, o fluxo prevê BAAR em duas amostras, cultura de escarro, teste de sensibilidade e radiografia de tórax PA/perfil; ofertar testes rápidos para IST.'],
+    'Dor abdominal':['Dor súbita intensa, irritação peritoneal ou instabilidade exigem avaliação médica imediata. No quadro estável, a analgesia depende da avaliação da causa.','Palpar abdome e aferir sinais vitais. Considerar teste rápido de gravidez em idade reprodutiva.'],
+    'Dor articular':['Sem alarme, termoterapia e analgesia simples; o quadro cita paracetamol. Trauma há menos de 72 horas segue para pronto atendimento.','Examinar mobilidade, edema, sinais inflamatórios e mecanismo de trauma.'],
+    'Dor lombar':['Sem alarme, calor local, orientação postural e analgesia simples conforme perfil. Trauma recente, déficit neurológico ou febre com disúria exigem avaliação médica.','Avaliar irradiação, força e sintomas urinários.'],
+    'Dor osteomuscular':['Na dor de baixo risco, repouso relativo, compressa fria na lesão aguda ou morna na contratura; paracetamol consta no quadro. Suspeita de fratura, luxação ou déficit motor exige avaliação médica.','Avaliar trauma, movimento, sensibilidade e força.'],
+    'Dor torácica':['Na suspeita de infarto ou instabilidade, acionar imediatamente médico e SAMU. Manter em observação com suporte disponível.','ECG em até 10 minutos da chegada, se disponível na UBS. Aferir PA, pulso, frequência respiratória e saturação.'],
+    'Edema':['Elevar os membros no edema leve de origem circulatória. Na gestação com PA elevada, avaliação médica imediata.','Aferir PA e avaliar simetria e cacifo. Para edema crônico no adulto não gestante, considerar EAS e função renal.'],
+    'Febre':['Hidratação, conforto e antitérmico conforme idade/peso; o quadro cita paracetamol e dipirona. Menor de três meses com febre requer avaliação médica urgente.','Aferir temperatura e avaliar foco, estado geral e sinais de gravidade.'],
+    'Herpes labial':['Recorrência localizada sem alarme: cuidados locais e avaliação de aciclovir oral ou tópico conforme faixa etária. Gestação, imunossupressão ou primeiro episódio muito sintomático: avaliação médica no dia. Lesão ocular ou incapacidade de ingerir líquidos: imediata.','Inspecionar extensão, crostas, sinais de infecção e acometimento ocular.'],
+    'Herpes genital':['Aciclovir precoce conforme episódio. Encaminhar para avaliação médica no primeiro episódio, gestação ou imunossupressão. Orientar evitar contato sexual durante as lesões.','Inspecionar lesões e linfonodos; ofertar testes rápidos para HIV, sífilis e hepatites.'],
+    'Herpes zoster':['Avaliação médica precoce para antiviral, preferencialmente até 72 horas. Cobrir as lesões. Acometimento ocular, neurológico ou disseminado exige atendimento imediato.','Examinar distribuição das lesões, extensão e sinais de complicação.'],
+    'Hemorroida/doenças orificiais':['Aumentar fibras e líquidos conforme tolerância, evitar esforço e orientar higiene com água após evacuar. Avaliar sangramento ou dor intensa.','Inspecionar região anal com consentimento e avaliar volume de sangramento.'],
+    'Hiperglicemia':['Verificar sinais de descompensação. Resultado acima de 500 mg/dL ou “HI”: atendimento imediato. Em seguimento estável, revisar uso de medicamentos e diário glicêmico.','Glicemia capilar no atendimento; glicemia de jejum na investigação e HbA1c para seguimento do diabetes diagnosticado.'],
+    'Leucorreias':['Identificar o quadro antes de escolher o esquema: candidíase, vaginose, tricomoníase e cervicite têm tratamentos diferentes. Febre ou dor pélvica importante exige avaliar infecção ascendente.','Exame ginecológico; avaliar testes para IST. Se persistência ou dúvida diagnóstica, considerar exame a fresco ou Gram.'],
+    'Mastalgia':['Sutiã de sustentação, compressa e correção da pega na lactação. Febre, nódulo, retração ou secreção papilar suspeita exigem avaliação dirigida.','Examinar as mamas. Distinguir investigação de alteração suspeita da mamografia de rastreamento, conforme idade e fluxo municipal.'],
+    'Mordedura/acidente com animais':['Lavar imediatamente com água e sabão ou soro. Avaliar profilaxia de raiva e tétano, acionar vigilância quando indicado e notificar no SINAN.','Verificar espécie, características da exposição, ferida e histórico vacinal.'],
+    'Odinofagia/síndrome gripal':['Hidratação, lavagem nasal com soro 0,9% e analgesia/antitérmico conforme idade. Dispneia, prostração intensa ou incapacidade de deglutir exige avaliação médica.','Examinar orofaringe, medir saturação, frequência respiratória e temperatura.'],
+    'Otalgia':['Se confirmado cerume impactado e sem suspeita de perfuração, o protocolo orienta ceruminolítico por cinco dias e retorno para reavaliação/lavagem. Mastoidalgia ou suspeita de perfuração: avaliação médica.','Realizar otoscopia antes de indicar gotas ou lavagem.'],
+    'Parasitoses intestinais':['Tratar conforme o agente identificado. O quadro inclui albendazol com duração diferente para cada parasitose e restrição na gestação. Orientar higiene das mãos, água e alimentos.','Parasitológico de fezes na investigação e amostra de controle após o tratamento.'],
+    'Pirose':['Fracionar refeições e evitar deitar por duas horas após comer. O quadro inclui hidróxido de alumínio ou magnésio conforme perfil. Disfagia ou dor ao engolir: avaliação médica; persistência após 14 dias: reavaliar.','Investigar sinais de alarme e uso de anti-inflamatórios.'],
+    'Problemas de pele':['Na pediculose, pente fino e permetrina 1%; na escabiose, a apresentação tópica é 5%. Confirmar diagnóstico, faixa etária e restrições antes do uso. Avaliar contatos. Infecção extensa ou necrose: avaliação médica.','Examinar distribuição, bordas, descamação e secreção.'],
+    'Problemas oftalmológicos':['Irrigação com soro 0,9% na irritação leve ou suspeita de corpo estranho superficial. Perda visual súbita, trauma ou dor intensa exige avaliação médica imediata.','Avaliar visão, secreção, dor, trauma e exposição química.'],
+    'Queimadura':['Proteger a lesão e orientar o curativo sem romper bolhas. Queimaduras graves, extensas, elétricas ou químicas exigem acionar SAMU e organizar transferência.','Avaliar extensão, profundidade, região atingida e agente causador.'],
+    'Reação alérgica':['Na reação leve localizada, afastar o desencadeante; o quadro inclui loratadina conforme idade/peso. Na suspeita de anafilaxia, acionar imediatamente o atendimento de emergência.','Verificar PA, saturação, frequência respiratória e sinais de comprometimento de via aérea.'],
+    'Sangramento genital':['Sangramento intenso, instabilidade, dor intensa ou suspeita de complicação gestacional: urgência/maternidade. Investigar a causa no seguimento.','Avaliar possibilidade de gestação e sinais vitais. No sangramento intermenstrual ou pós-coito, avaliar colo e indicação de citopatológico conforme fluxo, além da investigação diagnóstica.'],
+    'Síndrome pé-mão-boca':['Ofertar líquidos e dieta fria ou pastosa. Analgesia e antitérmico conforme idade/peso. Recusa de líquidos, sonolência ou piora: reavaliar prontamente.','Avaliar hidratação, mucosa oral, lesões e aceitação de líquidos.'],
+    'Sofrimento mental':['Acolher em ambiente seguro, estratificar risco e mobilizar rede de apoio. Ideação suicida com risco imediato, autoagressão ou desorganização grave exigem avaliação imediata da equipe.','Avaliar estado mental, risco atual, plano e suporte disponível.']
+  };
+  const rules=entries.map(([title,page,carePage,terms,care,kit])=>({title,page,carePage,rx:new RegExp('\\b(?:'+terms+')\\b'),care,kit,treatment:management[title]?.[0],assessment:management[title]?.[1]}));
   function positive(text){
-    return norm(text).split(/[.;!?\n|]+|\s+(?:mas|porem)\s+|,\s*(?=(?:refere|apresenta|com)\b)/)
+    return norm(text).replace(/\b(?:nao (?:gestante|gravida)|sem gestacao)\b/g,'perfil obstetrico negativo').split(/[.;!?\n|]+|\s+(?:mas|porem)\s+|(?:,\s*|\s+e\s+)(?=(?:refere|apresenta|com)\b)/)
       .filter(part=>!(/\b(?:descartad[ao]s?|negad[ao]s?|ausentes?|resolvid[ao]s?)\b/.test(part)))
       .map(part=>part.split(/\b(?:nega|negou|sem|nao|ausencia de|historico de|antecedente de|mae com|pai com)\b/)[0]).filter(Boolean);
   }
   function match(text){const parts=positive(text);return rules.filter(rule=>parts.some(part=>rule.rx.test(part)));}
+  const testMarkers=Object.entries({
+    hiv2:'(?:duo-)?hiv(?:\\s*(?:tr)?\\s*2)|tr[- ]?2',
+    hiv1:'(?:duo-)?hiv(?:\\s*(?:tr)?\\s*1)?|tr[- ]?1',
+    hb:'hbsag|hepatite b|hepb',
+    hc:'anti[- ]?hcv|hepatite c|hepc',
+    syphilis:'sifilis|sif|vdrl|duo-sif'
+  }).map(([id,marker])=>[id,new RegExp('\\b(?:'+marker+')(?:-res)?\\s*[:=-]?\\s*(nao reagente|reagente|positivo)\\b')]);
+  function testResults(text){
+    const result={};
+    for(const clause of norm(text).split(/[|;,\n.!?]+|\s+e\s+/)){
+      if(/\b(?:nega|historico|antecedente|sem)\b|(?:ist-)?tr-c-|\b(?:parceria|parceir[oa])\b/.test(clause))continue;
+      for(const [id,pattern] of testMarkers){
+        const match=clause.match(pattern);
+        if(!match)continue;
+        const value=match[1]==='nao reagente'?'negativo':'positivo';
+        result[id]=result[id]&&result[id]!==value?'divergente':value;
+      }
+    }
+    return result;
+  }
+  function specificCare(title,text,c){
+    const adult=c.adult&&!c.child&&!c.urgent&&!c.pregnancyConflict&&(c.gestante==='Não'||c.male&&c.gestante!=='Sim');
+    if(title==='Problemas de pele'){
+      const lice=/pediculose|piolhos?/.test(text),scabies=/escabiose|sarna/.test(text);
+      if(lice&&!scabies)return adult?'Pediculose confirmada: aplicar permetrina 1% no cabelo úmido por 10 minutos, passar pente fino e enxaguar. Repetir após sete dias se necessário. Avaliar contatos.':'Pediculose: pente fino e avaliação dos contatos. O quadro municipal indica permetrina 1% para maiores de dois anos; conferir idade e contraindicações.';
+      if(scabies&&!lice)return adult?'Escabiose confirmada: permetrina 5% na pele, conforme distribuição indicada para a idade. O manejo descreve retirar após 8–12 horas e repetir em sete dias. Avaliar contatos e higienizar roupas e roupa de cama.':'Escabiose: avaliar contatos e roupas de uso pessoal. O protocolo diferencia aplicação e limites etários da permetrina 5%; conferir idade e situação obstétrica antes da prescrição.';
+    }
+    if(title==='Herpes labial'&&adult)return 'Recorrência localizada em adulto imunocompetente, sem alarme: o quadro cita aciclovir 200 mg VO, cinco vezes ao dia por cinco dias, omitindo a dose da noite. Conferir alergias e função renal. Febre, acometimento ocular ou incapacidade de ingerir líquidos: avaliação médica imediata.';
+    return '';
+  }
   function urinary(c){
     const source={title:'Saúde da Mulher · p. 35–36',url:mulher+'#page=37'};
     const base={title:'Queixa urinária / suspeita de ITU',kit:'itu',refs:[{title:'Demanda Espontânea · p. 40–42',url:demanda+'#page=40'}]};
-    if(c.pregnancyConflict)return {...base,kit:null,care:'Conferir gestação. A avaliação registra “Não” e também a condição “Gestante”. Corrija a informação para consultar o fluxo aplicável.'};
+    if(c.pregnancyConflict)return {...base,kit:null,priority:c.urgent?'Avaliação médica prioritária por sinal de alarme.':'',care:'Conferir gestação. A avaliação registra “Não” e também a condição “Gestante”. Corrija a informação para consultar o fluxo aplicável.'};
+    if(c.child&&c.urgent)return {...base,priority:'Avaliação médica prioritária por sinal de alarme em paciente pediátrico.',exams:'Avaliar coleta de urina conforme o fluxo pediátrico; se gestante, EAS e urocultura com antibiograma.',care:'Priorizar avaliação médica e selecionar o tratamento conforme idade e quadro clínico.'};
     if(c.gestante==='Sim'){
       return {...base,title:'Queixa urinária na gestação',priority:c.urgent?'Avaliação médica prioritária por sinal de alarme.':'Atendimento prioritário na gestação. Investigar infecção alta.',
         exams:'EAS e urocultura com antibiograma. Colher a cultura antes do antibiótico quando possível, sem atrasar o atendimento.',
         care:c.urgent?'Febre, dor lombar ou comprometimento sistêmico exigem avaliação médica. Priorizar encaminhamento e tratamento.':'Providenciar avaliação médica para definir antibioticoterapia e revisar cultura e sensibilidade. O fluxograma cita cefalexina e nitrofurantoína, com restrição obstétrica para esta última no fim da gestação e na lactação.',
-        treatment:c.urgent?'':Number.isFinite(c.ig)&&c.ig>=36?'Para avaliação médica, o quadro cita cefalexina 500 mg VO de 6/6 h por 7–10 dias. Conferir alergias, cultura e sensibilidade.':'Entre as opções do fluxograma para avaliação médica estão cefalexina 500 mg VO de 6/6 h por 7–10 dias e nitrofurantoína 100 mg VO de 6/6 h por 7 dias. Conferir IG, alergias e função renal. O documento restringe a nitrofurantoína após a 36ª semana e na lactação.',
+        treatment:c.urgent||c.child?'':c.lactante==='Sim'||Number.isFinite(c.ig)&&c.ig>=36?'Para avaliação médica, o quadro cita cefalexina 500 mg VO de 6/6 h por 7–10 dias. Conferir alergias, cultura e sensibilidade.':'Entre as opções do fluxograma para avaliação médica estão cefalexina 500 mg VO de 6/6 h por 7–10 dias e nitrofurantoína 100 mg VO de 6/6 h por 7 dias. Conferir IG, alergias e função renal. O documento restringe a nitrofurantoína após a 36ª semana e na lactação.',
         note:'A seção 2.4 descreve esquemas na gestação, mas explicita a prescrição de enfermagem para cistite simples em não gestantes. Conferir o fluxo obstétrico com a equipe.',refs:[source,...base.refs]};
     }
     if(c.child)return {...base,priority:'Avaliar idade, estado geral, febre e sinais sistêmicos. Criança em idade escolar consta entre os critérios de prioridade.',
       exams:'A investigação depende da idade e do quadro. Avaliar coleta de urina conforme o fluxo pediátrico.',care:'Encaminhar para avaliação pediátrica conforme gravidade. A tabela de antibióticos para disúria se refere a adultos.'};
     if(c.urgent)return {...base,priority:'Avaliação médica prioritária. Investigar infecção alta ou complicação.',exams:'Avaliar EAS e urocultura com antibiograma conforme contexto. Os exames não devem atrasar o encaminhamento.',care:'Priorizar avaliação médica e definir tratamento conforme gravidade e cultura.'};
     if(c.gestante!=='Não'&&!c.male)return {...base,exams:'Verificar possibilidade de gestação. Se confirmada, o protocolo indica EAS e urocultura com antibiograma.',care:'Avaliar febre, dor lombar e fatores de complicação antes de definir tratamento.'};
-    return {...base,exams:'Avaliar EAS. A exceção é a mulher jovem não grávida com cistite típica e sem risco de resistência. Cultura em homens, recorrência, complicação ou risco de resistência. Em falha ou retorno rápido, cultura com antibiograma.',
+    return {...base,treatment:c.scope==='mulher'&&c.adult&&!c.male&&c.gestante==='Não'&&c.lactante!=='Sim'&&c.ituSimples==='Sim'&&c.ituCultura==='Não'&&c.alerta==='Não'?'Na cistite simples confirmada, o quadro de disúria lista nitrofurantoína 100 mg VO a cada 6 horas por 7 dias. Verificar alergia, função renal e lactação antes de prescrever.':'',exams:'Avaliar EAS. A exceção é a mulher jovem não grávida com cistite típica e sem risco de resistência. Cultura em homens, recorrência, complicação ou risco de resistência. Em falha ou retorno rápido, cultura com antibiograma.',
       care:c.male?'Avaliar infecção complicada e encaminhar para definição terapêutica.':c.scope==='mulher'&&c.adult?'Na cistite simples de mulher adulta não gestante, confirmar critérios, alergias, lactação e contraindicações. O fluxo descreve nitrofurantoína ou sulfametoxazol + trimetoprima conforme avaliação e protocolo institucional. Encaminhar se houver piora ou persistência.':'Confirmar faixa etária, perfil e ausência de complicação. O esquema de cistite simples depende dessa avaliação.',refs:[...base.refs,source]};
   }
-  return {rules,match,positive,norm,urinary,demanda,mulher};
+  return {rules,match,positive,norm,testResults,specificCare,urinary,demanda,mulher};
 });
