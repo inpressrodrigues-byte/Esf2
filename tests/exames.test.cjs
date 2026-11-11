@@ -45,3 +45,14 @@ test('Sugestões por queixa respeitam negação e não confirmam diagnóstico',(
  assert.deepEqual(R.suggests('Histórico de ITU. Hoje sem sintomas.'),[]);
  assert.deepEqual(R.suggests('',{gestante:'Sim',ig:32}),['pn3']);
 });
+
+test('Cada queixa municipal abre a orientação; negação e gestação conflitante não indicam tratamento',()=>{
+ const protocol=require('../assets/protocolo-consulta.js');
+ assert.equal(protocol.rules.length,35);
+ for(const rule of protocol.rules)assert.ok(protocol.match(rule.title).includes(rule),rule.title);
+ for(const text of ['Nega disúria','ITU descartada','Histórico de ITU'])assert.deepEqual(protocol.match(text),[]);
+ assert.equal(protocol.match('Disúria sem febre')[0].kit,'itu');
+ assert.equal(protocol.urinary({pregnancyConflict:true}).kit,null);
+ assert.ok(!protocol.urinary({gestante:'Sim',urgent:true}).treatment);
+ assert.ok(!protocol.urinary({child:true}).treatment);
+});

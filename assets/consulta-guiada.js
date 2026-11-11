@@ -1,107 +1,186 @@
-/* Navigation by reason. Hiding a stage never clears or changes clinical answers. */
+/* Uma orientação por problema, no ponto em que a equipe registra a queixa. */
 (()=>{
   'use strict';
-  const byId=id=>document.getElementById(id),models=new Map();
-  const motives={
-    smu:[['corrimento','Corrimento / leucorreia'],['itu','Queixa urinária'],['iniciar','Iniciar anticoncepcional'],['trocar','Trocar anticoncepcional'],['acompanhar','Acompanhar método'],['preconcepcao','Desejo engravidar'],['emergencia','Contracepção de emergência'],['gestante','Queixa ginecológica na gestação']],
-    pna:[['rotina','Iniciar pré-natal'],['corrimento','Pré-natal com corrimento'],['itu','Pré-natal com queixa urinária'],['exames','Revisar / programar exames']],
-    pnc:[['rotina','Acompanhamento pré-natal'],['corrimento','Pré-natal com corrimento'],['itu','Pré-natal com queixa urinária'],['exames','Revisar / programar exames']],
-    ger:[['aguda','Queixa aguda'],['itu','Queixa urinária'],['retorno','Retorno / resultados de exames'],['seguimento','Acompanhamento de condição crônica']],
-    prev:[['rotina','Rastreamento de rotina'],['resultado','Repetir coleta após exame alterado'],['seguimento','Seguimento após colposcopia ou tratamento'],['sintomas','Queixa ginecológica durante o rastreamento']],
-    pu:[['rotina','Crescimento e desenvolvimento'],['alimentacao','Alimentação / amamentação'],['sintomas','Criança com sintomas']],
-    id:[['rotina','Avaliação integral'],['quedas','Quedas / mobilidade'],['memoria','Memória / funcionalidade'],['medicamentos','Revisão de medicamentos']],
-    sm:[['acolhimento','Primeiro acolhimento'],['retorno','Acompanhamento'],['crise','Crise / necessidade imediata']],
-    hip:[['rotina','Acompanhamento de hipertensão / diabetes'],['sintomas','Sintomas / descompensação'],['exames','Revisão de exames']],
-    fer:[['inicial','Avaliação inicial da ferida'],['retorno','Reavaliação / curativo'],['piora','Piora / sinais de infecção']],
-    puerp:[['rotina','Acompanhamento puerperal'],['amamentacao','Dificuldade na amamentação'],['sintomas','Queixa no puerpério']],
-    ist:[['testagem','Testagem / exposição'],['sintomas','Sinais ou sintomas'],['seguimento','Seguimento de resultado / tratamento']],
-    vd:[['rotina','Visita programada'],['cuidados','Dependência / plano de cuidados'],['sintomas','Nova queixa no domicílio']]
-  };
-  const help={
-    corrimento:'Caracterize aspecto, cor, odor, prurido e sintomas associados. Registre gestação, sinais de alarme e achados do exame antes de confirmar hipótese e tratamento.',
-    itu:'Registre início, sintomas urinários, febre, dor lombar, gestação, episódios anteriores e antibióticos recentes. O kit diferencia as indicações de EAS e urocultura.',
-    iniciar:'Registre a preferência da usuária, possibilidade de gestação, PA, antecedentes e medicamentos. Compare elegibilidade e métodos antes de confirmar a escolha.',
-    trocar:'Registre o método atual, motivo da troca, última utilização, preferência e possibilidade de gestação. Revise elegibilidade e orientação de transição.',
-    acompanhar:'Registre método em uso, adesão, efeitos adversos, intercorrências e preferência. Revise as condições de elegibilidade.',
-    exames:'Confira resultados e pedidos anteriores. Separe exames já realizados daqueles que ainda precisam ser solicitados; confira as datas-alvo.',
-    resultado:'Identifique o exame, a data e o resultado. Registre a avaliação e o seguimento indicado, sem repetir automaticamente a coleta.',
-    sintomas:'Caracterize o sintoma e avalie sinais de alarme antes de seguir o atendimento de rotina.',
-    crise:'Priorize a avaliação de segurança, risco imediato e necessidade de atendimento/encaminhamento. O preenchimento não deve atrasar a assistência.',
-    piora:'Avalie sinais de infecção e comprometimento sistêmico antes de seguir o curativo de rotina.'
-  };
-  function value(p,k){return byId(p+'-guide-'+k);}
-  function stages(p){const m=models.get(p),reason=value(p,'motivo').value;if(p!=='smu'||!reason||reason==='outro')return m.tabs;
-    return m.tabs.filter(t=>!['smu-corrimento','smu-contracepcao'].includes(t.getAttribute('aria-controls'))||t.getAttribute('aria-controls')===(['iniciar','trocar','acompanhar','emergencia'].includes(reason)?'smu-contracepcao':['corrimento','gestante'].includes(reason)?'smu-corrimento':''));
+  const R=window.ProtocoloConsulta;
+  const byId=id=>document.getElementById(id);
+  const value=(p,key)=>byId(p+'-'+key)?.value||'';
+  const pages=new Map();
+  const kinds=['queixa','queixas','queixa-principal','complaints','historia-atual','hma','sintomas','manual-queixa','problemas','diagnostico','diagnostico-confirmado','condicao-protocolar'];
+  const legacyReasons={itu:'Queixa urinária',corrimento:'Corrimento',iniciar:'Iniciar anticoncepcional',trocar:'Trocar anticoncepcional',acompanhar:'Acompanhar método'};
+  const ciapTerms={U01:'Disúria',U71:'Infecção urinária',X14:'Corrimento vaginal',X72:'Candidíase vulvovaginal',X73:'Tricomoníase',N01:'Cefaleia',A03:'Febre',D12:'Constipação',D11:'Diarreia',R02:'Dispneia',L03:'Dor lombar'};
+  function inputText(p,page){
+    const structured=[...page.querySelectorAll('.complaint-chip.selected,.clinical-chip.selected,[id$="-queixas-clin"] input:checked,[id$="-queixas-gin"] input:checked')].map(e=>e.dataset.text||e.closest('label')?.textContent||e.textContent);
+    const codes=(window.ESFCiap?.capture(p)||[]).map(item=>ciapTerms[item.code]||window.ESFCiap.description(item.code)).filter(Boolean);
+    const content=[...kinds.map(key=>value(p,key)),...structured,...codes].filter(Boolean);
+    if(!content.length&&value(p,'guide-motivo'))content.push(legacyReasons[value(p,'guide-motivo')]||'');
+    return content.join('\n');
   }
-  function refresh(p){
-    const m=models.get(p);if(!m)return;const reason=value(p,'motivo').value,full=value(p,'completo').checked||!reason||reason==='outro',visible=full?m.tabs:stages(p);
-    m.page.classList.toggle('guided-consultation',!full);
-    m.rail.replaceChildren();
-    visible.forEach((t,i)=>{const b=document.createElement('button');b.type='button';b.className='guide-step';b.textContent=(i+1)+'. '+t.textContent.trim();b.dataset.guideTarget=t.getAttribute('aria-controls');b.setAttribute('aria-current',t.classList.contains('on')?'step':'false');b.onclick=()=>t.click();m.rail.append(b);});
-    m.rail.hidden=full;
-    m.hint.textContent=reason?(help[reason]||'Registre o motivo, os achados relevantes, a avaliação e o plano. As etapas mantêm identificação, avaliação de risco e revisão do SOAP.'):'Escolha o motivo para organizar as etapas. Para demandas combinadas, use “Ver formulário completo”.';
-    const native=byId('smu-motivo-consulta');if(p==='smu'&&native)native.closest('.f').classList.toggle('guide-hidden',!full);
-    if(p==='ger'){
-      for(const key of ['habitos','familiar','social']){
-        const field=byId('ger-'+key);
-        field?.closest('.f')?.classList.toggle('guide-hidden',!full&&['aguda','itu'].includes(reason)&&!field.value.trim());
+  function addRef(title,url){return {title,url};}
+  function activeDecisions(p,text,ctx){
+    const output=[],matches=R.match(text);
+    for(const rule of matches){
+      if(rule.kit==='itu'){output.push(R.urinary(ctx));continue;}
+      const item={title:rule.title,care:rule.care,kit:rule.kit,carePage:rule.carePage,refs:[addRef('Avaliação · p. '+rule.page,R.demanda+'#page='+rule.page)]};
+      if(rule.kit==='corrimento'){
+        item.exams='Se houver dúvida diagnóstica ou persistência, considerar exame a fresco ou Gram. Avaliar testagem para IST conforme exposição.';
+        item.refs.unshift(addRef('Saúde da Mulher · corrimento',R.mulher+'#page=14'));
+        if(p==='smu'||p==='pna'||p==='pnc')item.action='corrimento';
       }
+      if(rule.kit==='gestacao')item.exams='TIG ou β-hCG conforme indicação. Conferir o resultado e a necessidade de repetir a investigação.';
+      output.push(item);
     }
-    if(p==='smu'){
-      const showing={
-        'smu-contra-cigarros':byId('smu-contra-fuma')?.value==='Sim',
-        'smu-contra-diasparto':['lt6','6a6','gt6'].includes(byId('smu-contra-posparto')?.value),
-        'smu-contra-exclusiva':byId('smu-lactante')?.value==='Sim',
-        'smu-contra-apresentacao':byId('smu-contra-metodo')?.value==='mensal',
-        'smu-ig':byId('smu-gestante')?.value==='Sim'
-      };
-      for(const [id,needed] of Object.entries(showing)){
-        const field=byId(id);
-        field?.closest('.f')?.classList.toggle('guide-hidden',!full&&!needed&&!field.value);
-      }
-      const references=byId('smu-exames-mulher')?.querySelectorAll(':scope > .smu-card')||[];
-      for(const card of references){
-        const title=card.querySelector('h3')?.textContent;
-        const required={'Pré-concepção':['preconcepcao'],'Contracepção de emergência':['emergencia'],'Gestantes e demais demandas':['gestante','itu']}[title];
-        const previous=title==='Exames conforme indicação clínica'&&![...card.querySelectorAll('select,textarea')].some(control=>control.value);
-        card.classList.toggle('guide-hidden',!full&&(previous||Boolean(required&&!required.includes(reason))));
-      }
+    const motive=value(p,'motivo-consulta');
+    if(p==='smu'&&['iniciar','acompanhar','trocar','emergencia','preconcepcao'].includes(motive)){
+      const emergency=motive==='emergencia',pre=motive==='preconcepcao';
+      output.push({title:pre?'Pré-concepção':emergency?'Contracepção de emergência':'Anticoncepção',care:pre?'Revisar condições clínicas, medicamentos, vacinação e plano reprodutivo.':emergency?'Avaliar tempo desde a exposição e risco de violência. Seguir o fluxo de acesso ao levonorgestrel e programar seguimento.':'Revisar preferência, gestação, PA, uso atual e critérios de elegibilidade. A etapa Anticoncepção apresenta métodos, taxas de falha e condutas por categoria.',exams:'Solicitar exames conforme a indicação individual e os resultados anteriores.',kit:pre?'gestacao':'contracepcao',action:pre||emergency?'exames-mulher':'contracepcao',refs:[addRef('Saúde da Mulher · '+(pre?'pré-concepção':emergency?'emergência':'elegibilidade'),R.mulher+'#page='+(pre?47:emergency?65:62))]});
     }
-    if(['pna','pnc'].includes(p)){const panel=byId(p+'-corr-painel');panel?.classList.toggle('guide-hidden',!full&&reason!=='corrimento'&&byId(p+'-corr-ativo')?.value!=='Sim');}
-    const exam=byId(p+'-exkit-painel');m.exam.hidden=!exam||!reason;m.start.hidden=!reason;
-    m.extra.hidden=full||visible.some(t=>t.classList.contains('on'));
-    m.page.querySelectorAll('.ux-stage-select option').forEach(o=>{o.hidden=!full&&!visible.some(t=>t.getAttribute('aria-controls')===o.value);});
+    // Somente sintomas/achados atuais acionam o cruzamento. Textos de orientações e SOAP ficam fora.
+    const current=R.positive(text).join(' | ');
+    const specialized=[
+      ['ist',/uretrite|sifilis reagente|hiv reagente|condiloma|herpes genital|cervicite/,'IST'],
+      ['hip',/has mal controlada|diabetes.*sem controle|insuficiencia cardiaca|arritmia|hipotireoidismo|hipertireoidismo|nodulo de tireoide/,'Cardiologia / endocrinologia'],
+      ['fer',/ferida|ulcera de pressao|necrose|pe diabetico/,'Feridas'],
+      ['puerp',/amamentacao|aleitamento|puerperio/,'Puerpério']
+    ];
+    for(const [prefix,rx,title] of specialized){
+      if(!rx.test(current)||prefix==='puerp'&&p!=='puerp')continue;
+      const context=current+(ctx.gestante==='Sim'?' CONTEXTO_GESTANTE':'')+(value(p,'lactante')==='Sim'?' CONTEXTO_LACTANTE':'');
+      const d=condutaProtocoladaModulo(prefix,context);if(!d?.protocolada)continue;
+      // Esquemas específicos do adulto dependem de idade e situação obstétrica estabelecidas.
+      const drug=prefix==='ist'&&ctx.adult&&(ctx.gestante==='Não'||ctx.male)&&!ctx.urgent;
+      output.push({title,care:d.conduta,treatment:drug?[d.medicacao,d.dosagem].filter(Boolean).join(' '):'',refs:[addRef(d.fonte,d.url)]});
+    }
+    if(['pna','pnc'].includes(p)&&Number.isFinite(ctx.ig)){
+      const id=ctx.ig<14?'pn1':ctx.ig<28?'pn2':'pn3',built=ExamesRegras.build(id,ctx);
+      output.push({title:built.name,exams:built.items.filter(x=>x.selected).map(x=>x.name).join(' · '),kit:id,refs:[addRef('Pré-natal · exames por trimestre',ExamesRegras.sources.pn.url+'#page=29')]});
+    }
+    return output;
   }
-  function reset(p){if(!models.has(p))return;value(p,'motivo').value='';value(p,'completo').checked=false;refresh(p);}
-  function choose(p){
-    const reason=value(p,'motivo').value;
-    if(p==='prev'){
-      const code={rotina:'rastr',resultado:'repet',seguimento:'segs'}[reason];
-      const native=code&&document.querySelector(`input[name="prev-motivo"][value="${code}"]`);
-      if(native&&!native.checked)native.click();
-    }
-    if(p==='smu'&&reason&&reason!=='outro'){
-      const native=byId('smu-motivo-consulta');native.value=['corrimento','itu'].includes(reason)?'queixa':reason;native.dispatchEvent(new Event('change',{bubbles:true}));
-    }
-    if(['pna','pnc'].includes(p)&&reason==='corrimento'){const active=byId(p+'-corr-ativo');active.value='Sim';active.dispatchEvent(new Event('change',{bubbles:true}));}
-    const select=byId(p+'-exkit-kit');if(select){const c=window.ESFExames.context(p);const kit=['itu','corrimento'].includes(reason)?reason:['iniciar','trocar','acompanhar','emergencia'].includes(reason)?'contracepcao':['pna','pnc'].includes(p)&&Number.isFinite(c.ig)?c.ig<14?'pn1':c.ig<28?'pn2':'pn3':'';if(kit){select.value=kit;window.ESFExames.render(p);}}
-    refresh(p);
+  function tag(name,cls,text){
+    const node=document.createElement(name);if(cls)node.className=cls;if(text)node.textContent=text;return node;
   }
+  function line(node,label,text){if(!text)return;const row=tag('p');row.append(tag('strong','',label+' '),document.createTextNode(text));node.append(row);}
+  function navigate(p,id){
+    if(id==='corrimento'&&p!=='smu'){
+      byId(p+'-corr-abrir')?.click();return;
+    }
+    const tab=pages.get(p).page.querySelector('[aria-controls="'+p+'-'+id+'"]');tab?.click();
+  }
+  function display(p){
+    const model=pages.get(p);if(!model)return;
+    const {page,box}=model,ctx=ESFExames.context(p),text=inputText(p,page),items=activeDecisions(p,text,ctx);
+    const stamp=JSON.stringify(items);
+    if(model.stamp===stamp)return;model.stamp=stamp;
+    box.replaceChildren();box.hidden=!items.length;
+    for(const [index,item] of items.entries()){
+      const section=tag('article','care-item');
+      section.append(tag('h3','',item.title));
+      if(item.priority)section.append(tag('p','care-priority',item.priority));
+      line(section,'Exames',item.exams);line(section,'Conduta',item.care);line(section,'Tratamento',item.treatment);
+      if(item.note)section.append(tag('p','care-note',item.note));
+      const links=tag('div','care-links');
+      for(const ref of item.refs||[]){
+        if(!ref.url?.startsWith('https://'))continue;
+        const link=tag('a','',ref.title);link.href=ref.url;link.target='_blank';link.rel='noopener';links.append(link);
+      }
+      section.append(links);
+      if(item.carePage){
+        const details=tag('details','protocol-source');
+        const url=R.demanda+'#page='+item.carePage;
+        const link=tag('a','','Abrir a página no leitor de PDF');link.href=url;link.target='_blank';link.rel='noopener noreferrer';
+        details.append(tag('summary','','Ver manejo no protocolo · p. '+item.carePage),link);
+        details.addEventListener('toggle',()=>{
+          if(!details.open||details.querySelector('iframe'))return;
+          const frame=tag('iframe');frame.title='Manejo municipal de '+item.title;frame.referrerPolicy='no-referrer';frame.src=url;details.append(frame);
+        });section.append(details);
+      }
+      if(item.kit&&byId(p+'-exkit-painel')){
+        const order=tag('button','btn btn-s','Revisar pedido de exames');order.type='button';
+        order.onclick=()=>{
+          if(!ESFExames.cart(p).some(x=>x.kit===item.kit))ESFExames.build(p,item.kit);
+          ESFExames.open(p,item.kit);
+        };
+        section.append(order);
+      }
+      if(item.action){const b=tag('button','btn btn-s','Abrir avaliação específica');b.type='button';b.onclick=()=>navigate(p,item.action);section.append(b);}
+      if(index>0&&item.kit?.startsWith('pn')){const more=tag('details');more.append(tag('summary','',item.title),section);box.append(more);}else box.append(section);
+    }
+  }
+  function disclosure(node,label,cls){
+    if(!node||node.parentElement?.classList.contains(cls))return;
+    const details=tag('details',cls);details.append(tag('summary','',label));node.before(details);details.append(node);return details;
+  }
+  function clean(page,p){
+    // Guardar os controles antigos para reabertura de históricos e edição de dados complementares.
+    const manual=byId('manual-soap-'+p);disclosure(manual,'Complementar o registro em texto livre','extra-record');
+    const exams=byId(p+'-exkit-painel');if(exams){
+      disclosure(exams,'Pedidos de exames','order-drawer');
+      const picker=exams.querySelector('.exam-picker');disclosure(picker,'Escolher outro kit','manual-kit');
+      byId(p+'-exkit-sugestoes')?.setAttribute('hidden','');
+    }
+    const oldExam=byId('smu-confirmar-exames')?.closest('section');
+    if(p==='smu'&&oldExam)disclosure(oldExam,'Consultar ou editar pedidos do formulário anterior','old-orders');
+    const native=page.querySelector('.tp.on')||page;
+    const duplicates=new Set();
+    for(const btn of page.querySelectorAll('button[onclick]')){
+      const action=btn.getAttribute('onclick').trim(),key=(btn.closest('.tp')?.id||page.id)+'|'+action;
+      if(/^gerarSAE\(/.test(action)){if(duplicates.has(key))btn.remove();else duplicates.add(key);}
+      if(action==='gerarSoapPorIA()'&&byId('quick-actions')?.querySelector('.ai'))btn.hidden=true;
+    }
+    if(p==='ger')byId('ger-motivo')?.closest('.f')?.classList.add('legacy-motive');
+    for(const d of page.querySelectorAll('[id$="-endereco-auto"]')){
+      const field=byId(p+'-endereco');
+      if(field&&d.contains(byId(p+'-logradouro'))&&field.closest('.f'))field.closest('.f').classList.add('combined-address');
+    }
+    const anthro=byId(p+'-antropometria-auto');
+    const vital=(byId(p+'-pa')||byId(p+'-pa-atual')||byId(p+'-peso'))?.closest('.card');
+    if(anthro&&vital&&vital!==anthro&&vital.closest('.tp')===anthro.closest('.tp')){
+      const fields=anthro.querySelector('.module-form-grid');if(fields)vital.append(fields);
+      const status=byId(p+'-imc-status');if(status)vital.append(status);anthro.remove();
+    }
+    for(const card of page.querySelectorAll('.card')){
+      const title=card.querySelector(':scope > .ct')?.textContent.trim();
+      if(title==='Avaliação Vacinal — PNI'&&p!=='pu')disclosure(card,'Avaliar vacinação','support-section');
+      if(title==='Análise livre de laudo laboratorial')disclosure(card,'Interpretar laudo laboratorial','support-section');
+    }
+    // A área de impressão e os cálculos continuam lendo os valores dos mesmos controles.
+    return native;
+  }
+  function syncLegacy(p){
+    const m=pages.get(p);if(!m)return;
+    const address=byId(p+'-endereco'),derived=value(p,'logradouro')||value(p,'cep');
+    if(address?.closest('.combined-address'))address.closest('.f').hidden=Boolean(derived||!address.value);
+    const old=byId('ger-motivo');if(p==='ger'&&old?.closest('.legacy-motive'))old.closest('.f').hidden=!old.value;
+    const historic=byId('smu-confirmar-exames')?.closest('.old-orders');
+    if(p==='smu'&&historic)historic.hidden=![...historic.querySelectorAll('textarea,select')].some(e=>e.value)&&!window.ESFSaudeMulher?.records().some(r=>r.id==='exames');
+  }
+  function refresh(p){const m=pages.get(p);if(!m)return;if(!m.box.isConnected)m.home.after(m.box);syncLegacy(p);display(p);}
+  function reset(p){const m=pages.get(p);if(!m)return;clearTimeout(m.timer);m.stamp='';m.home.after(m.box);m.box.replaceChildren();m.box.hidden=true;for(const id of ['motivo','completo']){const e=byId(p+'-guide-'+id);if(e){e.value='';e.checked=false;}}}
   function mount(){
-    for(const [id,p]of Object.entries(QUICK_PAGE_PREFIX)){
-      const page=byId(id),tabs=[...(page?.querySelectorAll('.tabs .tab')||[])];if(!tabs.length)continue;
-      const root=document.createElement('section');root.className='consultation-guide';root.setAttribute('aria-label','Organizar consulta por motivo');
-      root.innerHTML=`<div class="guide-title"><h3>O que trouxe a pessoa à UBS hoje?</h3></div><div class="guide-choice"><div class="f"><label for="${p}-guide-motivo">Motivo principal deste atendimento</label><select id="${p}-guide-motivo"><option value="">Selecionar motivo</option>${(motives[p]||[]).concat([['outro','Outro motivo / várias demandas']]).map(([v,label])=>`<option value="${v}">${label}</option>`).join('')}</select></div><label class="guide-full"><input type="checkbox" id="${p}-guide-completo"> Ver formulário completo</label></div><p class="guide-hint"></p><div class="guide-actions"><button type="button" class="btn btn-p" data-guide-start hidden>Começar avaliação</button><button type="button" class="btn btn-s" data-guide-exams hidden>Revisar exames indicados</button></div><nav class="guide-steps" aria-label="Etapas para o motivo selecionado"></nav><p class="guide-extra" hidden>Você abriu uma etapa adicional. Os dados são preservados; use “Ver formulário completo” para consultar todas as etapas.</p>`;
-      page.querySelector('.tabs').before(root);
-      const m={page,tabs,root,rail:root.querySelector('.guide-steps'),hint:root.querySelector('.guide-hint'),extra:root.querySelector('.guide-extra'),start:root.querySelector('[data-guide-start]'),exam:root.querySelector('[data-guide-exams]')};models.set(p,m);
-      value(p,'motivo').addEventListener('change',()=>choose(p));value(p,'completo').addEventListener('change',()=>refresh(p));
-      m.start.onclick=()=>{const t=tabs.find(t=>/(Avalia|Anamn|Queixa)/i.test(t.textContent))||tabs[1]||tabs[0];t.click();byId(t.getAttribute('aria-controls'))?.scrollIntoView({block:'start',behavior:'smooth'});};
-      m.exam.onclick=()=>window.ESFExames?.open(p);
-      if(p==='smu')page.addEventListener('change',event=>{if(['smu-contra-fuma','smu-contra-posparto','smu-lactante','smu-contra-metodo','smu-gestante'].includes(event.target.id))refresh(p);});
-      page.querySelector('.tabs').addEventListener('click',()=>refresh(p));refresh(p);
+    for(const [id,p] of Object.entries(QUICK_PAGE_PREFIX)){
+      const page=byId(id);if(!page)continue;
+      const home=page.querySelector('.ux-stage-label')||page.querySelector('.tabs');if(!home)continue;
+      const box=tag('aside','consultation-protocol');box.id=p+'-protocolo-atual';box.setAttribute('aria-label','Orientação do protocolo');box.setAttribute('aria-live','polite');box.hidden=true;home.after(box);
+      const old=tag('div');old.hidden=true;
+      for(const k of ['motivo','completo']){const input=tag('input');input.id=p+'-guide-'+k;input.type=k==='completo'?'checkbox':'text';old.append(input);}old.className='consultation-guide legacy-guide';page.append(old);
+      pages.set(p,{page,box,home,stamp:'',timer:0});clean(page,p);
+      const change=e=>{
+        if(e.target.closest('.consultation-protocol'))return;
+        const model=pages.get(p),target=e.target;
+        if(Object.values(SOAP_IDS_MODULO[p]||{}).includes(target.id))return;
+        const relevant=target.closest('.clinical-chip,.complaint-chip,.alert-chip,[data-priority],[id$="-queixas-clin"],[id$="-queixas-gin"]')||kinds.some(k=>target.id===p+'-'+k)||['gestante','motivo-consulta'].some(k=>target.id===p+'-'+k);
+        const place=relevant&&target.closest('.complaint-list,.alert-check-list,.clinical-group,.f,.g2,.cki,.rpills');
+        if(place&&!place.contains(box)&&!place.closest('[hidden]')&&place.getClientRects().length)place.after(box);
+        clearTimeout(model.timer);model.timer=setTimeout(()=>refresh(p),e.type==='input'?100:0);
+      };
+      for(const event of ['change','input','click'])page.addEventListener(event,change);
     }
-    const restore=window.restaurarDadosModulo;window.restaurarDadosModulo=function(p,...args){const result=restore.call(this,p,...args);refresh(p);return result;};
-    matchMedia('(max-width:760px)').addEventListener('change',event=>{if(event.matches)alternarMenuLateral(true);});
+    const restore=window.restaurarDadosModulo;
+    window.restaurarDadosModulo=function(p,...args){const r=restore.call(this,p,...args);refresh(p);return r;};
+    const nav=window.go;
+    window.go=function(...args){const r=nav.apply(this,args);const p=prefixoPaginaAtual();if(p)refresh(p);return r;};
+    matchMedia('(max-width:760px)').addEventListener('change',e=>{if(e.matches)alternarMenuLateral(true);});
+    refresh(prefixoPaginaAtual());
   }
   window.ESFConsultaGuiada={refresh,reset};document.addEventListener('DOMContentLoaded',mount);
 })();

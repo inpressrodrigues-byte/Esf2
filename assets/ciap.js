@@ -107,7 +107,7 @@
     const data=aggregate(records);if(!data.length)box.append(document.createTextNode('Nenhum CIAP-2 confirmado neste recorte.'));
     else{const table=document.createElement('table');for(const row of [['CIAP-2','Descrição','Atendimentos'],...data.map(x=>[x.ciap,x.descricao,x.atendimentos])]){const tr=document.createElement('tr');for(const cell of row){const td=document.createElement('td');td.textContent=cell;tr.append(td);}table.append(tr);}box.append(table,button('Exportar contagem CIAP-2',()=>exportarLinhasCSV('ciap2-toledo',data)));}
   }
-  window.ESFCiap={capture,restore,restoreFromPage,suggest,suggestModule,aggregate,soapFor,mount,refreshSuggestions};
+  window.ESFCiap={capture,restore,restoreFromPage,suggest,suggestModule,aggregate,soapFor,mount,refreshSuggestions,description:code=>catalog.find(item=>item.code===code)?.display||''};
   async function init(){
     try{const res=await fetch('assets/ciap2.json');if(!res.ok)throw Error('HTTP '+res.status);const data=await res.json();catalog=data.concept.filter(c=>/^[A-Z][0-9]{2}$/.test(c.code));}catch{catalogError='Catálogo CIAP-2 indisponível. Recarregue para tentar novamente.';}
     mount();owner=CURRENT_AUTH_USER_ID;
