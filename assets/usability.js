@@ -42,6 +42,7 @@
     onNavigate(page);
   }
   function restoreValues(page, values) {
+    if(page?.id==='pg-puericultura')window.FluxoAPS?.prepararHistoricoInfantil(values);
     Object.entries(values || {}).forEach(([id,v]) => {
       const e = byId(id);
       if (!e || !page.contains(e) || ['file','password','button','submit'].includes(e.type)) return;
@@ -49,9 +50,16 @@
       else if (typeof v === 'string' || typeof v === 'number') e.value = v;
     });
     window.ESFCiap?.restoreFromPage(prefix(page));
+    if(page?.id==='pg-pn-consulta')window.FluxoAPS?.syncPerda();
   }
   function beforeRestore(page) {
     if (!page) return;
+    const defaults=initial.get(page.id)||{};
+    for(const e of page.querySelectorAll('.aps-new')){if(e.type==='checkbox')e.checked=false;else e.value='';}
+    for(const field of page.querySelectorAll('[id^="cm-"] input,[id^="cm-"] select,[id^="cm-"] textarea')){
+      if(Object.hasOwn(defaults,field.id))continue;
+      if(['radio','checkbox'].includes(field.type))field.checked=false;else field.value='';
+    }
     restoreValues(page,initial.get(page.id));
     window.ESFConsultaGuiada?.reset(prefix(page));
     page.querySelectorAll('[data-ux-key]').forEach(e=>e.classList.remove('selected'));
@@ -133,6 +141,10 @@
     });
     page.querySelectorAll('[data-ux-key],.clinical-chip,.complaint-chip,.alert-chip,.quick-care').forEach(e => e.classList.remove('selected'));
     page.querySelectorAll('input[type=file]').forEach(e => e.value = '');
+    for(const suffix of ['abertura-ref','vinculo-coleta','complaints','alerts','exkit-cart','exkit-order']){
+      const field=byId(p+'-'+suffix);if(field)field.value='';
+    }
+    window.ESFConsultaGuiada?.reset(p);
     page.querySelectorAll('.clinical-alerts,.soap-pendencias,.sae-preview').forEach(e => e.replaceChildren());
     if (typeof EXAMES_PADRAO !== 'undefined') delete EXAMES_PADRAO[p];
     if (typeof EXAMES_LIVRES !== 'undefined') delete EXAMES_LIVRES[p];
@@ -456,7 +468,7 @@
     document.body.classList.add('ux-compact','ux-prumo');
     const homeBackground=make('div');homeBackground.id='ux-home-background';homeBackground.setAttribute('aria-hidden','true');document.body.prepend(homeBackground);
     document.querySelectorAll('.pg').forEach(page=>{
-      const controls=[...page.querySelectorAll('input,select,textarea')].filter(e=>!e.closest('.exam-kits')&&e.id!=='smu-contra-continua');legacy.set(page.id,controls.filter(e=>!e.closest('.pn-corr')));
+      const controls=[...page.querySelectorAll('input,select,textarea')].filter(e=>!e.closest('.exam-kits')&&!['smu-contra-continua','pu-posicao-medida','pnc-sang-atual'].includes(e.id));legacy.set(page.id,controls.filter(e=>!e.closest('.pn-corr')));
       controls.forEach((e,i)=>{if(!e.id&&!['file','password'].includes(e.type))e.id=`ux-field-${page.id}-${i}`;});
       page.querySelectorAll('.clinical-chip,.complaint-chip,.alert-chip,.quick-care').forEach((e,i)=>e.dataset.uxKey=`${page.id}:${i}`);
       initial.set(page.id,collectValues(page));

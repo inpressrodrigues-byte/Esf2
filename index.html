@@ -914,6 +914,8 @@ body.sidebar-collapsed .dev-nav{display:none}
 <link rel="stylesheet" href="assets/consulta-guiada.css">
 <script defer src="assets/protocolo-consulta.js"></script>
 <script defer src="assets/consulta-guiada.js"></script>
+<script defer src="assets/crescimento.js"></script>
+<script defer src="assets/fluxo-assistencial.js"></script>
 </head>
 <body>
 
@@ -1149,9 +1151,9 @@ body.sidebar-collapsed .dev-nav{display:none}
     <div class="card">
       <div class="ct"><span class="dot dr"></span>GESTA — História Obstétrica</div>
       <div class="g3">
-        <div class="f"><label>Getações (G)</label><input type="number" id="pna-g" min="0" value="1"></div>
-        <div class="f"><label>Partos (P)</label><input type="number" id="pna-p" min="0" value="0"></div>
-        <div class="f"><label>Abortos (A)</label><input type="number" id="pna-a" min="0" value="0"></div>
+        <div class="f"><label>Getações (G)</label><input type="number" id="pna-g" min="0"></div>
+        <div class="f"><label>Partos (P)</label><input type="number" id="pna-p" min="0"></div>
+        <div class="f"><label>Abortos (A)</label><input type="number" id="pna-a" min="0"></div>
         <div class="f"><label>Cesáreas anteriores</label><input type="number" id="pna-ces" min="0" value="0"></div>
         <div class="f"><label>Filhos vivos</label><input type="number" id="pna-fv" min="0" value="0"></div>
         <div class="f"><label>Intervalo interpartal</label><input type="text" id="pna-iip" placeholder="Ex: 3 anos"></div>
@@ -1463,7 +1465,7 @@ body.sidebar-collapsed .dev-nav{display:none}
         <label class="cki"><input type="checkbox" onchange="checkPncQueixas()"> Disúria / ITU</label>
       </div>
       <div class="cklist" style="margin-bottom:10px" id="pnc-queixas-gin">
-        <label class="cki"><input type="checkbox" onchange="checkPncQueixas()"> Sangramento vaginal</label>
+        <label class="cki"><input type="checkbox" data-sang-marcado onchange="checkPncQueixas()"> Sangramento vaginal</label><label class="f" for="pnc-sang-atual">Sangramento vaginal nesta consulta<select id="pnc-sang-atual"><option value="">Não avaliado</option><option>Sim</option><option>Não</option></select></label>
         <label class="cki"><input type="checkbox" onchange="checkPncQueixas()"> Perda de líquido</label>
         <label class="cki"><input type="checkbox" onchange="checkPncQueixas()"> Corrimento vaginal alterado</label>
         <label class="cki"><input type="checkbox" onchange="checkPncQueixas()"> Perda de tampão mucoso</label>
@@ -1919,7 +1921,7 @@ body.sidebar-collapsed .dev-nav{display:none}
           <label>Perím. Torácico (cm)</label>
           <input type="number" id="pu-pt" step="0.1">
         </div>
-        <div class="f"><label>IMC</label><input class="ro" readonly id="pu-imc" type="text"></div>
+        <div class="f"><label for="pu-posicao-medida">Posição na medida</label><select id="pu-posicao-medida"><option value="">Não informada</option><option value="L">Deitada</option><option value="H">Em pé</option></select></div><div class="f"><label>IMC</label><input class="ro" readonly id="pu-imc" type="text"><small id="st-pu-imc"></small></div>
       </div>
       <div class="div" style="margin: 20px 0;"></div>
       <div class="g3">
@@ -1930,7 +1932,7 @@ body.sidebar-collapsed .dev-nav{display:none}
     </div>
 
     <div class="card">
-      <div class="ct"><span class="dot da"></span>Tendência de Crescimento (apoio visual)</div>
+      <div class="ct"><span class="dot da"></span>Evolução do crescimento · OMS</div>
       <div style="margin-bottom:10px; display:inline-block">
         <label style="font-size:12px;font-weight:600;color:var(--tx2);margin-right:8px">Visualizar Gráfico:</label>
         <select id="pu-chart-type" onchange="updateAntropometria()" style="border:1px solid var(--bd);border-radius:4px;padding:4px 8px;font-family:var(--font);font-size:13px">
@@ -1940,7 +1942,7 @@ body.sidebar-collapsed .dev-nav{display:none}
         </select>
       </div>
       <div style="position:relative; height:300px; width:100%; border:1px solid var(--bd); border-radius:var(--r); background:var(--sf2); padding:10px">
-        <canvas id="growthChart"></canvas>
+        <canvas id="growthChart" role="img" aria-label="Curvas da OMS e medidas da criança"></canvas>
       </div>
     </div>
   </div>
@@ -2836,7 +2838,7 @@ body.sidebar-collapsed .dev-nav{display:none}
 
     <div class="card">
       <div class="ct"><span class="dot da"></span>Rastreamento Mamográfico</div>
-      <div class="alert alert-i" style="margin-bottom:12px">ℹ Mamografia indicada para mulheres de <strong>50 a 69 anos</strong>, a cada 2 anos (INCA/MS). Avaliar individualmente para história familiar ou outros fatores de risco.</div>
+      <div class="alert alert-i" style="margin-bottom:12px">ℹ Mamografia indicada para mulheres de <strong>50 a 74 anos</strong>, a cada 2 anos (INCA/MS). Avaliar individualmente para história familiar ou outros fatores de risco.</div>
       <div class="g2">
         <div class="f"><label for="prev-mamo-ind">Mamografia indicada?</label><select id="prev-mamo-ind"><option value="">—</option><option>Sim — por faixa etária</option><option>Sim — por fator de risco</option><option>Não indicada no momento</option></select></div>
         <div class="f"><label>Última mamografia</label><input type="text" id="prev-mamo-ult" placeholder="Ex: 2023 / Não realizou"></div>
@@ -2849,7 +2851,7 @@ body.sidebar-collapsed .dev-nav{display:none}
   </div>
 
   <!-- TAB 5 · RESULTADO / CONDUTA -->
-  <div class="tp" id="prev-5">
+  <div class="tp" id="prev-5"><p class="ux-help">Rastreamento de risco habitual entre 25 e 64 anos. Onde o DNA-HPV está implantado, repetir em cinco anos após teste negativo. Onde se utiliza citologia, intervalo de três anos após dois exames anuais normais. Sintomas, resultados alterados e situações especiais exigem avaliação própria.</p>
     <div class="alert alert-i">ℹ Preencher quando o resultado do exame citopatológico for recebido. Registrar conduta e retorno.</div>
 
     <div class="card">
@@ -4738,23 +4740,9 @@ let idadePuericulturaGlobal = { cronologica_meses: 0 };
 let growthChart = null;
 
 // Tabela condensada da OMS (Medianas em meses-chave: 0, 2, 4, 6, 9, 12, 15, 18, 24, 36, 48, 60)
-const WHO_LABELS = [0, 2, 4, 6, 9, 12, 15, 18, 24, 36, 48, 60];
-const WHO_DATA = {
-  boys: {
-    peso: [3.3, 5.6, 7.0, 7.9, 8.9, 9.6, 10.3, 10.9, 12.2, 14.3, 16.3, 18.3],
-    alt:  [49.9, 58.4, 63.9, 67.6, 72.0, 75.7, 79.1, 82.3, 87.8, 96.1, 103.3, 110.0],
-    pc:   [34.5, 38.3, 40.5, 42.2, 43.8, 45.3, 46.3, 47.2, 48.3, 50.0, 50.8, 51.5]
-  },
-  girls: {
-    peso: [3.2, 5.1, 6.4, 7.3, 8.2, 8.9, 9.6, 10.2, 11.5, 13.9, 16.1, 18.2],
-    alt:  [49.1, 57.1, 62.1, 65.7, 70.1, 74.0, 77.5, 80.7, 86.4, 95.1, 102.7, 109.4],
-    pc:   [33.9, 37.3, 39.5, 41.1, 42.6, 44.0, 45.0, 46.0, 47.0, 48.9, 49.8, 50.6]
-  }
-};
-
-function calcAgeDetail(v) {
+function calcAgeDetail(v, referencia) {
   if(!v) return null;
-  const d = new Date(v + 'T00:00:00'); const h = new Date(); h.setHours(0,0,0,0);
+  const d = new Date(v + 'T00:00:00'); const h = referencia ? new Date(referencia+'T00:00:00') : new Date(); h.setHours(0,0,0,0);
   if(Number.isNaN(d.getTime())||d>h)return null;
   let y = h.getFullYear() - d.getFullYear(); let m = h.getMonth() - d.getMonth(); let dias = h.getDate() - d.getDate();
   if (dias < 0) { m--; dias += new Date(h.getFullYear(), h.getMonth(), 0).getDate(); }
@@ -4764,7 +4752,7 @@ function calcAgeDetail(v) {
 
 function idadeCrianca(){
   const dataNasc = document.getElementById('pu-nasc').value; if(!dataNasc) return;
-  const idade = calcAgeDetail(dataNasc); if(!idade) return;
+  const idade = calcAgeDetail(dataNasc, val('pu-data')); if(!idade) return;
   idadePuericulturaGlobal.cronologica_meses = idade.totalM;
 
   let txtCron = idade.totalM === 0 ? idade.dias + ' dias' : (idade.y === 0 ? idade.m + ' meses e ' + idade.dias + ' dias' : idade.y + ' anos e ' + idade.m + ' meses');
@@ -4806,7 +4794,7 @@ function autoSelecionaConsultaMes(meses, dias) {
   else if (meses <= 10)     val = '10m';
   else if (meses <= 11)     val = '11m';
 
-  if (!val) return; // acima de 11 meses não auto-seleciona
+  if (!val) {document.querySelectorAll('[id^="cm-"]').forEach(e=>e.style.display='none');document.querySelectorAll('input[name="pu-mes"]:checked').forEach(e=>e.checked=false);return;}
 
   // Marca o radio button correspondente
   const radio = document.querySelector(`input[name="pu-mes"][value="${val}"]`);
@@ -4822,109 +4810,8 @@ function autoSelecionaConsultaMes(meses, dias) {
   }
 }
 
-function initChart() {
-  const ctx = document.getElementById('growthChart');
-  if (!ctx) return;
-  if(!window.Chart){
-    const status=document.getElementById('st-pu-peso');
-    if(status)status.innerHTML='<span style="color:var(--amber)">Carregando gráfico sem bloquear a consulta...</span>';
-    garantirChartJs().then(ok=>{if(ok)initChart();else if(status)status.innerHTML='<span style="color:var(--amber)">Gráfico bloqueado pela rede; os campos permanecem utilizáveis.</span>'});
-    return;
-  }
-  if (growthChart) { growthChart.destroy(); growthChart = null; }
-  growthChart = new Chart(ctx.getContext('2d'), {
-    type: 'line',
-    data: {
-      datasets: [
-        { label: 'Faixa superior aproximada', data: [], borderColor: '#eab308', fill: false, borderDash: [6,4], tension: 0.4, pointRadius: 0, borderWidth: 1.5, parsing: false },
-        { label: 'Mediana',             data: [], borderColor: '#22c55e', fill: false, tension: 0.4, pointRadius: 0, borderWidth: 2, parsing: false },
-        { label: 'Faixa inferior aproximada',  data: [], borderColor: '#ef4444', fill: false, borderDash: [6,4], tension: 0.4, pointRadius: 0, borderWidth: 1.5, parsing: false },
-        { label: 'Criança',             data: [], backgroundColor: '#2563eb', borderColor: '#1d4ed8', pointRadius: 8, pointHoverRadius: 10, showLine: false, parsing: false }
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'top', labels: { font: { size: 11 }, usePointStyle: true } },
-        tooltip: { callbacks: { label: c => { const v = c.raw?.y; return c.dataset.label + ': ' + (v != null ? v : '—'); } } }
-      },
-      scales: {
-        x: { type: 'linear', title: { display: true, text: 'Idade (meses)', font: { size: 11 } }, ticks: { stepSize: 6 }, min: 0, max: 61 },
-        y: { title: { display: true, text: 'Valor', font: { size: 11 } }, beginAtZero: false }
-      }
-    }
-  });
-}
-
-function updateAntropometria() {
-  const p   = parseFloat(document.getElementById('pu-peso').value);
-  const a   = parseFloat(document.getElementById('pu-alt').value);
-  const pc  = parseFloat(document.getElementById('pu-pc').value);
-  const sexoRaw = document.getElementById('pu-sexo').value;
-  const sexo = sexoRaw === 'Menina' ? 'girls' : (sexoRaw === 'Menino' ? 'boys' : null);
-  const meses = idadePuericulturaGlobal.cronologica_meses;
-  const temIdade = (typeof meses === 'number' && !isNaN(meses));
-
-  // ── IMC — altura em cm (>10); avisa se digitado em metros ──
-  if (p && a && a > 10) {
-    document.getElementById('pu-imc').value = (p / Math.pow(a / 100, 2)).toFixed(1) + ' kg/m²';
-  } else if (p && a && a <= 10) {
-    document.getElementById('pu-imc').value = 'Altura em cm (ex: 78)';
-  } else {
-    document.getElementById('pu-imc').value = '—';
-  }
-
-  // ── Avaliação textual ──
-  function evalVal(val, base, multMin, multMax) {
-    if (!val || isNaN(val)) return '<span style="color:var(--tx3)">—</span>';
-    if (val < base * multMin) return '<span style="color:var(--rose)">'+icrisk('dr')+' Abaixo / Insuficiente</span>';
-    if (val > base * multMax) return '<span style="color:var(--amber)">'+icrisk('da')+' Acima / Elevado</span>';
-    return '<span style="color:var(--green)">'+icrisk('dg')+' Adequado</span>';
-  }
-
-  if (sexo && temIdade) {
-    let closestIdx = 0, minDiff = Infinity;
-    WHO_LABELS.forEach((L, i) => { const d = Math.abs(L - meses); if (d < minDiff) { minDiff = d; closestIdx = i; } });
-    const pMin = 0.78, pMax = 1.25, aMin = 0.94, aMax = 1.06, pcMin = 0.95, pcMax = 1.05;
-    document.getElementById('st-pu-peso').innerHTML = evalVal(p,  WHO_DATA[sexo].peso[closestIdx], pMin, pMax);
-    document.getElementById('st-pu-alt').innerHTML  = evalVal(a,  WHO_DATA[sexo].alt[closestIdx],  aMin, aMax);
-    document.getElementById('st-pu-pc').innerHTML   = evalVal(pc, WHO_DATA[sexo].pc[closestIdx],  pcMin, pcMax);
-  }
-
-  // ── Gráfico ──
-  if (!growthChart) return;
-  if (!sexo) {
-    growthChart.data.datasets.forEach(d => d.data = []);
-    growthChart.update();
-    return;
-  }
-
-  const type = document.getElementById('pu-chart-type').value;
-  const baseData = WHO_DATA[sexo][type];
-
-  let minM, maxM, yLabel;
-  if (type === 'peso')     { minM = 0.78; maxM = 1.25; yLabel = 'Peso (kg)'; }
-  else if (type === 'alt') { minM = 0.94; maxM = 1.06; yLabel = 'Estatura (cm)'; }
-  else                     { minM = 0.95; maxM = 1.05; yLabel = 'Perím. Cefálico (cm)'; }
-
-  growthChart.options.scales.y.title.text = yLabel;
-  const allVals = baseData.flatMap(v => [v * minM, v * maxM]);
-  growthChart.options.scales.y.min = Math.floor(Math.min(...allVals) * 0.97);
-  growthChart.options.scales.y.max = Math.ceil(Math.max(...allVals) * 1.03);
-
-  growthChart.data.datasets[0].data = WHO_LABELS.map((x, i) => ({ x, y: +(baseData[i] * maxM).toFixed(2) }));
-  growthChart.data.datasets[1].data = WHO_LABELS.map((x, i) => ({ x, y: baseData[i] }));
-  growthChart.data.datasets[2].data = WHO_LABELS.map((x, i) => ({ x, y: +(baseData[i] * minM).toFixed(2) }));
-
-  const userVal = type === 'peso' ? p : (type === 'alt' ? a : pc);
-  if (temIdade && !isNaN(userVal) && userVal > 0) {
-    growthChart.data.datasets[3].data = [{ x: meses, y: userVal }];
-  } else {
-    growthChart.data.datasets[3].data = [];
-  }
-
-  growthChart.update();
-}
+function initChart(){updateAntropometria();}
+function updateAntropometria(){window.CrescimentoOMS?.render();}
 
 // Inicializa a escuta passiva nas antigas funções manuais para não quebrar a lógica de IMC do Idoso/Gestante
 function dataISOEmUTC(valor){
@@ -4936,14 +4823,15 @@ function formatarDataUTC(data){
   return new Intl.DateTimeFormat('pt-BR',{timeZone:'UTC'}).format(data);
 }
 function calcularDppNaegeleUTC(dum){
-  return new Date(Date.UTC(dum.getUTCFullYear()+1,dum.getUTCMonth()-3,dum.getUTCDate()+7));
+  return new Date(dum.getTime()+280*86400000);
 }
 function calcIG(prefix){
   const dumEl=document.getElementById(prefix+'-dum'), igEl=document.getElementById(prefix+'-ig'), banner=document.getElementById(prefix+'-ig-banner');
   const dum=dumEl?.value;
+  const dppEl=document.getElementById(prefix+'-dpp');if(dppEl)dppEl.value='';
   if(!dum){if(igEl)igEl.value='';if(banner)banner.classList.remove('show');return;}
   const dDate=dataISOEmUTC(dum); if(!dDate)return;
-  const agora=new Date(), hoje=new Date(Date.UTC(agora.getFullYear(),agora.getMonth(),agora.getDate()));
+  const agora=new Date(), hoje=dataISOEmUTC(val(prefix+'-data'))||new Date(Date.UTC(agora.getFullYear(),agora.getMonth(),agora.getDate()));
   const diffMs=hoje-dDate, diffDias=Math.floor(diffMs/(1000*60*60*24));
   if(diffDias<0){igEl.value='DUM no futuro';if(banner)banner.classList.remove('show');return;}
   const semanas=Math.floor(diffDias/7), diasResto=diffDias%7;
@@ -4981,6 +4869,7 @@ function showConsultaMes(val){
   }
   el.querySelectorAll('input[type="radio"][name$="-risco"]').forEach(r=>r.closest('.card')?.remove());
   el.style.display='block';
+  window.FluxoAPS?.reverMes(el);
 }
 
 function mesLabel(val){
@@ -5337,7 +5226,8 @@ function checkPncQueixas() {
   const c = document.getElementById('pnc-queixas-alerts'); if(!c)return; c.innerHTML='';
   const q = Array.from(document.querySelectorAll('#pnc-queixas-clin input:checked, #pnc-queixas-gin input:checked')).map(e=>e.closest('.cki').textContent.trim());
   const mf=document.getElementById('pnc-mf')?.value||'';
-  const perdaTipo=document.getElementById('pnc-perda-tipo')?.value||'', perdaQtd=document.getElementById('pnc-perda-qtd')?.value||'';
+  const perdaAtiva=window.FluxoAPS?.perdaAtiva()!==false;
+  const perdaTipo=perdaAtiva?val('pnc-perda-tipo'):'', perdaQtd=perdaAtiva?val('pnc-perda-qtd'):'';
   const add=(classe,titulo,texto)=>c.innerHTML+=`<div class="alert ${classe}"><strong>${titulo}:</strong> ${texto}</div>`;
   if(q.includes('Náuseas / vômitos')) add('alert-w','Náuseas/vômitos — Protocolo Toledo','avaliar vômitos contínuos/intensos, desidratação, perda de peso e alterações urinárias/metabólicas. Orientar refeições pequenas a cada 3 horas, alimento leve ao acordar e antes de dormir, evitar jejum, gorduras, temperos, doces e odores fortes, e manter hidratação. Se medidas falharem e riscos forem afastados, realizar avaliação profissional para prescrição escalonada: bromoprida 10 mg 8/8h; segunda escolha metoclopramida 10 mg 8/8h; terceira escolha ondansetrona 8 mg 8/8h, meia hora antes das refeições. Suspeita de hiperêmese gravídica exige avaliação médica.');
   if(q.includes('Cefaleia')) add('alert-w','Cefaleia — Protocolo Toledo','aferir e repetir PA, afastar sinais de pré-eclâmpsia e investigar enxaqueca/outras causas e medicamentos. Orientar repouso em local pouco iluminado e ventilado, hidratação, alimentação adequada e relaxamento. Se recorrente, solicitar avaliação médica. Com riscos afastados e persistência: avaliação profissional para paracetamol 500 mg 6/6h se dor; segunda escolha dipirona 500 mg 6/6h se dor.');
@@ -6948,7 +6838,7 @@ function montarSoapClinico(cfg) {
   ].filter(Boolean).join('\n');
   const vacinaSoap=resumoVacinalSoap(cfg.modulo);
   alvos.p.value = [
-    cfg.cd ? `Conduta realizada:\n${formatarCondutaSoap(cfg.cd)}` : '',
+    cfg.cd ? `Plano de cuidados:\n${formatarCondutaSoap(cfg.cd)}` : '',
     cfg.plano ? 'PLANO/ORIENTACOES:\n' + cfg.plano : '',
     guia.condutas ? 'CONDUTAS DOS ACHADOS SELECIONADOS:\n' + resumoLinhasOperacionais(guia.condutas,4) : '',
     vacinaSoap ? 'AVALIACAO VACINAL PNI:\n' + resumoLinhasOperacionais(vacinaSoap,5) : ''
@@ -7066,7 +6956,7 @@ function gerarSoapAutomatoPnc() {
   const queixas = val('pnc-queixas');
   checkPncQueixas(); checkPncVitais();
   const queixasMarcadas=Array.from(document.querySelectorAll('#pnc-queixas-clin input:checked, #pnc-queixas-gin input:checked')).map(e=>e.closest('.cki')?.textContent.trim()).filter(Boolean);
-  const perda=[val('pnc-perda-tipo'),val('pnc-perda-qtd'),val('pnc-perda-obs')].filter(Boolean).join(' | ');
+  const perda=window.FluxoAPS?.perdaAtiva()===false?'':[val('pnc-perda-tipo'),val('pnc-perda-qtd'),val('pnc-perda-obs')].filter(Boolean).join(' | ');
   const alertas=[document.getElementById('pnc-queixas-alerts')?.innerText,document.getElementById('pnc-vitais-alerts')?.innerText].filter(Boolean).join('\n');
   const medidas=[['IG',val('pnc-ig'),''],['PA',val('pnc-pa'),'mmHg'],['BCF',val('pnc-bcf'),'bpm'],['AU',val('pnc-au'),'cm'],['Apresentação',val('pnc-apres'),'']].filter(x=>x[1]).map(([n,v,u])=>`${n} ${v}${u?' '+u:''}`).join(', ');
   montarSoapClinico({
@@ -7091,10 +6981,10 @@ function gerarSoapAutomatoPu() {
   avaliarDNPMAutomatico();
   const dnpmClass=val('pu-dnpm-class'), dnpmObs=val('pu-dnpm-obs');
   const riscoPu=calcRisco();
-  const idadeM=calcAgeDetail(val('pu-nasc'))?.totalM;
+  const idadeM=calcAgeDetail(val('pu-nasc'),val('pu-data'))?.totalM;
   const medidaLinear=Number.isFinite(idadeM)&&idadeM<24?'Comprimento':'Estatura';
   const dnpmAtraso=/prov[aá]vel atraso|poss[ií]vel atraso/i.test(dnpmClass);
-  const medidas=[['Peso',val('pu-peso'),'kg'],[medidaLinear,val('pu-alt'),'cm'],['Perímetro cefálico',val('pu-pc'),'cm'],['Perímetro abdominal',val('pu-pa'),'cm'],['Perímetro torácico',val('pu-pt'),'cm'],['IMC',val('pu-imc'),'kg/m²']].filter(x=>x[1]).map(([n,v,u])=>`${n} ${v} ${u}`).join(', ');
+  const medidas=[['Peso',val('pu-peso'),'kg'],[medidaLinear,val('pu-alt'),'cm'],['Perímetro cefálico',val('pu-pc'),'cm'],['Perímetro abdominal',val('pu-pa'),'cm'],['Perímetro torácico',val('pu-pt'),'cm'],['IMC',val('pu-imc'),'']].filter(x=>x[1]).map(([n,v,u])=>`${n} ${v} ${u}`).join(', ');
   montarSoapClinico({
     nome, idade, modulo:'pu',
     ids:{s:'pu-s', o:'pu-o', a:'pu-a-soap', p:'pu-p'},
@@ -7102,8 +6992,8 @@ function gerarSoapAutomatoPu() {
     hma:[val('pu-alim')?`Responsável refere alimentação: ${val('pu-alim')}.`:'',val('pu-queixas')?`Queixas/intercorrências referidas: ${val('pu-queixas')}.`:''].filter(Boolean).join('\n'),
     hp:'',
     exame:[medidas,val('pu-peso')&&avaliacaoAutoP&&avaliacaoAutoP!=='-'?`Avaliação do peso: ${avaliacaoAutoP}.`:'',val('pu-alt')&&avaliacaoAutoA&&avaliacaoAutoA!=='-'?`Avaliação do ${medidaLinear.toLowerCase()}: ${avaliacaoAutoA}.`:''].filter(Boolean).join('\n'),
-    hd:[`Puericultura com avaliação antropométrica e acompanhamento do desenvolvimento.`,dnpmClass?`DNPM: ${dnpmClass}.`:'',marcos?`Marcos presentes/observados: ${marcos}.`:'Marcos do desenvolvimento não registrados como avaliados; não inferir atraso apenas por ausência de marcação.',dnpmObs,`Estratificação CIB-PR: ${riscoPu.nivel}.`,riscoPu.criterios.length?`Critérios: ${riscoPu.criterios.join('; ')}.`:'Critérios de risco não identificados nos campos preenchidos.'].filter(Boolean).join(' '),
-    cd:`Orientadas vacinas conforme calendário, alimentação, sinais de alerta, prevenção de acidentes, higiene e estimulação do desenvolvimento. ${dnpmAtraso?(dnpmClass.includes('Provável')?'Encaminhar para avaliação neuropsicomotora especializada e manter seguimento na APS.':'Orientar estimulação direcionada e reavaliar em 30 dias, se o marco foi testado e realmente ausente.'):'Retorno conforme faixa etária e rotina da unidade.'}\nEstratificação de risco: ${riscoPu.conduta}\nAvaliar crescimento em curvas/escore-z e comparar com medidas anteriores quando disponíveis.`
+    hd:['Consulta de puericultura.',dnpmClass?`DNPM: ${dnpmClass}.`:'',marcos?`Marcos presentes/observados: ${marcos}.`:'Marcos do desenvolvimento não registrados como avaliados; não inferir atraso apenas por ausência de marcação.',dnpmObs,`Estratificação CIB-PR: ${riscoPu.nivel}.`,riscoPu.criterios.length?`Critérios: ${riscoPu.criterios.join('; ')}.`:'Critérios de risco não identificados nos campos preenchidos.'].filter(Boolean).join(' '),
+    cd:`Avaliar vacinação, alimentação, prevenção de acidentes e desenvolvimento conforme idade. ${dnpmAtraso?(dnpmClass.includes('Provável')?'Encaminhar para avaliação neuropsicomotora especializada e manter seguimento na APS.':'Orientar estimulação direcionada e reavaliar em 30 dias, se o marco foi testado e realmente ausente.'):'Retorno conforme faixa etária e rotina da unidade.'}\nEstratificação de risco: ${riscoPu.conduta}\nAvaliar crescimento em curvas/escore-z e comparar com medidas anteriores quando disponíveis.`
   });
   mudarParaAbaSoap('[onclick*="pu-6"]','pu-6');
   showToast('SOAP Puericultura preenchido!');
@@ -7150,8 +7040,8 @@ function gerarSoapIdoso() {
     hma:'',
     hp:[val('id-cron')?`Condições prevalentes: ${val('id-cron')}.`:'',val('id-meds')?`Medicamentos em uso: ${val('id-meds')}.`:'',polifarmacia,val('id-vac')?`Vacinas: ${val('id-vac')}.`:'',val('id-cuidador')?`Cuidador: ${val('id-cuidador')}.`:'',val('id-rede-apoio')?`Rede de apoio: ${val('id-rede-apoio')}.`:''].filter(Boolean).join('\n'),
     exame:[['PA',val('id-pa')],['Controle PA',val('id-controle-pa')],['Glicemia',val('id-gli')],['Controle glicêmico',val('id-controle-glicemia')],['Peso',val('id-peso')],['Altura',val('id-alt')],['IMC',val('id-imc')],['AVD',val('id-avd')],['AIVD',val('id-aivd')],['Mobilidade',val('id-mob')],['Quedas',val('id-quedas')],['Risco de queda',val('id-risco-queda')],['MEEM',val('id-meem')],['Cognição',val('id-cognicao')],['Humor',val('id-humor')]].filter(x=>x[1]).map(x=>`${x[0]}: ${x[1]}`).concat(gds?[gds]:[]).join(' | '),
-    hd:[`Avaliação multidimensional da pessoa idosa. IVCF-20: ${ivcf.total} pontos — ${ivcf.classe}.`,dominios.length?`Domínios alterados no IVCF-20: ${dominios.join(' | ')}.`:'Sem domínios pontuados no IVCF-20 pelos campos preenchidos.',val('id-fragilidade')?`Fragilidade clínica: ${val('id-fragilidade')}.`:'',funcionalidade,violenciaTxt,altoRisco?'Alerta: pessoa idosa com risco aumentado.':''].filter(Boolean).join(' '),
-    cd:`Orientadas medidas de prevenção de quedas, revisão medicamentosa completa, atualização vacinal, atividade física conforme tolerância e acompanhamento de condições crônicas. ${altoRisco?'Construir plano de cuidados individualizado, programar reavaliação precoce, avaliar visita domiciliar com ACS/equipe e cuidado multiprofissional conforme necessidades identificadas.':'Manter acompanhamento periódico e promoção do envelhecimento saudável.'} Registrar metas de PA/glicemia somente quando houver contexto clínico suficiente e histórico de medidas.`
+    hd:[ivcf.total===null?'IVCF-20 incompleto.':`IVCF-20: ${ivcf.total} pontos — ${ivcf.classe}.`,dominios.length?`Domínios alterados no IVCF-20: ${dominios.join(' | ')}.`:'Sem domínios pontuados no IVCF-20 pelos campos preenchidos.',val('id-fragilidade')?`Fragilidade clínica: ${val('id-fragilidade')}.`:'',funcionalidade,violenciaTxt,altoRisco?'Alerta: pessoa idosa com risco aumentado.':''].filter(Boolean).join(' '),
+    cd:`Avaliar medidas de prevenção de quedas, medicamentos, vacinação, atividade física e condições crônicas. ${altoRisco?'Construir plano de cuidados individualizado, programar reavaliação precoce, avaliar visita domiciliar com ACS/equipe e cuidado multiprofissional conforme necessidades identificadas.':'Manter acompanhamento periódico e promoção do envelhecimento saudável.'} Registrar metas de PA/glicemia somente quando houver contexto clínico suficiente e histórico de medidas.`
   });
   mudarParaAbaSoap('[onclick*="id-6"]','id-6');
   showToast('SOAP Idoso preenchido!');
@@ -7259,7 +7149,7 @@ function calcRisco() {
   const interManual = Array.from(document.querySelectorAll('.risco-inter:checked')).map(x=>x.closest('.cki')?.textContent.trim()).filter(Boolean);
   const altoAuto=[], interAuto=[];
   const pesoNasc=parseFloat(document.getElementById('pu-pn')?.value), igNasc=parseFloat(document.getElementById('pu-ig')?.value);
-  const apgarTxt=document.getElementById('pu-apgar')?.value||'', apgarPartes=apgarTxt.match(/\d+/g)||[], apgar5=parseInt(apgarPartes[1]||apgarPartes[0]||'');
+  const apgarTxt=document.getElementById('pu-apgar')?.value||'', apgarPartes=apgarTxt.match(/\d+/g)||[], apgar5=parseInt(apgarPartes[1]||'');
   if(Number.isFinite(pesoNasc)){if(pesoNasc<2000||pesoNasc>=4000)altoAuto.push(`Peso ao nascer ${pesoNasc} g`);else if(pesoNasc<2500)interAuto.push(`Peso ao nascer ${pesoNasc} g`);}
   if(Number.isFinite(igNasc)){if(igNasc<=34)altoAuto.push(`Prematuridade: ${igNasc} semanas`);else if(igNasc<37)interAuto.push(`IG ao nascer: ${igNasc} semanas`);}
   if(Number.isFinite(apgar5)&&apgar5<7)altoAuto.push(`Apgar no 5º minuto menor que 7 (${apgar5})`);
@@ -7288,11 +7178,11 @@ function calcRisco() {
     conduta.innerHTML='<strong>Conduta CIB-PR:</strong> seguimento intensificado na APS, ampliando o calendário de puericultura. Se os fatores não melhorarem ou houver piora, reclassificar como alto risco e encaminhar à Atenção Ambulatorial Especializada.';
   } else {
     el.style.background='var(--sf2)'; el.style.borderColor='var(--bd)'; el.style.color='var(--tx)';
-    el.textContent='Nenhum critério marcado — Risco Habitual';
-    conduta.innerHTML='<strong>Conduta CIB-PR:</strong> acompanhamento de rotina na APS. Reavaliar a estratificação em todas as consultas até completar 2 anos.';
+    el.textContent=document.getElementById('pu-risco-revisado')?.checked?'Risco habitual após revisão':'Revisar os critérios para classificar o risco';
+    conduta.innerHTML=!document.getElementById('pu-risco-revisado')?.checked?'Revisar critérios clínicos e antecedentes.':'<strong>Conduta CIB-PR:</strong> acompanhamento de rotina na APS. Reavaliar a estratificação em todas as consultas até completar 2 anos.';
   }
   conduta.innerHTML+='<div style="margin-top:5px;font-size:11px;color:var(--tx3)">Fonte: Estratificação de Risco de Crianças no Paraná, aprovada na CIB/PR em 28/04/2021. Um único critério define o estrato, prevalecendo o maior risco.</div>';
-  return {nivel:alto?'Alto risco':inter?'Risco intermediário':'Risco habitual',criterios:[...altoAuto,...altoManual,...interAuto,...interManual],conduta:conduta.innerText};
+  return {nivel:alto?'Alto risco':inter?'Risco intermediário':document.getElementById('pu-risco-revisado')?.checked?'Risco habitual':'Não avaliado',criterios:[...altoAuto,...altoManual,...interAuto,...interManual],conduta:conduta.innerText};
 }
 
 document.addEventListener('change',e=>{if(e.target.closest?.('#pg-puericultura'))calcRisco();});
@@ -7717,7 +7607,7 @@ function gerarSoapPreventivo() {
   const nome = document.getElementById('prev-nome')?.value || '';
   const idade = document.getElementById('prev-idade')?.value || '';
   const motivo = document.querySelector('input[name="prev-motivo"]:checked')?.value || '';
-  const motivoTxt = {rastr:'rastreamento citopatológico', repet:'repetição de exame citopatológico alterado', segs:'seguimento pós-diagnóstico/tratamento'}[motivo] || 'preventivo ginecológico';
+  const motivoTxt = val('prev-vinculo-coleta')?'avaliação de resultado de coleta anterior':{rastr:'rastreamento citopatológico', repet:'repetição de exame citopatológico alterado', segs:'seguimento pós-diagnóstico/tratamento'}[motivo] || 'preventivo ginecológico';
   const dum = document.getElementById('prev-dum')?.value || '';
   const diu = document.getElementById('prev-diu')?.value || '';
   const gravida = document.getElementById('prev-gravida')?.value || '';
@@ -7751,8 +7641,8 @@ function gerarSoapPreventivo() {
   const norm=v=>normalizarTextoProtocolo(v||'');
   const sim=v=>/\bsim\b/.test(norm(v));
   const nao=v=>/\bnao\b|\bn[aã]o\b/.test(norm(v));
-  const ns=v=>/nao sabe|não sabe|ignorado|nao lembra|não lembra/.test(norm(v));
-  const fraseSelecao=(valor,simTxt,naoTxt,nsTxt='Não soube informar.')=>sim(valor)?simTxt:(nao(valor)?naoTxt:(ns(valor)?nsTxt:''));
+  const ns=v=>/^ns$|nao sabe|não sabe|ignorado|nao lembra|não lembra/.test(norm(v));
+  const fraseSelecao=(valor,simTxt,naoTxt,nsTxt='Não soube informar.')=>ns(valor)?nsTxt:(sim(valor)?simTxt:(nao(valor)?naoTxt:''));
   const linhasS=[],linhasO=[],linhasA=[],linhasP=[];
   linhasS.push(`Paciente comparece à UBS para consulta de ${motivoTxt}.`);
   if(dum)linhasS.push(`DUM: ${formatarDataBR(dum)}.`);
@@ -7768,9 +7658,9 @@ function gerarSoapPreventivo() {
   const manual=manualSoapPartes('prev');
   if(manual.s)linhasS.push(`Registro complementar da anamnese: ${finalizarFraseSoap(manual.s)}`);
 
-  linhasO.push('Realizada avaliação ginecológica conforme registro da consulta.');
   if(vaginaDesc)linhasO.push(`Inspeção da vagina e vulva: ${finalizarFraseSoap(vaginaDesc)}`);
   if(coloTxt)linhasO.push(`Inspeção do colo: ${coloTxt.toLowerCase()}${coloDesc?` — ${finalizarFraseSoap(coloDesc)}`:'.'}`);
+  if(val('prev-vinculo-coleta'))linhasO.push('Resultado referente à coleta anterior vinculada no histórico.');
   if(mat)linhasO.push(`Material coletado: ${finalizarFraseSoap(mat)}`);
   if(corr)linhasO.push(`Corrimento: ${finalizarFraseSoap(corr)}`);
   if(dst)linhasO.push(dst==='sim'?'Sinais de IST presentes conforme descrição registrada.':'Sinais de IST: não identificados na avaliação registrada.');
@@ -7785,7 +7675,6 @@ function gerarSoapPreventivo() {
   if(manual.o)linhasO.push(`Achado complementar: ${finalizarFraseSoap(manual.o)}`);
 
   linhasA.push(`Paciente em consulta de ${motivoTxt}.`);
-  if(!queixas&&!temQueixaGine)linhasA.push('Sem queixas ginecológicas registradas no momento.');
   if(temQueixaGine)linhasA.push('Queixa ginecológica registrada para avaliação associada ao rastreamento.');
   if(/normal/i.test(coloTxt)&&!lesaoColo)linhasA.push('Colo uterino com aspecto normal à inspeção registrada.');
   if(lesaoColo)linhasA.push('Achado cervical alterado registrado, com necessidade de caracterização e conduta conforme fluxo.');
@@ -7794,17 +7683,12 @@ function gerarSoapPreventivo() {
   if(adequab||normal||achados.length)linhasA.push('Resultado citopatológico avaliado conforme registro disponível.');
   if(manual.a)linhasA.push(`Avaliação complementar: ${finalizarFraseSoap(manual.a)}`);
 
-  linhasP.push('Realizada consulta de rastreamento conforme rotina da APS.');
   if(mat)linhasP.push('Coleta citopatológica registrada conforme técnica e rotina da unidade.');
   if(lesaoColo)linhasP.push('Caracterizar lesão cervical quanto à localização, tamanho, aspecto, sangramento ao toque/friabilidade e secreção; se houver suspeita clínica de lesão sugestiva de câncer, seguir fluxo municipal e não aguardar apenas o resultado citopatológico.');
   if(achadoMama)linhasP.push('Caracterizar achado mamário quanto à mama, quadrante, tamanho, consistência, mobilidade, dor, limites, pele, descarga papilar e linfonodos; avaliar seguimento conforme fluxo de mama/imagem quando indicado.');
   if(temQueixaGine)linhasP.push('Avaliar corrimento, dor, odor ou sangramento em abordagem clínica/sindrômica conforme Protocolo IST Toledo, com orientação de parceria sexual quando indicado.');
   if(conduta)linhasP.push(`Conduta definida: ${finalizarFraseSoap(conduta)}`);
   if(retorno)linhasP.push(`Retorno/agendamento: ${formatarDataBR(retorno)}.`);
-  else linhasP.push('Orientada a retornar para avaliação do resultado do exame, quando disponível.');
-  linhasP.push('Orientada quanto à importância do acompanhamento ginecológico periódico.');
-  linhasP.push('Orientada a procurar a UBS em caso de corrimento vaginal, dor pélvica, sangramento fora do período menstrual, sangramento após relação sexual, lesões genitais ou outros sintomas ginecológicos.');
-  linhasP.push('Mantidas orientações sobre prevenção de IST e uso de preservativo.');
   if(orient)linhasP.push(`Orientações adicionais registradas: ${finalizarFraseSoap(orient)}`);
   if(encam)linhasP.push(`Conduta complementar/encaminhamento: ${finalizarFraseSoap(encam)}`);
   if(manual.p)linhasP.push(`Conduta complementar pactuada: ${finalizarFraseSoap(manual.p)}`);
@@ -7917,6 +7801,11 @@ function calcERSM() {
 
   // Alerta crítico (ideação com plano ou delirium)
   verificaAlertaCritico();
+  if(!document.getElementById('sm-ersm-revisado')?.checked){
+    document.getElementById('sm-ersm-score').textContent=total?String(total)+' (parcial)':'—';
+    clasDiv.textContent='Estratificação pendente de revisão';clasDiv.style.color='var(--tx)';clasDiv.style.background='var(--sf2)';
+    condDiv.textContent='';
+  }
 }
 
 function verificaAlertaCritico() {
@@ -7992,14 +7881,15 @@ function gerarSoapSM() {
   const agudos = smEventosAgudosMarcados();
   const guia = coletarGuiaClinico('sm');
   const scoreNum=Number(score)||0;
+  const aplicado=!!document.getElementById('sm-ersm-revisado')?.checked;
   const criterios=sintomasPts.length?`Itens pontuados no ERSM: ${sintomasPts.map(x=>`${x.label} (${x.pts} ponto${x.pts>1?'s':''})`).join('; ')}.`:'Nenhum item pontuado foi marcado no ERSM; classificação baseada apenas nos campos preenchidos.';
   const exameMental=guia.exame?`Exame do estado mental guiado: ${guia.exame}`:'Exame do estado mental não registrado nos campos estruturados; revisar aparência, comportamento, fala, humor/afeto, pensamento, senso-percepção, orientação, juízo crítico e sinais de intoxicação/agitação.';
   const seguranca=smResumoSeguranca();
   const identificacao = [`Paciente ${nome}, ${idade}${sexo ? `, ${sexo}` : ''}.`, ocupacao ? `Ocupação/situação de trabalho: ${ocupacao}.` : '', escolaridade ? `Escolaridade: ${escolaridade}.` : '', responsavel ? `Responsável: ${responsavel}.` : '', area ? `Endereço/microárea: ${area}.` : '', contato ? `Contato: ${contato}.` : ''].filter(Boolean);
   document.getElementById('sm-s').value = ['DESCRIÇÃO DA CONSULTA', ...identificacao, 'Comparece à APS/ESF para escuta qualificada, avaliação em saúde mental e estratificação de risco.', vulnerabilidades.length ? `Condições de vulnerabilidade identificadas: ${vulnerabilidades.join('; ')}.` : '', agudos.length ? `Eventos agudos informados: ${agudos.join('; ')}.` : '', guia.anamnese ? `ANAMNESE GUIADA:\n${guia.anamnese}` : ''].filter(Boolean).join('\n');
-  document.getElementById('sm-o').value = ['Aplicado Instrumento de Estratificação de Risco em Saúde Mental - versão reduzida.', `Pontuação total: ${score} pontos.`, `Estratificação: ${classif || 'não calculada'}.`, criterios, exameMental, seguranca].filter(Boolean).join('\n');
-  document.getElementById('sm-a').value = [`Avaliação de risco em saúde mental: ${classif || score + ' pontos'}.`, criterios, vulnerabilidades.length ? `Vulnerabilidades relevantes: ${vulnerabilidades.join('; ')}.` : '', agudos.length ? 'Presença de evento agudo/critério crítico, exigindo avaliação imediata e definição de fluxo de urgência.' : '', scoreNum>40?'Necessário diferenciar risco atual, risco histórico, fatores de proteção e rede de apoio antes de definir fluxo final.':''].filter(Boolean).join('\n');
-  document.getElementById('sm-p').value = [smPlanoIndividualizado(scoreNum,sintomasPts,agudos,vulnerabilidades), guia.condutas ? `CONDUTAS DOS ACHADOS SELECIONADOS:\n${guia.condutas}` : ''].filter(Boolean).join('\n');
+  document.getElementById('sm-o').value = [aplicado?'ERSM revisado.':'ERSM sem avaliação concluída.',aplicado?`Pontuação total: ${score} pontos.`:'',aplicado?`Estratificação: ${classif}.`:'',sintomasPts.length?criterios:'', exameMental, seguranca].filter(Boolean).join('\n');
+  document.getElementById('sm-a').value = [aplicado?`Avaliação de risco em saúde mental: ${classif}.`:'', vulnerabilidades.length ? `Vulnerabilidades relevantes: ${vulnerabilidades.join('; ')}.` : '', agudos.length ? 'Presença de evento agudo/critério crítico, exigindo avaliação imediata e definição de fluxo de urgência.' : '', scoreNum>40?'Necessário diferenciar risco atual, risco histórico, fatores de proteção e rede de apoio antes de definir fluxo final.':''].filter(Boolean).join('\n');
+  document.getElementById('sm-p').value = [(aplicado||agudos.length||sintomasPts.some(x=>/idea[cç][aã]o suicida com planejamento|delirium tremens/i.test(x.label)))?smPlanoIndividualizado(scoreNum,sintomasPts,agudos,vulnerabilidades):'', guia.condutas ? `CONDUTAS DOS ACHADOS SELECIONADOS:\n${guia.condutas}` : ''].filter(Boolean).join('\n');
   if(guia.alertas) document.getElementById('sm-a').value += '\n\nACHADOS QUE REQUEREM AVALIACAO:\n' + guia.alertas;
   if(resumoVacinalSoap('sm')) document.getElementById('sm-p').value += '\n\nAVALIACAO VACINAL PNI:\n' + resumoVacinalSoap('sm');
   finalizarSoapModulo('sm',`Consulta de enfermagem em saúde mental${nome&&nome!=='PACIENTE'?` de ${nome}`:''}.`);
@@ -8014,7 +7904,7 @@ const DOC_CAL_W=595,DOC_CAL_H=842;
 function docCalDefault(){return{global:{x:0,y:0},group:{check:{x:0,y:0},text:{x:0,y:0},score:{x:0,y:0}},items:{},zoom:.76,page:1}}
 function docCalMerge(raw){const d=docCalDefault(),r=raw||{};return{...d,...r,global:{...d.global,...(r.global||{})},group:{check:{...d.group.check,...(r.group?.check||{})},text:{...d.group.text,...(r.group?.text||{})},score:{...d.group.score,...(r.group?.score||{})}},items:{...(r.items||{})}}}
 function lerDocCalibracao(doc){try{return docCalMerge(JSON.parse(localStorage.getItem(DOC_CAL_KEYS[doc])||'{}'))}catch(e){return docCalDefault()}}
-function salvarDocCalibracao(doc,c){try{localStorage.setItem(DOC_CAL_KEYS[doc],JSON.stringify(docCalMerge(c)))}catch(e){}}
+function salvarDocCalibracao(doc,c){if(!temPermissao('editar_protocolos'))return;try{localStorage.setItem(DOC_CAL_KEYS[doc],JSON.stringify(docCalMerge(c)))}catch(e){}}
 function salvarCoordenadasDoc(doc){
   const c=lerDocCalibracao(doc);
   salvarDocCalibracao(doc,c);
@@ -8040,7 +7930,7 @@ function docCalIVCFTokens(){
   add('ivcf-saude','Autopercepção da saúde',389,n('ivcf-saude')>0?676:687);
   [['ivcf-compras','Compras',646],['ivcf-dinheiro','Controle dinheiro/contas',616],['ivcf-casa','Trabalhos domésticos',589],['ivcf-banho','Banho sozinho',569],['ivcf-esquecimento','Esquecimento referido',524],['ivcf-piora-memoria','Piora da memória',504],['ivcf-memoria-cotidiano','Memória impede cotidiano',488],['ivcf-tristeza','Desânimo/tristeza',457],['ivcf-interesse','Perda de interesse',434],['ivcf-bracos','Elevar braços',390],['ivcf-maos','Manusear objetos',369],['ivcf-perda-peso','Perda de peso/IMC/panturrilha/marcha',326],['ivcf-caminhar','Dificuldade de caminhar',303],['ivcf-quedas','Quedas',283],['ivcf-incontinencia','Incontinência',263],['ivcf-visao','Visão',224],['ivcf-audicao','Audição',181],['ivcf-comorbidades','Comorbidades múltiplas',116]].forEach(([id,label,y])=>add(id,label,n(id)>0?184:237,y));
   const r=typeof calcularIVCF20==='function'?calcularIVCF20():{total:0};
-  add('ivcf-total','Pontuação total',540,76,'score',String(r.total||0),10);
+  add('ivcf-total','Pontuação total',540,76,'score',r.total===null?'':String(r.total),10);
   return tokens;
 }
 const ERSM_CHECK_Y_P1=[397.8,421.3,444.6,468.0,491.4,514.9,538.2,561.6,585.0,608.5,631.8,655.2,678.6,702.1,725.4,748.8,772.2,795.7,819.0,842.4,865.8,889.3,912.6,936.0,959.4,982.9];
@@ -8090,7 +7980,7 @@ function ativarAbaCalibradorDoc(doc){
   pg.querySelectorAll('.tp').forEach(t=>t.classList.remove('on'));document.getElementById(cfg.tp)?.classList.add('on');
   pg.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',(t.getAttribute('onclick')||'').includes(cfg.tp)));
 }
-function abrirCalibradorDoc(doc){ativarAbaCalibradorDoc(doc);const d=document.getElementById(`${doc}-calibrador`);if(!d)return;d.open=true;setTimeout(()=>{atualizarCalibradorDoc(doc);d.scrollIntoView({behavior:'smooth',block:'start'});document.getElementById(`${doc}-cal-page`)?.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});},40)}
+function abrirCalibradorDoc(doc){if(!exigirPermissao('editar_protocolos'))return;go('editor');const d=document.getElementById(`${doc}-calibrador`);if(!d)return;d.open=true;setTimeout(()=>{atualizarCalibradorDoc(doc);d.scrollIntoView({behavior:'smooth',block:'start'});document.getElementById(`${doc}-cal-page`)?.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});},40)}
 function fecharCalibradorDoc(doc){const d=document.getElementById(`${doc}-calibrador`);if(d)d.open=false}
 function resetarCalibradorDoc(doc){try{localStorage.removeItem(DOC_CAL_KEYS[doc])}catch(e){}atualizarCalibradorDoc(doc);showToast('Calibração restaurada.')}
 let DOC_CAL_DRAG_ACTIVE=false;
@@ -8230,7 +8120,7 @@ function coletarDadosPaciente(prefix){
 }
 function preencherDadosPaciente(prefix,dados){
   const mapa=CAMPOS_PACIENTE[prefix]||{};
-  Object.entries(mapa).forEach(([k,id])=>{const el=document.getElementById(id);if(el&&dados?.[k])el.value=k==='cpf'?formatarCPF(dados[k]):dados[k];});
+  Object.entries(mapa).forEach(([k,id])=>{const el=document.getElementById(id);if(el&&dados?.[k]&&!['cronicas','risco_queda','fragilidade','polifarmacia','visita_domiciliar'].includes(k))el.value=k==='cpf'?formatarCPF(dados[k]):dados[k];});
   if(prefix==='pna')idadeGest(); if(prefix==='pu'){idadeCrianca();updateAntropometria();checkMCHATIdade();} if(prefix==='prev'){idadePrev();prevVerificaIdade();} if(prefix==='id')idadeIdoso(); if(prefix==='sm')idadeSM();
 }
 async function buscarPacientePorCPF(input){
@@ -8239,8 +8129,9 @@ async function buscarPacientePorCPF(input){
   const prefix=input.id.split('-')[0], locais=carregarPacientes(),escopo=escopoDadosClinicos().chave;
   let dados=locais[cpf]||null;
   if(_sb&&CURRENT_AUTH_USER_ID&&navigator.onLine){
-    try{const r=await _sb.from('pacientes').select('dados,unidade').eq('cpf',cpf).maybeSingle();if(escopo!==escopoDadosClinicos().chave)return;if(r.error)throw r.error;dados=r.data?{...r.data.dados,unidade:r.data.unidade}:null;if(dados)locais[cpf]=dados;else delete locais[cpf];salvarPacientesLocal(locais);}catch(e){showToast('Não foi possível conferir o cadastro na nuvem.');return;}
+    try{const r=await _sb.from('pacientes').select('dados,unidade').eq('cpf',cpf).maybeSingle();if(escopo!==escopoDadosClinicos().chave||normalizarCPF(input.value)!==cpf)return;if(r.error)throw r.error;dados=r.data?{...r.data.dados,unidade:r.data.unidade}:null;if(dados)locais[cpf]=dados;else delete locais[cpf];salvarPacientesLocal(locais);}catch(e){showToast('Não foi possível conferir o cadastro na nuvem.');return;}
   }
+  window.FluxoAPS?.historico(prefix);
   if(dados){preencherDadosPaciente(prefix,dados);showToast('✓ Cadastro do paciente localizado e preenchido.');}
   else showToast('CPF ainda não cadastrado. Os dados serão salvos ao finalizar o atendimento.');
 }
@@ -8610,27 +8501,34 @@ const IVCF_SECOES=[
   ['Comunicação',[['ivcf-visao','Problema de visão que impeça atividade cotidiana?',0,2],['ivcf-audicao','Problema de audição que impeça atividade cotidiana?',0,2]]],
   ['Comorbidades múltiplas',[['ivcf-comorbidades','Cinco ou mais doenças, cinco ou mais medicamentos ou internação recente?',0,4]]]
 ];
-function campoIVCF(item){if(Array.isArray(item[2]))return`<div class="f"><label>${item[1]}</label><select id="${item[0]}" class="ivcf-item" onchange="calcularIVCF20()"><option value="">—</option>${item[2].map(x=>`<option value="${x[1]}">${x[0]}</option>`).join('')}</select></div>`;return`<div class="f"><label>${item[1]}</label><select id="${item[0]}" class="ivcf-item" onchange="calcularIVCF20()"><option value="0">Não</option><option value="${item[3]}">Sim</option></select></div>`}
+function campoIVCF(item){if(Array.isArray(item[2]))return`<div class="f"><label>${item[1]}</label><select id="${item[0]}" class="ivcf-item" onchange="calcularIVCF20()"><option value="">—</option>${item[2].map(x=>`<option value="${x[1]}">${x[0]}</option>`).join('')}</select></div>`;return`<div class="f"><label>${item[1]}</label><select id="${item[0]}" class="ivcf-item" onchange="calcularIVCF20()"><option value="">Não avaliado</option><option value="0">Não</option><option value="${item[3]}">Sim</option></select></div>`}
 function montarIVCF20(){const el=document.getElementById('ivcf20-form');if(!el||el.dataset.ready)return;el.dataset.ready='1';el.innerHTML=IVCF_SECOES.map(s=>`<div class="ivcf-dom"><h4>${s[0]}</h4><div class="ivcf-grid">${s[1].map(campoIVCF).join('')}</div></div>`).join('');calcularIVCF20()}
 function calcularIVCF20(){
   const getN=id=>Number(document.getElementById(id)?.value||0);
   let total=getN('ivcf-idade')+getN('ivcf-saude')+Math.min(4,getN('ivcf-compras')+getN('ivcf-dinheiro')+getN('ivcf-casa'))+getN('ivcf-banho');
   ['ivcf-esquecimento','ivcf-piora-memoria','ivcf-memoria-cotidiano','ivcf-tristeza','ivcf-interesse','ivcf-bracos','ivcf-maos','ivcf-perda-peso','ivcf-caminhar','ivcf-quedas','ivcf-incontinencia','ivcf-visao','ivcf-audicao','ivcf-comorbidades'].forEach(id=>total+=getN(id));
+  const respostas=[...document.querySelectorAll('#ivcf20-form .ivcf-item')];
+  if(!respostas.length||respostas.some(e=>e.value==='')){
+    const classe='Avaliação incompleta',out=document.getElementById('ivcf20-resultado'),hidden=document.getElementById('ivcf20-class');
+    if(out)out.textContent=classe+' · '+respostas.filter(e=>e.value!=='').length+' de '+respostas.length+' itens respondidos.';
+    if(hidden)hidden.value='';return {total:null,classe};
+  }
   const classe=total>=15?'Idoso frágil':total>=7?'Idoso em risco de fragilização':'Idoso robusto',nivel=total>=15?'alta':total>=7?'media':'';
   const out=document.getElementById('ivcf20-resultado');if(out){out.className='ivcf-result '+nivel;out.innerHTML=`Pontuação IVCF-20: <strong>${total} / 40</strong> — ${classe}.<br><small>${total>=15?'Realizar avaliação multidimensional, construir plano de cuidados e considerar acompanhamento compartilhado/visita domiciliar.':total>=7?'Investigar os domínios alterados, elaborar plano de cuidados e reavaliar precocemente.':'Manter promoção da saúde e acompanhamento periódico.'}</small>`}
   let hidden=document.getElementById('ivcf20-class');if(!hidden){hidden=document.createElement('input');hidden.type='hidden';hidden.id='ivcf20-class';document.getElementById('id-5')?.appendChild(hidden)}hidden.value=`${total} pontos — ${classe}`;avaliarRiscoIdoso();return{total,classe}
 }
 async function gerarIVCF20PDF(){
+  if(!exigirPermissao('gerar_documentos'))return;
   const status=document.getElementById('ivcf20-pdf-status');if(status)status.textContent='Gerando...';
   try{
     if(!window.PDFLib||!window.IVCF20_MODELO_BASE64)throw new Error('Modelo oficial do IVCF-20 não carregado.');
     const doc=await PDFLib.PDFDocument.load(ersmBase64ToUint8Array(window.IVCF20_MODELO_BASE64)),page=doc.getPages()[0],font=await doc.embedFont(PDFLib.StandardFonts.HelveticaBold),azul=PDFLib.rgb(.05,.18,.48);
     const x=(field,px,py,size=8)=>{const p=docCalPdfPoint('ivcf',field,'check',px,py);page.drawText('X',{x:p.x,y:p.y,size,font,color:azul})};
-    const escolha=(id,y)=>{const v=Number(document.getElementById(id)?.value||0);x(id,v>0?184:237,y)};
-    const idade=Number(val('ivcf-idade')||0);if(idade===0)x('ivcf-idade',389,720);else if(idade===1)x('ivcf-idade',389,709);else x('ivcf-idade',389,698);
-    Number(val('ivcf-saude')||0)>0?x('ivcf-saude',389,676):x('ivcf-saude',389,687);
+    const escolha=(id,y)=>{if(val(id)==='')return;const v=Number(val(id));x(id,v>0?184:237,y)};
+    const idade=Number(val('ivcf-idade')||0);if(!val('ivcf-idade')){}else if(idade===0)x('ivcf-idade',389,720);else if(idade===1)x('ivcf-idade',389,709);else x('ivcf-idade',389,698);
+    if(val('ivcf-saude')!=='')Number(val('ivcf-saude'))>0?x('ivcf-saude',389,676):x('ivcf-saude',389,687);
     [['ivcf-compras',646],['ivcf-dinheiro',616],['ivcf-casa',589],['ivcf-banho',569],['ivcf-esquecimento',524],['ivcf-piora-memoria',504],['ivcf-memoria-cotidiano',488],['ivcf-tristeza',457],['ivcf-interesse',434],['ivcf-bracos',390],['ivcf-maos',369],['ivcf-perda-peso',326],['ivcf-caminhar',303],['ivcf-quedas',283],['ivcf-incontinencia',263],['ivcf-visao',224],['ivcf-audicao',181],['ivcf-comorbidades',116]].forEach(([id,y])=>escolha(id,y));
-    const r=calcularIVCF20(),pt=docCalPdfPoint('ivcf','ivcf-total','score',540,76);page.drawText(String(r.total),{x:pt.x,y:pt.y,size:10,font,color:azul});
+    const r=calcularIVCF20(),pt=docCalPdfPoint('ivcf','ivcf-total','score',540,76);if(r.total!==null)page.drawText(String(r.total),{x:pt.x,y:pt.y,size:10,font,color:azul});
     const bytes=await doc.save(),url=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'})),a=document.createElement('a');a.href=url;a.download=`ivcf20-${rotuloId(val('id-nome','paciente'))}.pdf`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),120000);if(status)status.textContent='IVCF-20 preenchido gerado.';
   }catch(e){console.error(e);if(status)status.textContent=e.message||'Não foi possível gerar o IVCF-20.'}
 }
@@ -8674,6 +8572,7 @@ function sanitizarRegrasSAEProtocoladas(p,regras){
 }
 function aplicarSugestaoSAE(p,chave){const s=SAE_SUGESTOES[chave];if(!s)return;const regras=sanitizarRegrasSAEProtocoladas(p,[s]);preencherCamposSAE(p,regras);renderizarPreviewSAE(p,regras);showToast('Sugestão SAE aplicada. Revise e valide antes de salvar.')}
 function campoClinicoDerivavel(e){
+  if(e.closest('[data-clinico-inativo]'))return false;
   if(e.hidden||e.type==='hidden'||e.type==='file'||e.closest('[data-ciap],.exam-kits,.consultation-guide'))return false;
   if((e.type==='checkbox'||e.type==='radio')&&!e.checked)return false;
   return !Object.values(SOAP_IDS_MODULO).some(ids=>Object.values(ids).includes(e.id));
@@ -8683,7 +8582,7 @@ function renderizarPreviewSAE(p,regras){const out=document.getElementById(`${p}-
 function gerarSAE(p,silencioso=false,textoExtra=''){const texto=coletarTextoSAE(p,textoExtra);let regras=SAE_REGRAS.filter(x=>x.rx.test(texto)).slice(0,5);if(!regras.length)regras.push({problema:'Necessidade de promoção e manutenção da saúde',diagnostico:'Disposição para melhora da gestão da saúde',objetivo:'Fortalecer autocuidado, prevenção e continuidade do acompanhamento.',resultado:'Conhecimento e autogestão da saúde melhorados.',intervencoes:'Realizar educação em saúde, identificar necessidades, pactuar cuidados e retorno.',orientacoes:'Manter acompanhamento, vacinação e cuidados pactuados.',cuidados:['Comparecer ao retorno agendado','Manter vacinação atualizada']});regras=sanitizarRegrasSAEProtocoladas(p,regras);preencherCamposSAE(p,regras,true);renderizarPreviewSAE(p,regras);if(!silencioso)showToast(`${regras.length} sugestão(ões) SAE gerada(s). Revise e valide clinicamente.`);return regras}
 function limparSAE(p){['problema','diagnostico','objetivo','resultado','intervencoes','orientacoes','prescricao','prazo','responsavel','evolucao'].forEach(k=>{const e=document.getElementById(`${p}-pc-${k}`);if(e)e.value=''});document.querySelectorAll(`#${p}-plano-cuidados .quick-care.selected`).forEach(x=>x.classList.remove('selected'));const out=document.getElementById(`${p}-sae-preview`);if(out){out.className='sae-preview';out.innerHTML=''}showToast('SAE limpa.')}
 function alternarCuidadoPronto(p,btn){btn.classList.toggle('selected');const e=document.getElementById(`${p}-pc-prescricao`);if(e)e.value=Array.from(document.querySelectorAll(`#${p}-plano-cuidados .quick-care.selected`)).map(x=>x.textContent.trim()).join('\n')}
-function montarPlanosCuidados(){PLANO_MODULOS.forEach(([p,alvo])=>{const area=document.getElementById(alvo);if(!area||document.getElementById(`${p}-plano-cuidados`))return;const cuidados=MODULOS_EM_DESENVOLVIMENTO.has(p)?CUIDADOS_PRONTOS.filter(x=>!/(procurar.*urg[eê]ncia|medica[cç][aã]o|encaminh)/i.test(x)):CUIDADOS_PRONTOS;const c=document.createElement('div');c.className='card';c.id=`${p}-plano-cuidados`;c.innerHTML=`<div class="sae-head"><div class="ct" style="margin:0"><span class="dot dg"></span>SAE — Plano de Cuidados de Enfermagem</div><small>O sistema sugere hipóteses NANDA-I e resultados/intervenções compatíveis com NOC/NIC. O enfermeiro deve revisar e validar clinicamente.</small></div><div class="brow"><button class="btn btn-p" type="button" onclick="gerarSAE('${p}')">GERAR SAE</button><button class="btn btn-s" type="button" onclick="limparSAE('${p}')">Limpar SAE</button><button class="btn btn-s" onclick="aplicarSugestaoSAE('${p}','queda')">Risco de queda</button><button class="btn btn-s" onclick="aplicarSugestaoSAE('${p}','adesao')">Adesão inadequada</button><button class="btn btn-s" onclick="aplicarSugestaoSAE('${p}','dor')">Dor</button><button class="btn btn-s" onclick="aplicarSugestaoSAE('${p}','ferida')">Ferida</button><button class="btn btn-s" onclick="aplicarSugestaoSAE('${p}','ansiedade')">Ansiedade</button></div><div id="${p}-sae-preview" class="sae-preview"></div><div class="plano-cuidados-grid"><div class="f"><label>Problema identificado</label><textarea id="${p}-pc-problema"></textarea></div><div class="f"><label>Hipótese diagnóstica de enfermagem — NANDA-I</label><textarea id="${p}-pc-diagnostico"></textarea></div><div class="f"><label>Objetivo do cuidado</label><textarea id="${p}-pc-objetivo"></textarea></div><div class="f"><label>Resultado esperado — NOC compatível</label><textarea id="${p}-pc-resultado"></textarea></div><div class="f"><label>Intervenções de enfermagem — NIC compatível</label><textarea id="${p}-pc-intervencoes"></textarea></div><div class="f"><label>Orientações ao paciente/família</label><textarea id="${p}-pc-orientacoes"></textarea></div><div class="f span2"><label>Prescrição de cuidados de enfermagem</label><div class="quick-care-list">${cuidados.map(x=>`<button type="button" class="quick-care" onclick="alternarCuidadoPronto('${p}',this)">${x}</button>`).join('')}</div><textarea id="${p}-pc-prescricao" placeholder="Cuidados selecionados e cuidados personalizados..."></textarea></div><div class="f"><label>Prazo para reavaliação</label><input type="date" id="${p}-pc-prazo"></div><div class="f"><label>Responsável pelo acompanhamento</label><input id="${p}-pc-responsavel"></div><div class="f span2"><label>Conduta pactuada com paciente/família</label><textarea id="${p}-pc-pactuada">Paciente/família compreende as orientações, concorda com o plano de cuidado e foi orientado sobre sinais de alerta e retorno.</textarea></div><div class="f span2"><label>Evolução no retorno</label><textarea id="${p}-pc-evolucao"></textarea></div></div>`;area.appendChild(c)})}
+function montarPlanosCuidados(){PLANO_MODULOS.forEach(([p,alvo])=>{const area=document.getElementById(alvo);if(!area||document.getElementById(`${p}-plano-cuidados`))return;const cuidados=MODULOS_EM_DESENVOLVIMENTO.has(p)?CUIDADOS_PRONTOS.filter(x=>!/(procurar.*urg[eê]ncia|medica[cç][aã]o|encaminh)/i.test(x)):CUIDADOS_PRONTOS;const c=document.createElement('div');c.className='card';c.id=`${p}-plano-cuidados`;c.innerHTML=`<div class="sae-head"><div class="ct" style="margin:0"><span class="dot dg"></span>SAE — Plano de Cuidados de Enfermagem</div><small>O sistema sugere hipóteses NANDA-I e resultados/intervenções compatíveis com NOC/NIC. O enfermeiro deve revisar e validar clinicamente.</small></div><div class="brow"><button class="btn btn-p" type="button" onclick="gerarSAE('${p}')">GERAR SAE</button><button class="btn btn-s" type="button" onclick="limparSAE('${p}')">Limpar SAE</button><button class="btn btn-s" onclick="aplicarSugestaoSAE('${p}','queda')">Risco de queda</button><button class="btn btn-s" onclick="aplicarSugestaoSAE('${p}','adesao')">Adesão inadequada</button><button class="btn btn-s" onclick="aplicarSugestaoSAE('${p}','dor')">Dor</button><button class="btn btn-s" onclick="aplicarSugestaoSAE('${p}','ferida')">Ferida</button><button class="btn btn-s" onclick="aplicarSugestaoSAE('${p}','ansiedade')">Ansiedade</button></div><div id="${p}-sae-preview" class="sae-preview"></div><div class="plano-cuidados-grid"><div class="f"><label>Problema identificado</label><textarea id="${p}-pc-problema"></textarea></div><div class="f"><label>Hipótese diagnóstica de enfermagem — NANDA-I</label><textarea id="${p}-pc-diagnostico"></textarea></div><div class="f"><label>Objetivo do cuidado</label><textarea id="${p}-pc-objetivo"></textarea></div><div class="f"><label>Resultado esperado — NOC compatível</label><textarea id="${p}-pc-resultado"></textarea></div><div class="f"><label>Intervenções de enfermagem — NIC compatível</label><textarea id="${p}-pc-intervencoes"></textarea></div><div class="f"><label>Orientações ao paciente/família</label><textarea id="${p}-pc-orientacoes"></textarea></div><div class="f span2"><label>Prescrição de cuidados de enfermagem</label><div class="quick-care-list">${cuidados.map(x=>`<button type="button" class="quick-care" onclick="alternarCuidadoPronto('${p}',this)">${x}</button>`).join('')}</div><textarea id="${p}-pc-prescricao" placeholder="Cuidados selecionados e cuidados personalizados..."></textarea></div><div class="f"><label>Prazo para reavaliação</label><input type="date" id="${p}-pc-prazo"></div><div class="f"><label>Responsável pelo acompanhamento</label><input id="${p}-pc-responsavel"></div><div class="f span2"><label>Conduta pactuada com paciente/família</label><textarea id="${p}-pc-pactuada"></textarea></div><div class="f span2"><label>Evolução no retorno</label><textarea id="${p}-pc-evolucao"></textarea></div></div>`;area.appendChild(c)})}
 function resumoPlanoCuidados(p){const campos=[['Problemas identificados',`${p}-pc-problema`],['Hipóteses diagnósticas de enfermagem para validação clínica',`${p}-pc-diagnostico`],['Objetivos',`${p}-pc-objetivo`],['Resultado esperado',`${p}-pc-resultado`],['Intervenções/cuidados de enfermagem',`${p}-pc-intervencoes`],['Prescrição de cuidados',`${p}-pc-prescricao`],['Orientações',`${p}-pc-orientacoes`],['Prazo',`${p}-pc-prazo`],['Responsável',`${p}-pc-responsavel`],['Conduta pactuada',`${p}-pc-pactuada`],['Evolução no retorno',`${p}-pc-evolucao`]].map(([l,id])=>val(id)?`${l}:\n${val(id)}`:'').filter(Boolean);return campos.length?`\n\nSAE — SISTEMATIZAÇÃO DA ASSISTÊNCIA DE ENFERMAGEM\nSugestões para avaliação e validação clínica pelo enfermeiro responsável.\n\n${campos.join('\n\n')}`:''}
 
 const AUTO_DRAFT_KEY='esf_rascunho_automatico_v1';let autoDraftTimer;
@@ -8705,7 +8604,7 @@ const QUICK_PAGE_PREFIX={'pg-pn-abertura':'pna','pg-pn-consulta':'pnc','pg-pueri
 const CAMPOS_ESSENCIAIS={
  pna:[['idade gestacional',['pna-ig']],['pressão arterial',['pna-pa']],['BCF',['pna-bcf']],['altura uterina',['pna-au']],['queixa',['pna-queixas']],['avaliação',['pna-a-soap']],['conduta',['pna-soap-p']]],
  pnc:[['idade gestacional',['pnc-ig']],['pressão arterial',['pnc-pa']],['BCF',['pnc-bcf']],['altura uterina',['pnc-au']],['queixa',['pnc-queixas']],['avaliação',['pnc-a']],['conduta',['pnc-p']]],
- pu:[['peso',['pu-peso']],['estatura',['pu-alt']],['alimentação',['pu-alim']],['desenvolvimento',['pu-dnpm','pu-dn']],['vacinação',['pu-vac','pu-vacinacao']],['exame físico',['pu-o']],['orientações',['pu-p']]],
+ pu:[['peso',['pu-peso']],['estatura',['pu-alt']],['alimentação',['pu-alim']],['desenvolvimento',['pu-dnpm-class','pu-dnpm-obs']],['vacinação',['pu-vac','pu-vacinacao']],['exame físico',['pu-o']],['orientações',['pu-p']]],
  prev:[['motivo',['prev-motivo']],['histórico ginecológico',['prev-hist','prev-hma']],['achados',['prev-o']],['coleta',['prev-coleta','prev-material']],['orientações',['prev-p']]],
  hip:[['pressão arterial',['hip-pa-atual','hip-pa']],['adesão',['hip-adesao']],['sintomas',['hip-sintomas']],['conduta',['hip-conduta','hip-p']],['retorno',['hip-retorno']]],
  fer:[['localização',['fer-local']],['tamanho',['fer-comprimento','fer-largura']],['aspecto/tecido',['fer-tecido']],['exsudato',['fer-exsudato']],['dor',['fer-dor','fer-dor-escala']],['cobertura/conduta',['fer-cobertura','fer-conduta']],['evolução',['fer-evolucao']]],
@@ -9184,7 +9083,9 @@ function coletarDadosModulo(prefix){
   const pagina=document.getElementById('pg-'+moduloPorPrefixo(prefix)?.page), dados={};
   pagina?.querySelectorAll('input,select,textarea').forEach((el,i)=>{
     if(['button','submit','file','password'].includes(el.type))return;
-    const key=el.id||`@${i}`;
+    const legacy=window.ESFUsability?.legacyControls(prefix);const index=el.id?0:legacy?legacy.indexOf(el):i;
+    if(!el.id&&index<0)return;
+    const key=el.id||`@${index}`;
     if(el.type==='checkbox'||el.type==='radio')dados[key]={checked:el.checked,value:el.value};
     else dados[key]=el.value;
   });
@@ -9195,6 +9096,7 @@ function coletarDadosModulo(prefix){
 function restaurarDadosModulo(prefix,dados){
   const pagina=document.getElementById('pg-'+moduloPorPrefixo(prefix)?.page), controles=window.ESFUsability?.legacyControls(prefix)||pagina?.querySelectorAll('input,select,textarea')||[];
   window.ESFUsability?.beforeRestore(pagina);
+  if(prefix==='pu')window.FluxoAPS?.prepararHistoricoInfantil(dados);
   Object.entries(dados||{}).forEach(([id,v])=>{const el=id.startsWith('@')?controles[Number(id.slice(1))]:document.getElementById(id);if(!el)return;if(typeof v==='object'&&v!==null&&'checked'in v){el.checked=!!v.checked;}else el.value=v??'';});
   window.ESFUsability?.restore(pagina,dados?.__interface);
   if(window.ESFCiap)window.ESFCiap.restore(prefix,dados?.__ciap2||[]);
@@ -9209,6 +9111,7 @@ function restaurarDadosModulo(prefix,dados){
   setTimeout(()=>avaliarVacinasModulo(prefix),0);
 }
 function criarAtendimento(tipo) {
+  if(tipo==='Preventivo'&&val('prev-vinculo-coleta')&&!window.FluxoAPS?.registros('prev').some(a=>a.tipo==='Preventivo'&&a.id===val('prev-vinculo-coleta'))){showToast('Confira a coleta vinculada a este paciente.');return null;}
   const u = getUsuarioAtual();
   if (!u || !u.nome) {
     showToast('Identifique-se antes de salvar. Toque no ícone de perfil no canto superior direito.');
@@ -11818,6 +11721,7 @@ function classificacaoImc(imc,prefix){
   if(imc<18.5)return'Abaixo do peso';if(imc<25)return'Eutrofia';if(imc<30)return'Sobrepeso';if(imc<35)return'Obesidade grau I';if(imc<40)return'Obesidade grau II';return'Obesidade grau III';
 }
 function calcularImcAutomatico(prefix){
+  if(prefix==='pu'){updateAntropometria();return;}
   const peso=document.getElementById(`${prefix}-peso`),altura=campoAltura(prefix),imcEl=document.getElementById(`${prefix}-imc`),status=document.getElementById(`${prefix}-imc-status`);
   if(!peso||!altura||!imcEl)return;
   const p=Number(String(peso.value||'').replace(',','.')),aInformada=Number(String(altura.value||'').replace(',','.')),a=aInformada>3?aInformada/100:aInformada;
@@ -12175,7 +12079,7 @@ async function gerarPacoteDiabetesGestacionalPN(){
   function gps(prefix){
     if(prefix==='pnc')return ''; // Os campos obstétricos da abertura não são o P do SOAP de seguimento.
     const g=valAny([`${prefix}-g`]),p=valAny([`${prefix}-p`]),a=valAny([`${prefix}-a`]);
-    return (g||p||a)?`G${g||0} P${p||0} A${a||0}`:'';
+    return (g||p||a)?[g&&'G'+g,p&&'P'+p,a&&'A'+a].filter(Boolean).join(' '):'';
   }
   function isG1P0A0(prefix){return String(valAny([`${prefix}-g`])||'0')==='1'&&String(valAny([`${prefix}-p`])||'0')==='0'&&String(valAny([`${prefix}-a`])||'0')==='0'}
   function futureRN(prefix){return valAny([`${prefix}-rn-nome`,`${prefix}-nome-rn`,`${prefix}-futuro-rn`,`${prefix}-bebe-nome`,`${prefix}-bebê-nome`])}
@@ -12382,6 +12286,9 @@ async function gerarPacoteDiabetesGestacionalPN(){
     const s=[];
     if(prefix==='pna')add(s,`Gestante${nome?` ${nome}`:''}${idade?`, ${idade} anos`:''}, comparece à UBS para abertura de pré-natal${valAny([`${prefix}-acomp`])?`, ${valAny([`${prefix}-acomp`]).toLowerCase()}`:''}.`);
     else add(s,`Gestante${nome?` ${nome}`:''}${idade?`, ${idade} anos`:''}, comparece à UBS para consulta de pré-natal.`);
+    if(prefix==='pnc')add(s,line('Antecedentes históricos revisados',valAny(['pnc-abertura-ref'])));
+    if(prefix==='pnc'&&window.FluxoAPS?.perdaAtiva())add(s,line('Características da perda vaginal', ['pnc-perda-tipo','pnc-perda-qtd','pnc-perda-obs'].map(id=>valAny([id])).filter(Boolean).join(' · ')));
+    if(prefix==='pnc'&&valAny(['pnc-sang-atual']))add(s,line('Sangramento vaginal nesta consulta',valAny(['pnc-sang-atual'])));
     add(s,gps(prefix)?`Antecedentes obstétricos registrados: ${gps(prefix)}.`:'');
     if(!isG1P0A0(prefix))add(s,line('Intervalo interpartal',valAny([`${prefix}-iip`])));
     add(s,line('Gestação planejada',valAny([`${prefix}-planejada`])));
@@ -12425,6 +12332,7 @@ async function gerarPacoteDiabetesGestacionalPN(){
     add(o,testsText(tr));
 
     const a=[];
+    if(prefix==='pnc'){add(a,line('Risco reavaliado pelo profissional',valAny(['pnc-risco-reavaliado'])));add(a,line('Critérios e conduta registrados',valAny(['pnc-risco-fundamento'])));}
     add(a,`${prefix==='pna'?'Abertura de pré-natal':'Pré-natal em seguimento'} na APS.`);
     if(valAny([`${prefix}-ig`,`${prefix}-dpp`]))add(a,`Idade gestacional e DPP registradas conforme dados preenchidos.`);
     if(pnSifilisReagente(prefix))add(a,'ALERTA: teste rápido/sorologia para sífilis reagente. Necessário ativar fluxo de sífilis na gestação.');
@@ -12883,8 +12791,8 @@ async function gerarPacoteDiabetesGestacionalPN(){
 
   function validarPuericultura(acao,res){
     const t=textoPagina('pu'),salvar=/salvar|copiar|exportar|pdf/i.test(acao);
-    [['idade da criança',['pu-idade','pu-nasc']],['peso',['pu-peso']],['comprimento/estatura',['pu-alt','pu-comprimento']],['perímetro cefálico',['pu-pc']],['alimentação',['pu-alim']],['vacinação',['pu-vac','pu-vacinacao']],['DNPM',['pu-dnpm','pu-dn']]].forEach(([nome,ids])=>{if(!campoTem(ids))(salvar?add(res.erros,`${nome} não registrado.`,nome,'Registrar ou justificar não avaliado.'):add(res.pendencias,`${nome} não registrado.`,nome,'Registrar ou justificar.'))});
-    if(!campoTem(['pu-dnpm','pu-dn'])&&/dnpm adequado|desenvolvimento adequado/.test(normTxt(window.textoSoapAtual?.(false)||'')))add(res.erros,'DNPM vazio não pode ser descrito como adequado.','DNPM','Marcar os marcos avaliados ou deixar como não avaliado.');
+    [['idade da criança',['pu-idade','pu-nasc']],['peso',['pu-peso']],['comprimento/estatura',['pu-alt','pu-comprimento']],['perímetro cefálico',['pu-pc']],['alimentação',['pu-alim']],['vacinação',['pu-vac-status','pu-vac-obs']],['DNPM',['pu-dnpm-class','pu-dnpm-obs']]].forEach(([nome,ids])=>{if(!campoTem(ids))(salvar?add(res.erros,`${nome} não registrado.`,nome,'Registrar ou justificar não avaliado.'):add(res.pendencias,`${nome} não registrado.`,nome,'Registrar ou justificar.'))});
+    if(!campoTem(['pu-dnpm-class','pu-dnpm-obs'])&&/dnpm adequado|desenvolvimento adequado/.test(normTxt(window.textoSoapAtual?.(false)||'')))add(res.erros,'DNPM vazio não pode ser descrito como adequado.','DNPM','Marcar os marcos avaliados ou deixar como não avaliado.');
     if(/nao reage|não reage|atraso|marco ausente|vacina atrasada/.test(t)&&!condutaOk('pu'))add(res.erros,'Alteração de desenvolvimento/vacina sem conduta.','Puericultura','Registrar orientação, retorno e fluxo conforme protocolo.');
   }
 
@@ -12994,7 +12902,7 @@ async function gerarPacoteDiabetesGestacionalPN(){
   }
   function prefixAtual(){return window.prefixoPaginaAtual?.()||''}
   function sanitizarSoapPosGeracao(prefix){
-    if(prefix==='pu'&&!campoTem(['pu-dnpm','pu-dn'])){
+    if(prefix==='pu'&&!campoTem(['pu-dnpm-class','pu-dnpm-obs'])){
       const ids=soapMap().pu||{};
       [ids.a,ids.o,ids.p].forEach(id=>{const e=el(id);if(e)e.value=String(e.value||'').replace(/[^.\n]*(DNPM|desenvolvimento)[^.\n]*(adequad[oa])[^.\n]*\.?/gi,'DNPM não avaliado nos campos preenchidos.')});
     }

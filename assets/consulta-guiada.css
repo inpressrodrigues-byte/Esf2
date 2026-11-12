@@ -6,3 +6,5 @@
 @media print{.consultation-protocol{display:none!important}}
 .protocol-picker{margin:8px 0;grid-column:1/-1}.protocol-picker>summary{cursor:pointer;font-weight:600;padding:8px 0}.protocol-options{display:flex;flex-wrap:wrap;gap:5px;padding:6px 0}.protocol-options [aria-pressed=true]{font-weight:bold;outline:2px solid currentColor}.consultation-protocol{grid-column:1/-1}
 @media print{.protocol-picker{display:none!important}}
+.mode-switch{float:right;margin:0 0 .4rem .5rem}.pg .tabs{clear:both}.canonical-shortcut{margin:6px 0 12px}.pg :is(.g3,.cki,.card,.rpills,.f,.support-section)[hidden]{display:none!important}.support-section>details{margin-left:1rem}.support-section p{white-space:pre-line}.instrument-help summary{font-size:.8rem;cursor:pointer}.instrument-help .sm-desc{display:block}
+@media print{.mode-switch,.canonical-shortcut,[id$="-historico-consulta"]{display:none!important}}
