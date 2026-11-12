@@ -50,5 +50,16 @@ for(const [name,pages] of [['gerarIVCF20PDF',1],['gerarPdfERSM',2],['gerarFichaR
  const n=await page.evaluate(async b=>(await PDFLib.PDFDocument.load(b)).getPageCount(),bytes.toString('base64'));
  assert.equal(n,pages,name);console.log('PASS '+name+' em PDF legível com '+n+' página(s)');
 }
+await nav('pni');await page.locator('#pni-filtros button[data-grupo="gestante"]').click();assert.equal(await page.locator('#pni-ig-field').isVisible(),true);
+await page.locator('#pni-filtros button[data-grupo="crianca"]').click();assert.equal(await page.locator('#pni-ig-field').isVisible(),false);
+await nav('sinan');
+const options=await page.locator('#sinan-ficha-modelo option').evaluateAll(list=>list.map(o=>o.value).filter(Boolean));
+assert.ok(options.length>1);await page.selectOption('#sinan-ficha-modelo',options[0]);assert.ok(await page.inputValue('#sinan-agravo'));
+await page.fill('#sinan-agravo','Agravo fictício sem correspondência');assert.equal(await page.inputValue('#sinan-ficha-modelo'),'');
+await page.selectOption('#sinan-ficha-modelo',options[1]);await page.evaluate(()=>sinanSalvarRascunho());
+const sourceName=await page.inputValue('#sinan-agravo');
+await page.evaluate(()=>{CURRENT_AUTH_USER_ID='qa-outra-conta';sinanInicializar();});assert.equal(await page.inputValue('#sinan-agravo'),'');
+await page.evaluate(()=>{CURRENT_AUTH_USER_ID='qa-fluxo';sinanInicializar();});assert.equal(await page.inputValue('#sinan-agravo'),sourceName);
+console.log('PASS Calendário por grupo no PNI, catálogo SINAN, troca de agravo e isolamento de rascunho');
 assert.deepEqual(errors,[]);console.log('PASS Modos na mesma ficha, escala preservada e calibração no editor');
 }finally{await browser?.close();server.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

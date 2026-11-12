@@ -4087,7 +4087,11 @@ window.SINAN_COORDS_ESPECIFICOS = Object.assign(window.SINAN_COORDS_ESPECIFICOS 
 
 </script><script>
 // ── SINAN — NOTIFICAÇÃO INDIVIDUAL ─────────────────────────────
-const SINAN_RASCUNHO_KEY='esf_sinan_rascunho_v1';
+let sinanEscopoAberto=null;
+function chaveRascunhoSinan(){
+  const s=escopoDadosClinicos();
+  return CURRENT_AUTH_USER_ID&&s.permitido?'esf_sinan_rascunho_v2:'+CURRENT_AUTH_USER_ID+':'+s.chave:'';
+}
 const SINAN_FICHAS_TOLEDO_URL='https://www.toledo.pr.gov.br/portais/saude/vigilancia-em-saude/sinan/fichas-de-notificacao';
 const SINAN_FICHAS_BASE='https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2024-07/';
 const SINAN_FICHAS_INTEGRADAS_IDS=['ac-animal','ac-trabalho','material-biologico','aids-adulto','aids-crianca','antirrabico','coqueluche','crianca-hiv','difteria','febre-amarela','febre-maculosa','gestante-hiv','hantavirose','hepatites','sifilis-adquirida','toxoplasmose-adquirida'];
@@ -4169,7 +4173,7 @@ function sinanFichaAtual(){
   if(sel)return sinanFichaPorId(sel);
   const q=sinanNormalizar(sinanVal('sinan-agravo'));
   if(!q)return null;
-  return SINAN_FICHAS_CATALOGO.find(f=>sinanNormalizar(f.nome)===q)||SINAN_FICHAS_CATALOGO.find(f=>sinanNormalizar(f.nome).includes(q)||q.includes(sinanNormalizar(f.nome)))||null;
+  return SINAN_FICHAS_CATALOGO.find(f=>sinanNormalizar(f.nome)===q)||null;
 }
 function sinanMontarCatalogoFichas(){
   const sel=sinanEl('sinan-ficha-modelo'),dl=sinanEl('sinan-agravos');
@@ -4177,13 +4181,13 @@ function sinanMontarCatalogoFichas(){
   if(dl)dl.innerHTML=SINAN_FICHAS_CATALOGO.map(f=>`<option value="${escTR(f.nome)}"></option>`).join('');
 }
 function sinanSincronizarAgravo(){
-  const f=sinanFichaAtual(),sel=sinanEl('sinan-ficha-modelo');
-  if(f&&sel&&sel.value!==f.id)sel.value=f.id;
+  const q=sinanNormalizar(sinanVal('sinan-agravo')),f=SINAN_FICHAS_CATALOGO.find(x=>sinanNormalizar(x.nome)===q);
+  sinanSet('sinan-ficha-modelo',f?.id||'');
   sinanRenderFichaSelecionada();
 }
 function sinanAplicarFichaSelecionada(){
-  const f=sinanFichaAtual();
-  if(f)sinanSet('sinan-agravo',f.nome);
+  const f=sinanFichaPorId(sinanVal('sinan-ficha-modelo'));
+  sinanSet('sinan-agravo',f?.nome||'');
   sinanRenderFichaSelecionada();
 }
 function sinanOrientacaoFicha(f){
@@ -4327,8 +4331,8 @@ function sinanValidar(mostrar=false){
   if(mostrar&&faltam.length){faltam[0].scrollIntoView({behavior:'smooth',block:'center'});faltam[0].focus()}
   return faltam.length===0;
 }
-function sinanSalvarRascunho(){try{localStorage.setItem(SINAN_RASCUNHO_KEY,JSON.stringify(sinanCampos()));showToast('Rascunho SINAN salvo neste dispositivo.')}catch(e){alert('Não foi possível salvar o rascunho.')}}
-function sinanLimpar(){if(!confirm('Limpar todos os campos da ficha SINAN?'))return;document.querySelectorAll('#pg-sinan input,#pg-sinan select,#pg-sinan textarea').forEach(el=>{if(el.type!=='file')el.value=''});sinanSet('sinan-uf-notif','PR');sinanSet('sinan-mun-notif','Toledo');sinanSet('sinan-mun-notif-cod','4127700');sinanSet('sinan-uf-res','PR');sinanSet('sinan-mun-res','Toledo');sinanSet('sinan-mun-res-cod','4127700');sinanSet('sinan-data-notif',new Date().toISOString().slice(0,10));localStorage.removeItem(SINAN_RASCUNHO_KEY);sinanValidar();sinanRenderFichaSelecionada()}
+function sinanSalvarRascunho(){const chave=chaveRascunhoSinan();if(!chave||chave!==sinanEscopoAberto)return showToast('Confira o usuário e a UBS antes de salvar.');try{localStorage.setItem(chave,JSON.stringify(sinanCampos()));showToast('Rascunho SINAN salvo neste dispositivo.')}catch(e){alert('Não foi possível salvar o rascunho.')}}
+function sinanLimpar(){if(!confirm('Limpar todos os campos da ficha SINAN?'))return;document.querySelectorAll('#pg-sinan input,#pg-sinan select,#pg-sinan textarea').forEach(el=>{if(el.type!=='file')el.value=''});sinanSet('sinan-uf-notif','PR');sinanSet('sinan-mun-notif','Toledo');sinanSet('sinan-mun-notif-cod','4127700');sinanSet('sinan-uf-res','PR');sinanSet('sinan-mun-res','Toledo');sinanSet('sinan-mun-res-cod','4127700');sinanSet('sinan-data-notif',new Date().toISOString().slice(0,10));localStorage.removeItem(chaveRascunhoSinan());sinanValidar();sinanRenderFichaSelecionada()}
 async function sinanBuscarPaciente(){
   const cpf=normalizarCPF(sinanVal('sinan-cpf'));const st=sinanEl('sinan-paciente-status');
   if(cpf.length!==11){if(st)st.textContent='Informe um CPF válido para buscar.';return}
@@ -4579,9 +4583,15 @@ async function gerarFichaSinanEspecifica(){
   }catch(e){alert((e?.message&&e.message!=='Failed to fetch')?e.message:'Modelo específico indisponível. A ficha geral antiga não será usada como substituta.')}
 }
 function sinanInicializar(){
+  const chave=chaveRascunhoSinan();if(chave===sinanEscopoAberto)return;
+  sinanEscopoAberto=chave;
+  document.querySelectorAll('#pg-sinan input,#pg-sinan textarea,#pg-sinan select').forEach(e=>{
+    if(e.tagName==='SELECT')e.selectedIndex=0;else if(e.type!=='file')e.value=e.defaultValue||'';
+  });
   sinanMontarCatalogoFichas();
+  if(!chave){sinanRenderFichaSelecionada();return;}
   const hoje=new Date().toISOString().slice(0,10);if(!sinanVal('sinan-data-notif'))sinanSet('sinan-data-notif',hoje);
-  let rascunho={};try{rascunho=JSON.parse(localStorage.getItem(SINAN_RASCUNHO_KEY)||'{}');sinanPreencher(rascunho)}catch(e){}
+  let rascunho={};try{rascunho=JSON.parse(localStorage.getItem(chave)||'{}');sinanPreencher(rascunho)}catch(e){}
   const u=typeof getUsuarioAtual==='function'?getUsuarioAtual():null;
   sinanSet('sinan-unidade',sinanVal('sinan-unidade')||u?.unidade||PROTO?.unit?.nome||'');sinanSet('sinan-notificante-unidade',sinanVal('sinan-notificante-unidade')||u?.unidade||PROTO?.unit?.nome||'');sinanSet('sinan-notificante-nome',sinanVal('sinan-notificante-nome')||u?.nome||'');sinanSet('sinan-notificante-funcao',sinanVal('sinan-notificante-funcao')||u?.cargo||'');
   sinanSincronizarAgravo();
@@ -4680,6 +4690,7 @@ function go(id,btn){
   window.ESFUsability?.onNavigate(pagina);
   if(typeof restaurarRascunhoAutomatico==='function')setTimeout(()=>restaurarRascunhoAutomatico('pg-'+id),30);
   if(btn)btn.classList.add('on');
+  if(id==='sinan')sinanInicializar();
   if(id==='inicio')atualizarResumoDashboard();
   if(id==='reportes')setTimeout(carregarReportes,50);
   if(id==='busca-ativa')setTimeout(renderBuscaAtiva,50);
@@ -9819,6 +9830,7 @@ async function diagnosticarConexao(){
 }
 
 function aplicarPermissoesInterface(){
+  if(sinanEscopoAberto!==null&&sinanEscopoAberto!==chaveRascunhoSinan())sinanInicializar();
   const mostrar=(seletor,permitido)=>document.querySelectorAll(seletor).forEach(el=>el.style.display=permitido?'':'none');
   mostrar('[onclick*="historico"]',temPermissao('ver_historico'));
   mostrar('[onclick*="pacientes"]',temPermissao('ver_historico'));
