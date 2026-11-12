@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght=400;500;600&family=DM+Mono:wght=400;500&display=swap" rel="stylesheet">
 <script defer src="vendor/pdf-lib.min.js"></script>
 <script defer src="assets/modelos.js"></script>
+<script defer src="assets/sinan-sifilis-adquirida.js"></script>
 <script src="assets/ai-transport.js"></script>
 <script>
 const _SB_URL = 'https://mcmletzjgykhwknshacg.supabase.co';
@@ -3731,6 +3732,7 @@ body.sidebar-collapsed .dev-nav{display:none}
         <div class="f"><label for="sinan-unidade">6. Unidade notificadora *</label><input id="sinan-unidade" class="sinan-obrigatorio" data-label="Unidade notificadora" placeholder="Unidade de Saúde ou outra fonte"></div>
         <div class="f"><label for="sinan-unidade-cod">Código CNES da unidade</label><input id="sinan-unidade-cod" maxlength="7"></div>
         <div class="f"><label>7. Data dos primeiros sintomas *</label><input type="date" id="sinan-primeiros-sintomas" class="sinan-obrigatorio" data-label="Data dos primeiros sintomas"></div>
+        <div class="f" hidden><label for="sinan-data-diagnostico">7. Data do diagnóstico *</label><input type="date" id="sinan-data-diagnostico" class="sinan-obrigatorio" data-label="Data do diagnóstico (coleta do material ou evidência clínica)" disabled><small>Data da coleta do material para exame ou da evidência clínica.</small></div>
       </div>
       <div id="sinan-ficha-status" style="margin-top:12px"></div>
     </div>
@@ -4141,7 +4143,7 @@ const SINAN_FICHAS_CATALOGO=[
   ['raiva','Raiva humana','ficha_notificacao_raiva_humana.pdf','Zoonoses',false],
   ['rotavirus','Rotavírus','ficha_notificacao_rotavirus.pdf','Diarreicas / imunopreveníveis',false],
   ['sarampo-rubeola','Sarampo / Rubéola','ficha_notificacao_sarampo_rubeola.pdf','Exantemáticas / imunopreveníveis',false],
-  ['sifilis-adquirida','Sífilis adquirida','ficha_notificacao_sifilis_adquirida.pdf','IST / sífilis',false],
+  ['sifilis-adquirida','Sífilis adquirida','ficha_notificacao_sifilis_adquirida.pdf','IST / sífilis',true],
   ['sifilis-congenita','Sífilis congênita','ficha_notificacao_sifilis_congenita.pdf','IST / sífilis',false],
   ['sifilis-gestante','Sífilis em gestante','ficha_notificacao_sifilis_em_gestante.pdf','IST / sífilis / gestação',false],
   ['src','Síndrome da rubéola congênita','ficha_notificacao_sindrome_da_rubeola_congenita.pdf','Exantemáticas / gestação',false],
@@ -4225,7 +4227,11 @@ const SINAN_FICHA_CAMPOS_ESPECIFICOS={
     ['esquema-tratamento','40. Esquema de tratamento realizado','select',[['','—'],['1','1 — Penicilina G benzatina 2.400.000 UI'],['2','2 — Penicilina G benzatina 4.800.000 UI'],['3','3 — Penicilina G benzatina 7.200.000 UI'],['4','4 — Outro esquema'],['5','5 — Não realizado'],['9','9 — Ignorado']]],
     ['data-inicio-tratamento','41. Data do início do tratamento','date'],
     ['classificacao-final','42. Classificação final do caso','select',[['','—'],['1','1 — Confirmado'],['2','2 — Descartado']]],
-    ['observacoes','Observações adicionais','textarea']
+    ['observacoes','Observações adicionais','textarea'],
+    ['investigador-unidade','Município / unidade do investigador','text'],
+    ['investigador-cnes','CNES da unidade do investigador','text'],
+    ['investigador-nome','Nome do investigador','text'],
+    ['investigador-funcao','Função do investigador','text']
   ],
   'hepatites':[
     ['ocupacao','Ocupação','text'],['gestante-semanas','Gestante - semanas de gestação','text'],['vacina-hepatite-b','Vacina contra hepatite B','select',SINAN_SIM_NAO_IGN],['exposicao-provavel','Provável fonte/mecanismo de infecção','textarea'],['suspeita-tipo','Suspeita/tipo de hepatite','select',[['','—'],['A','Hepatite A'],['B','Hepatite B'],['C','Hepatite C'],['D','Hepatite D'],['E','Hepatite E'],['9','Ignorado']]],['marcadores','Marcadores laboratoriais registrados','textarea'],['classificacao-final','Classificação final','select',[['','—'],['1','Confirmado'],['2','Descartado'],['3','Inconclusivo']]],['evolucao','Evolução do caso','textarea']],
@@ -4277,27 +4283,34 @@ function sinanRenderCamposEspecificos(f){
     ...campos.map(c=>sinanCampoEspecificoHtml(f,c)),
     `<div class="f span3"><label for="sinan-esp-campos">Outros campos/observações da ficha</label><textarea id="sinan-esp-campos" placeholder="Use se houver detalhe adicional que não esteja nos campos acima."></textarea></div>`
   ].filter(Boolean).join('');
-  sinanAutoPreencherCamposEspecificos(f);
+  if(f.id==='sifilis-adquirida'){
+    const botao=document.createElement('button');
+    botao.type='button';botao.className='btn btn-s';botao.textContent='Usar notificante como investigador';
+    botao.onclick=()=>{
+      for(const item of ['unidade','nome','funcao'])sinanSet('sinan-esp-sifilis-adquirida-investigador-'+item,sinanVal('sinan-notificante-'+item));
+      sinanSet('sinan-esp-sifilis-adquirida-investigador-cnes',sinanVal('sinan-notificante-unidade')===sinanVal('sinan-unidade')?sinanVal('sinan-unidade-cod'):'');
+    };
+    const unidade=sinanEl('sinan-esp-sifilis-adquirida-investigador-unidade').parentElement;
+    unidade.before(botao);
+  }
 }
 function sinanValoresCamposEspecificos(){
   return Array.from(document.querySelectorAll('#sinan-campos-especificos .sinan-esp-field')).map(el=>({id:el.id,label:el.dataset.sinanLabel||el.id,value:String(el.value||'').trim(),ficha:el.dataset.sinanFicha||''})).filter(x=>x.value);
 }
-function sinanAutoPreencherCamposEspecificos(f){
-  if(!f)return;
-  const set=(suf,v)=>{const el=sinanEl(`sinan-esp-${f.id}-${suf}`);if(el&&!el.value&&v)el.value=v};
-  if(f.id==='sifilis-adquirida'){
-    const tr=String(document.body.innerText||'');
-    set('data-teste-nao-treponemico',sinanVal('sinan-primeiros-sintomas')||sinanVal('sinan-data-notif'));
-    if(/vdrl|rpr/i.test(tr))set('teste-nao-treponemico','1');
-    if(/teste r[aá]pido|trepon[eê]mico|s[ií]filis.*reagente/i.test(tr))set('teste-treponemico','1');
-  }
-}
 function sinanRenderFichaSelecionada(){
   const f=sinanFichaAtual(),status=sinanEl('sinan-ficha-status'),painel=sinanEl('sinan-ficha-especifica-painel'),campos=sinanEl('sinan-esp-campos');
+  const adquirida=f?.id==='sifilis-adquirida';
+  for(const [id,exibir] of [['sinan-primeiros-sintomas',!adquirida],['sinan-data-diagnostico',adquirida]]){
+    const input=sinanEl(id);
+    input.disabled=!exibir;input.parentElement.hidden=!exibir;input.parentElement.style.display=exibir?'':'none';
+  }
+  const tipo=sinanEl('sinan-tipo');
+  if(adquirida&&!tipo.disabled){tipo.dataset.anterior=tipo.value;tipo.value='2';tipo.disabled=true;}
+  if(!adquirida&&tipo.disabled){tipo.disabled=false;tipo.value=tipo.dataset.anterior||'';}
   const o=sinanOrientacaoFicha(f);
   const html=`<div class="alert ${o.classe}"><div><strong>${escTR(o.titulo)}:</strong> ${escTR(o.texto)}${f?`<br><small>Modelo selecionado: ${escTR(f.nome)} · Fonte interna: catálogo oficial da Prefeitura de Toledo/Vigilância em Saúde</small>`:''}</div></div>`;
-  if(status)status.innerHTML=html;
-  if(painel) painel.innerHTML=html+(f?`<div class="vac-table-wrap" style="margin-top:10px"><table class="vac-table"><thead><tr><th>Campo específico esperado</th><th>Uso no sistema</th></tr></thead><tbody>${sinanCamposEspecificosSugeridos(f).map(c=>`<tr><td>${escTR(c)}</td><td>Registrar no campo específico e transcrever para a ficha oficial até calibrarmos este modelo.</td></tr>`).join('')}</tbody></table></div>`:'');
+  if(status)status.innerHTML=html+(adquirida?'<small>Para sífilis em gestante, use a ficha própria disponível no <a href="https://www.toledo.pr.gov.br/node/12562" target="_blank" rel="noopener noreferrer">catálogo de notificações de Toledo</a>.</small>':'');
+  if(painel) painel.innerHTML=html+(f&&!adquirida?`<div class="vac-table-wrap" style="margin-top:10px"><table class="vac-table"><thead><tr><th>Campo específico esperado</th><th>Uso no sistema</th></tr></thead><tbody>${sinanCamposEspecificosSugeridos(f).map(c=>`<tr><td>${escTR(c)}</td><td>Registrar no campo específico e transcrever para a ficha oficial até calibrarmos este modelo.</td></tr>`).join('')}</tbody></table></div>`:'');
   if(campos&&!campos.value&&f)campos.placeholder='Campos esperados para '+f.nome+': '+sinanCamposEspecificosSugeridos(f).join('; ')+'.';
   sinanRenderCamposEspecificos(f);
 }
@@ -4305,11 +4318,12 @@ function sinanGerarChecklistEspecifica(){
   const f=sinanFichaAtual(),out=sinanEl('sinan-checklist-especifica');
   if(!out)return;
   if(!f){out.innerHTML='<div class="alert alert-w"><div>Selecione uma ficha oficial primeiro.</div></div>';return}
-  const campos=sinanCamposEspecificosSugeridos(f),gerais=['Tipo de notificação','Agravo/doença','Data da notificação','Município/UF','Unidade notificadora','Primeiros sintomas','Nome','Nascimento/idade','Sexo','Gestante','Raça/cor','Escolaridade','CNS','Nome da mãe','Endereço/telefone','Notificante'];
+  const campos=sinanCamposEspecificosSugeridos(f),gerais=['Tipo de notificação','Agravo/doença','Data da notificação','Município/UF','Unidade notificadora',f.id==='sifilis-adquirida'?'Data do diagnóstico':'Primeiros sintomas','Nome','Nascimento/idade','Sexo','Gestante','Raça/cor','Escolaridade','CNS','Nome da mãe','Endereço/telefone','Notificante'];
   out.innerHTML=`<div class="alert alert-i"><div><strong>Checklist para ${escTR(f.nome)}</strong><br>Use este roteiro para garantir que os dados necessários ao modelo específico estejam no sistema antes de gerar.</div></div><div class="vac-table-wrap"><table class="vac-table"><thead><tr><th>Bloco</th><th>Itens</th></tr></thead><tbody><tr><td>Dados gerais</td><td>${gerais.map(escTR).join(' · ')}</td></tr><tr><td>Campos específicos</td><td>${campos.map(escTR).join(' · ')}</td></tr><tr><td>Modelo selecionado</td><td>${escTR(f.nome)}</td></tr></tbody></table></div>`;
 }
+let sinanRevisaoLegado=false;
 function sinanCampos(){
-  const d={};document.querySelectorAll('#pg-sinan input[id],#pg-sinan select[id],#pg-sinan textarea[id]').forEach(el=>{if(el.type!=='file')d[el.id]=el.value});return d;
+  const d={};document.querySelectorAll('#pg-sinan input[id],#pg-sinan select[id],#pg-sinan textarea[id]').forEach(el=>{if(el.type!=='file')d[el.id]=el.value});d.resultadosSifilisConferidos=!sinanRevisaoLegado;return d;
 }
 function sinanPreencher(d){Object.entries(d||{}).forEach(([id,v])=>sinanSet(id,v))}
 function sinanAtualizarIdade(){
@@ -4319,7 +4333,7 @@ function sinanAtualizarIdade(){
   else{sinanSet('sinan-idade',idade.dias);sinanSet('sinan-idade-unidade','2')}
 }
 function sinanValidar(mostrar=false){
-  const faltam=Array.from(document.querySelectorAll('#pg-sinan .sinan-obrigatorio')).filter(el=>!el.value?.trim());
+  const faltam=Array.from(document.querySelectorAll('#pg-sinan .sinan-obrigatorio:not(:disabled)')).filter(el=>!el.value?.trim());
   const f=sinanFichaAtual(),especificosVazios=f?Array.from(document.querySelectorAll('#sinan-campos-especificos .sinan-esp-field')).filter(el=>!String(el.value||'').trim()).map(el=>el.dataset.sinanLabel||el.id).slice(0,12):[];
   document.querySelectorAll('#pg-sinan .sinan-obrigatorio').forEach(el=>el.style.borderColor=el.value?.trim()?'':'#cf3f5b');
   const out=sinanEl('sinan-validacao');
@@ -4522,37 +4536,12 @@ function sinanDesenharDadosInvestigacaoPorMapa(pdf,pages,font,bold,color,map){
   at(p1,compact?367:367,y.tel+dy,sinanVal('sinan-pais'),5.9,45);
 }
 function sinanEspVal(f,id){return sinanEl(`sinan-esp-${f.id}-${id}`)?.value?.trim()||''}
-function sinanDesenharSifilisAdquirida(pdf,pages,font,bold,color,f){
-  const p1=pages[0],p2=pages[1]||pages[0];
-  const at=(page,x,y,text,size=6,max=80,b=false)=>{text=sinanSeguro(text).slice(0,max);if(text)page.drawText(text,{x,y,size,font:b?bold:font,color})};
-  const code=(x,y,id)=>{const v=sinanEspVal(f,id);if(v)at(p1,x,y,v,7,3,true)};
-  const spaced=(x,y,text,step=9.4,size=5.8,max=40)=>sinanSeguro(text).slice(0,max).split('').forEach((c,i)=>{if(c!==' ')at(p1,x+i*step,y,c,size,1)});
-  const digitsAt=(page,y,text,xs,size=5.8)=>sinanSomenteNumeros(text).slice(0,xs.length).split('').forEach((c,i)=>at(page,xs[i],y,c,size,1));
-  const date=(y,id,xs)=>digitsAt(p1,y,sinanData(sinanEspVal(f,id)),xs,5.8);
-  const ocup=sinanEspVal(f,'ocupacao');if(ocup)spaced(67,309,ocup,8.7,5.8,55);
-  code(240,283,'antecedente-sifilis');
-  code(522,283,'tratamento-anterior');
-  code(535,252,'comportamento-sexual');
-  code(246,202,'teste-nao-treponemico');
-  const titulo=sinanEspVal(f,'titulo-vdrl');if(titulo)at(p1,340,202,titulo.replace(/^1\s*:\s*/,'').replace(/^/,'1:'),6,10,true);
-  date(202,'data-teste-nao-treponemico',[430,444,458,475,489,506,520,534]);
-  code(535,174,'teste-treponemico');
-  code(535,141,'classificacao-clinica');
-  code(535,108,'esquema-tratamento');
-  date(106,'data-inicio-tratamento',[430,444,458,475,489,506,520,534]);
-  code(272,65,'classificacao-final');
-  const obs=sinanEspVal(f,'observacoes');
-  if(obs){
-    let y=680;
-    sinanTextoLinhas(obs,92).slice(0,9).forEach(l=>{at(p2,57,y,l,6.3,96);y-=17.3});
-  }
-}
 function sinanDesenharDadosPorFicha(pdf,pages,font,bold,color,f){
+  if(f?.id==='sifilis-adquirida')return sinanDesenharSifilisAdquirida(pdf,pages,font,bold,color,f);
   if(f&&SINAN_FICHAS_INVESTIGACAO.has(f.id)){
     const map=window.SINAN_COORDS_ESPECIFICOS?.[f.id];
     if(map)sinanDesenharDadosInvestigacaoPorMapa(pdf,pages,font,bold,color,map);
     else sinanDesenharDadosInvestigacao(pdf,pages,font,bold,color);
-    if(f.id==='sifilis-adquirida')sinanDesenharSifilisAdquirida(pdf,pages,font,bold,color,f);
     return;
   }
   return sinanDesenharDadosGerais(pdf,pages,font,bold,color);
@@ -4561,7 +4550,7 @@ function sinanAdicionarComplementoEspecifico(pdf,font,bold,color,f){
   const especificos=sinanValoresCamposEspecificos().map(x=>[x.label,x.value]);
   const resumo=[['FICHA SELECIONADA',f?.nome],['PACIENTE',sinanVal('sinan-nome')],['AGRAVO',sinanVal('sinan-agravo')],['RESUMO CLINICO / SUSPEITA',sinanVal('sinan-esp-resumo')],['DATA DA INVESTIGACAO',sinanVal('sinan-esp-data-investigacao')],['CLASSIFICACAO INICIAL',sinanVal('sinan-esp-classificacao')],['LOCAL PROVAVEL',sinanVal('sinan-esp-local-provavel')],...especificos,['OUTROS CAMPOS / OBSERVACOES',sinanVal('sinan-esp-campos')]].filter(([,v])=>String(v||'').trim());
   if(!resumo.length)return;
-  let page=pdf.addPage([595.28,841.89]);
+  let page;
   const at=(x,y,t,s=9,b=false)=>page.drawText(sinanSeguro(t),{x,y,size:s,font:b?bold:font,color});
   const novaPagina=()=>{page=pdf.addPage([595.28,841.89]);at(46,800,'COMPLEMENTO DE PREENCHIMENTO - FICHA ESPECIFICA SINAN',12,true);at(46,782,'Dados gerados pelo sistema para transcricao/conferencia dos campos especificos do agravo.',8,false);return 748};
   novaPagina();
@@ -4573,18 +4562,24 @@ async function gerarFichaSinanEspecifica(){
   const f=sinanFichaAtual();
   if(!f||f.id==='individual-geral'){alert('Selecione a ficha específica do agravo. A ficha geral antiga não será mais usada.');return}
   try{
+    if(f.id==='sifilis-adquirida' && ['1','2','3','4'].includes(sinanVal('sinan-gestante'))){
+      throw new Error('O modelo de sífilis adquirida traz “Não se aplica” impresso no campo Gestante. Confira o agravo e a ficha de sífilis em gestante antes de gerar.');
+    }
+    if(f.id==='sifilis-adquirida' && sinanRevisaoLegado && !confirm('Este rascunho foi salvo na versão que podia sugerir resultados e data de coleta automaticamente. Você conferiu os dois testes de sífilis e a data de coleta com o registro original?'))return;
     if(!window.PDFLib?.PDFDocument)throw new Error('O gerador de PDF não foi carregado.');
     const modelo=await sinanObterModeloEspecifico(f);
     const {PDFDocument,StandardFonts,rgb}=window.PDFLib,pdf=await PDFDocument.load(modelo.bytes),pages=pdf.getPages(),font=await pdf.embedFont(StandardFonts.Helvetica),bold=await pdf.embedFont(StandardFonts.HelveticaBold),color=rgb(.02,.08,.32);
     sinanDesenharDadosPorFicha(pdf,pages,font,bold,color,f);
-    sinanAdicionarComplementoEspecifico(pdf,font,bold,color,f);
+    if(f.id!=='sifilis-adquirida')sinanAdicionarComplementoEspecifico(pdf,font,bold,color,f);
     const bytes=await pdf.save(),blob=new Blob([bytes],{type:'application/pdf'}),url=URL.createObjectURL(blob),a=document.createElement('a'),nome=sinanSeguro(sinanVal('sinan-nome')).toLowerCase().replace(/[^a-z0-9]+/g,'-'),agr=sinanSeguro(f.nome).toLowerCase().replace(/[^a-z0-9]+/g,'-');
-    a.href=url;a.download='sinan-'+agr+'-'+(nome||'notificacao')+'.pdf';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);sinanSalvarRascunho();showToast('Ficha específica SINAN gerada.');
+    a.href=url;a.download='sinan-'+agr+'-'+(nome||'notificacao')+'.pdf';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);if(f.id==='sifilis-adquirida')sinanRevisaoLegado=false;sinanSalvarRascunho();showToast('Ficha específica SINAN gerada.');
   }catch(e){alert((e?.message&&e.message!=='Failed to fetch')?e.message:'Modelo específico indisponível. A ficha geral antiga não será usada como substituta.')}
 }
 function sinanInicializar(){
   const chave=chaveRascunhoSinan();if(chave===sinanEscopoAberto)return;
-  sinanEscopoAberto=chave;
+  sinanEscopoAberto=chave;sinanRevisaoLegado=false;
+  sinanEl('sinan-tipo').disabled=false;
+  delete sinanEl('sinan-tipo').dataset.anterior;
   document.querySelectorAll('#pg-sinan input,#pg-sinan textarea,#pg-sinan select').forEach(e=>{
     if(e.tagName==='SELECT')e.selectedIndex=0;else if(e.type!=='file')e.value=e.defaultValue||'';
   });
@@ -4596,6 +4591,10 @@ function sinanInicializar(){
   sinanSet('sinan-unidade',sinanVal('sinan-unidade')||u?.unidade||PROTO?.unit?.nome||'');sinanSet('sinan-notificante-unidade',sinanVal('sinan-notificante-unidade')||u?.unidade||PROTO?.unit?.nome||'');sinanSet('sinan-notificante-nome',sinanVal('sinan-notificante-nome')||u?.nome||'');sinanSet('sinan-notificante-funcao',sinanVal('sinan-notificante-funcao')||u?.cargo||'');
   sinanSincronizarAgravo();
   try{sinanPreencher(rascunho)}catch(e){}
+  if(sinanFichaAtual()?.id==='sifilis-adquirida'){
+    sinanSet('sinan-tipo','2');
+    sinanRevisaoLegado=!rascunho.resultadosSifilisConferidos && ['teste-nao-treponemico','teste-treponemico','data-teste-nao-treponemico'].some(id=>sinanEspVal(sinanFichaAtual(),id));
+  }
 }
 async function garantirPdfJs(){const ok=await carregarDependenciaRede('pdfjs',()=>!!window.pdfjsLib);if(ok)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';return ok}
 async function garantirChartJs(){return carregarDependenciaRede('chart',()=>!!window.Chart)}
@@ -5865,7 +5864,11 @@ function atualizarTestesRapidosPna(){
 }
 function avaliarResultadosTR(){
   const preencher=(seletor,outId)=>{const reag=Array.from(document.querySelectorAll(`${seletor} select[id$="-res"]`)).filter(x=>x.value==='REAGENTE').map(x=>x.closest('.tr-test-grid')?.querySelector('.tr-test-title')?.textContent).filter(Boolean),out=document.getElementById(outId);if(out)out.innerHTML=reag.length?`<div class="alert alert-e"><strong>Resultado(s) reagente(s):</strong> ${reag.join('; ')}. Realizar acolhimento, aconselhamento pós-teste, registro e ativar o fluxo protocolar correspondente.</div>`:'';return reag};
-  preencher('#pna-tr','tr-alertas');const reagIST=preencher('#pg-ist','ist-tr-alertas'),outIST=document.getElementById('ist-tr-alertas');if(reagIST.length&&outIST){const r=resumoTestesRapidosIST();outIST.innerHTML=`<div class="alert alert-e"><strong>Conduta protocolada — Toledo:</strong><div style="white-space:pre-line;margin-top:5px">${r.conduta}</div></div>`}const e=document.getElementById('ist-alerts');if(e){const outros=(e.value||'').split('; ').filter(x=>x&&x!=='Teste reagente'&&x!=='Gestante com teste reagente');e.value=[...new Set([...outros,reagIST.length?'Teste reagente':'',reagIST.length&&document.getElementById('ist-tr-condicao')?.value==='gestante'?'Gestante com teste reagente':''].filter(Boolean))].join('; ')}if(typeof avaliarPrioridadeModulo==='function')avaliarPrioridadeModulo('ist');avaliarProtocolosPna();
+  preencher('#pna-tr','tr-alertas');
+  if(trVal('tr-principal-condicao')==='gestante' && trVal('tr-p-duo-sif-res')==='REAGENTE'){
+    document.getElementById('tr-alertas').insertAdjacentHTML('beforeend','<a href="https://www.toledo.pr.gov.br/node/12562" target="_blank" rel="noopener noreferrer">Abrir catálogo de Toledo: ficha de sífilis em gestante</a>');
+  }
+  const reagIST=preencher('#pg-ist','ist-tr-alertas'),outIST=document.getElementById('ist-tr-alertas');if(reagIST.length&&outIST){const r=resumoTestesRapidosIST();outIST.innerHTML=`<div class="alert alert-e"><strong>Conduta protocolada — Toledo:</strong><div style="white-space:pre-line;margin-top:5px">${r.conduta}</div></div>`}const e=document.getElementById('ist-alerts');if(e){const outros=(e.value||'').split('; ').filter(x=>x&&x!=='Teste reagente'&&x!=='Gestante com teste reagente');e.value=[...new Set([...outros,reagIST.length?'Teste reagente':'',reagIST.length&&document.getElementById('ist-tr-condicao')?.value==='gestante'?'Gestante com teste reagente':''].filter(Boolean))].join('; ')}if(typeof avaliarPrioridadeModulo==='function')avaliarPrioridadeModulo('ist');avaliarProtocolosPna();
 }
 function trVal(id,fallback=''){return(document.getElementById(id)?.value||fallback).trim();}function formatarDataBR(data){if(!data)return'';const p=data.split('-');return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:data;}function idadePorNascimento(data){if(!data)return'';const n=new Date(data+'T12:00:00'),h=new Date();let a=h.getFullYear()-n.getFullYear();if(h<new Date(h.getFullYear(),n.getMonth(),n.getDate()))a--;return String(a);}
 function dadosLaudoTR(prefix,gestante){
@@ -12268,23 +12271,6 @@ async function gerarPacoteDiabetesGestacionalPN(){
     return true;
   }
 
-  function prepararSinanSifilis(prefix){
-    try{
-      if(typeof sinanSet!=='function')return;
-      sinanSet('sinan-ficha-modelo','sifilis-adquirida');
-      sinanSet('sinan-agravo','Sífilis adquirida');
-      sinanSet('sinan-data-notif',todayISO());
-      sinanSet('sinan-primeiros-sintomas',valAny([`${prefix}-data-sintomas`,`${prefix}-dum`])||todayISO());
-      ['nome','cpf','cns','nasc','idade','sexo','mae','telefone','cep','logradouro','numero','bairro'].forEach(k=>sinanSet(`sinan-${k}`,valAny([`${prefix}-${k}`,`pac-${k}`])));
-      sinanSet('sinan-gestante',prefix==='pna'||prefix==='pnc'?'1º Trimestre':'');
-      if(typeof sinanSincronizarAgravo==='function')sinanSincronizarAgravo();
-      if(typeof sinanSalvarRascunho==='function')sinanSalvarRascunho();
-      showToast('SINAN de sífilis adquirido preparado em rascunho. Revise os dados complementares antes de imprimir.');
-    }catch(e){console.warn('Falha ao preparar SINAN sífilis:',e)}
-  }
-  // Exposto no escopo global para a IIFE de auditoria (validarPN) conseguir chamar.
-  window.prepararSinanSifilis = prepararSinanSifilis;
-
   function gerarSoapPN(prefix){
     const nome=valAny([`${prefix}-nome`]);
     const idade=valAny([`${prefix}-idade`]);
@@ -12372,7 +12358,6 @@ async function gerarPacoteDiabetesGestacionalPN(){
     add(p,window.ESFExames?'Revisar exames por trimestre e indicação no painel de kits; somente solicitações confirmadas são registradas abaixo.':pnaPlanoExamesSoap?.(parseNumber(valAny([`${prefix}-ig`])))||'Solicitar ou conferir exames de rotina conforme protocolo municipal.');
     if(pnSifilisReagente(prefix)){
       add(p,'Diante de sífilis reagente, ativar fluxo protocolar de sífilis na gestação, realizar aconselhamento pós-teste, registrar tratamento/seguimento, avaliar/tratar parceria sexual e verificar notificação/SINAN conforme fluxo municipal.');
-      prepararSinanSifilis(prefix);
     }
     add(p,pnaPlanoVacinalSoap?.(parseNumber(valAny([`${prefix}-ig`])))||'Conferir carteira vacinal e atualizar conforme calendário vigente.');
     add(p,line('Odontologia',valAny([`${prefix}-odonto`])));
@@ -12778,7 +12763,6 @@ async function gerarPacoteDiabetesGestacionalPN(){
     if(/sangramento vaginal|perda de liquido|perda de líquido|dor abdominal intensa|dor epigastrica|dor epigástrica|reducao de movimentos|redução de movimentos/.test(t)&&!condutaOk(prefix))add(res.erros,'Sinal de alarme obstétrico sem conduta registrada.','Anamnese/alertas','Registrar avaliação, orientação/fluxo e retorno/encaminhamento conforme protocolo municipal.');
     if(/sifilis.*reagente|sífilis.*reagente|tr sifilis.*reagente|tr sífilis.*reagente/.test(t)&&!/sifilis.*nao reagente|sífilis.*não reagente/.test(t)){
       if(!/sinan|notifica|vdrl|parceria|tratamento|fluxo/.test(t+normTxt(window.textoSoapAtual?.(false)||'')))add(res.erros,'Sífilis reagente sem fluxo completo registrado.','Teste rápido','Registrar VDRL/fluxo, parceria sexual, notificação/SINAN e seguimento conforme Protocolo IST Toledo.');
-      if(typeof prepararSinanSifilis==='function')try{prepararSinanSifilis(prefix)}catch(e){}
     }
     if(ig!==null&&ig>=20&&!campoTem([`${prefix}-bcf`]))add(res.pendencias,'BCF não registrado para IG em que a avaliação geralmente é aplicável.','BCF','Registrar se avaliado ou justificar.');
     if(ig!==null&&ig>=20&&!campoTem([`${prefix}-au`]))add(res.pendencias,'Altura uterina não registrada.','AU','Registrar se avaliado ou justificar.');
