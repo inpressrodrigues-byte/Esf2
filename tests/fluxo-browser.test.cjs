@@ -62,5 +62,6 @@ await page.evaluate(()=>{CURRENT_AUTH_USER_ID='qa-outra-conta';sinanInicializar(
 await page.evaluate(()=>{CURRENT_AUTH_USER_ID='qa-fluxo';sinanInicializar();});assert.equal(await page.inputValue('#sinan-agravo'),sourceName);
 console.log('PASS Calendário por grupo no PNI, catálogo SINAN, troca de agravo e isolamento de rascunho');
 await require('./sinan-sifilis.cjs')(page);
+await require('./sinan-catalogo.cjs')(page,options);
 assert.deepEqual(errors,[]);console.log('PASS Modos na mesma ficha, escala preservada e calibração no editor');
 }finally{await browser?.close();server.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

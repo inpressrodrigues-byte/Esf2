@@ -10,6 +10,8 @@
 <script defer src="vendor/pdf-lib.min.js"></script>
 <script defer src="assets/modelos.js"></script>
 <script defer src="assets/sinan-sifilis-adquirida.js"></script>
+<script defer src="assets/sinan-geometria.js"></script>
+<script defer src="assets/sinan-investigacao.js"></script>
 <script src="assets/ai-transport.js"></script>
 <script>
 const _SB_URL = 'https://mcmletzjgykhwknshacg.supabase.co';
@@ -3733,6 +3735,8 @@ body.sidebar-collapsed .dev-nav{display:none}
         <div class="f"><label for="sinan-unidade-cod">Código CNES da unidade</label><input id="sinan-unidade-cod" maxlength="7"></div>
         <div class="f"><label>7. Data dos primeiros sintomas *</label><input type="date" id="sinan-primeiros-sintomas" class="sinan-obrigatorio" data-label="Data dos primeiros sintomas"></div>
         <div class="f" hidden><label for="sinan-data-diagnostico">7. Data do diagnóstico *</label><input type="date" id="sinan-data-diagnostico" class="sinan-obrigatorio" data-label="Data do diagnóstico (coleta do material ou evidência clínica)" disabled><small>Data da coleta do material para exame ou da evidência clínica.</small></div>
+        <div class="f" hidden><label for="sinan-data-acidente">7. Data do acidente *</label><input type="date" id="sinan-data-acidente" class="sinan-obrigatorio" data-label="Data do acidente" disabled></div>
+        <div class="f" hidden><label for="sinan-data-atendimento">7. Data do atendimento *</label><input type="date" id="sinan-data-atendimento" class="sinan-obrigatorio" data-label="Data do atendimento" disabled></div>
       </div>
       <div id="sinan-ficha-status" style="margin-top:12px"></div>
     </div>
@@ -4085,7 +4089,6 @@ body.sidebar-collapsed .dev-nav{display:none}
 </script><script>
 
 </script><script>
-window.SINAN_COORDS_ESPECIFICOS = Object.assign(window.SINAN_COORDS_ESPECIFICOS || {}, {"ac-animal": {"arquivo": "ficha_notificacao_ac_animal_peconhento.pdf", "nome": "Acidente por animal peçonhento", "w": 595.0, "h": 841.0, "xVariant": "default", "y": {"dataNotif": 696.9, "uf": 669.5, "unidade": 640.5, "nome": 613.7, "dem": 579.9, "esc": 550.2, "cns": 521.4, "mun": 489.9, "end": 460.1, "comp": 434.0, "ref": 410.4, "tel": 385.2}}, "ac-trabalho": {"arquivo": "ficha_notificacao_acidente_de_trabalho.pdf", "nome": "Acidente de trabalho", "w": 595.0, "h": 842.0, "xVariant": "default", "y": {"dataNotif": 629.6, "uf": 601.7, "unidade": 572.0, "nome": 545.7, "dem": 512.4, "esc": 483.1, "cns": 453.9, "mun": 424.8, "end": 395.0, "comp": 369.0, "ref": 345.3, "tel": 320.0}}, "material-biologico": {"arquivo": "ficha_notificacao_acidente_material_biologico.pdf", "nome": "Acidente com material biológico", "w": 595.0, "h": 842.0, "xVariant": "default", "y": {"dataNotif": null, "uf": 626.2, "unidade": 596.4, "nome": 569.9, "dem": 536.9, "esc": 507.2, "cns": 478.3, "mun": 448.3, "end": 418.5, "comp": 392.6, "ref": 369.0, "tel": 343.7}}, "aids-adulto": {"arquivo": "ficha_notificacao_aids_adulto.pdf", "nome": "AIDS adulto", "w": 595.0, "h": 841.0, "xVariant": "default", "y": {"dataNotif": 684.8, "uf": 657.5, "unidade": 628.4, "nome": 601.0, "dem": 567.8, "esc": 538.0, "cns": 509.3, "mun": 477.2, "end": 447.4, "comp": 421.3, "ref": 397.7, "tel": 372.5}}, "aids-crianca": {"arquivo": "ficha_notificacao_aids_crianca.pdf", "nome": "AIDS criança", "w": 595.0, "h": 841.0, "xVariant": "default", "y": {"dataNotif": 699.1, "uf": 671.7, "unidade": 642.7, "nome": 615.9, "dem": 582.2, "esc": 552.4, "cns": 523.7, "mun": 494.3, "end": 464.5, "comp": 438.5, "ref": 414.9, "tel": 389.7}}, "antirrabico": {"arquivo": "ficha_notificacao_atendimento_antirrabico_humano.pdf", "nome": "Atendimento antirrábico humano", "w": 595.0, "h": 841.0, "xVariant": "default", "y": {"dataNotif": 736.6, "uf": 709.3, "unidade": 680.2, "nome": 653.4, "dem": 619.7, "esc": 589.9, "cns": 561.2, "mun": 529.6, "end": 499.8, "comp": 473.8, "ref": 450.2, "tel": 425.0}}, "coqueluche": {"arquivo": "ficha_notificacao_coqueluche.pdf", "nome": "Coqueluche", "w": 595.0, "h": 841.0, "xVariant": "default", "y": {"dataNotif": 663.9, "uf": 636.5, "unidade": 607.4, "nome": 580.6, "dem": 546.9, "esc": 517.1, "cns": 488.4, "mun": 457.6, "end": 427.8, "comp": 401.8, "ref": 378.2, "tel": 353.0}}, "crianca-hiv": {"arquivo": "ficha_notificacao_crianca_exposta_hiv.pdf", "nome": "Criança exposta ao HIV", "w": 595.0, "h": 841.0, "xVariant": "default", "y": {"dataNotif": 693.9, "uf": 666.5, "unidade": 637.1, "nome": 610.7, "dem": 576.0, "esc": 547.1, "cns": 518.4, "mun": 489.1, "end": 459.3, "comp": 433.3, "ref": 409.7, "tel": 384.5}}, "difteria": {"arquivo": "ficha_notificacao_difteria.pdf", "nome": "Difteria", "w": 595.0, "h": 841.0, "xVariant": "default", "y": {"dataNotif": 695.3, "uf": 668.0, "unidade": 638.9, "nome": 612.1, "dem": 578.3, "esc": 548.5, "cns": 519.8, "mun": 487.7, "end": 457.9, "comp": 431.8, "ref": 408.2, "tel": 383.0}}, "febre-amarela": {"arquivo": "ficha_notificacao_febre_amarela.pdf", "nome": "Febre amarela", "w": 595.0, "h": 842.0, "xVariant": "default", "y": {"dataNotif": 698.0, "uf": 668.5, "unidade": 639.5, "nome": 612.5, "dem": 578.9, "esc": 549.2, "cns": 520.3, "mun": 490.4, "end": 460.6, "comp": 434.6, "ref": 411.0, "tel": 385.7}}, "febre-maculosa": {"arquivo": "ficha_notificacao_febre_maculosa.pdf", "nome": "Febre maculosa", "w": 595.0, "h": 841.0, "xVariant": "default", "y": {"dataNotif": 690.8, "uf": 661.2, "unidade": 632.2, "nome": 605.4, "dem": 571.7, "esc": 541.9, "cns": 513.1, "mun": 481.6, "end": 451.8, "comp": 425.8, "ref": 402.2, "tel": 377.0}}, "gestante-hiv": {"arquivo": "ficha_notificacao_gestante_hiv.pdf", "nome": "Gestante HIV", "w": 595.0, "h": 841.0, "xVariant": "default", "y": {"dataNotif": 714.8, "uf": 685.2, "unidade": 656.1, "nome": 629.4, "dem": 595.6, "esc": 565.8, "cns": 537.1, "mun": 507.1, "end": 477.3, "comp": 451.3, "ref": 427.7, "tel": 402.5}}, "hantavirose": {"arquivo": "ficha_notificacao_hantavirose.pdf", "nome": "Hantavirose", "w": 595.0, "h": 842.0, "xVariant": "default", "y": {"dataNotif": 682.0, "uf": 652.4, "unidade": 623.4, "nome": 596.6, "dem": 562.8, "esc": 533.0, "cns": 504.3, "mun": 472.9, "end": 443.1, "comp": 417.0, "ref": 393.4, "tel": 368.2}}, "hepatites": {"arquivo": "ficha_notificacao_hepatites_virais.pdf", "nome": "Hepatites virais", "w": 595.0, "h": 841.0, "xVariant": "default", "y": {"dataNotif": 560.4, "uf": 531.2, "unidade": 501.7, "nome": 474.9, "dem": 441.1, "esc": 411.3, "cns": 382.6, "mun": 351.9, "end": 322.1, "comp": 296.0, "ref": 272.4, "tel": 247.2}}, "sifilis-adquirida": {"arquivo": "ficha_notificacao_sifilis_adquirida.pdf", "nome": "Sífilis adquirida", "w": 611.0, "h": 791.0, "xVariant": "compact", "y": {"dataNotif": 664.0, "uf": 637.0, "unidade": 609.0, "nome": 584.0, "dem": 547.0, "esc": 513.0, "cns": 486.0, "mun": 455.8, "end": 426.0, "comp": 398.0, "ref": 371.0, "tel": 343.0}}, "toxoplasmose-adquirida": {"arquivo": "ficha_notificacao_toxoplasmose_adquirida.pdf", "nome": "Toxoplasmose adquirida", "w": 595.0, "h": 841.0, "xVariant": "default", "y": {"dataNotif": 730.9, "uf": 704.6, "unidade": 677.3, "nome": 648.1, "dem": 614.3, "esc": 584.5, "cns": 555.8, "mun": 524.4, "end": 494.6, "comp": 468.5, "ref": 444.9, "tel": 419.7}}});
 
 </script><script>
 // ── SINAN — NOTIFICAÇÃO INDIVIDUAL ─────────────────────────────
@@ -4196,6 +4199,7 @@ function sinanOrientacaoFicha(f){
   if(!f)return {classe:'alert-i',titulo:'Selecione uma ficha',texto:'Escolha o agravo para o sistema indicar o modelo oficial correto.'};
   if(f.id==='dengue-chik')return {classe:'alert-w',titulo:'Dengue/Chikungunya — SINAN Online',texto:'A Prefeitura orienta registro no SINAN Online. O sistema ainda assim gera a ficha preenchida para apoio físico/local quando necessário.'};
   if(f.calibrada==='esus-sinan')return {classe:'alert-w',titulo:`${f.nome} — e-SUS SINAN`,texto:'A Prefeitura orienta registro no e-SUS SINAN. O sistema ainda assim organiza os dados e gera a ficha preenchida para apoio local quando houver modelo em PDF.'};
+  if(window.SINAN_GEOMETRIA?.[f.id])return {classe:'alert-i',titulo:f.nome,texto:'Dados gerais preenchidos no impresso oficial. Informações complementares seguem nos campos correspondentes, nas observações ou em folha de continuação.'};
   if(f.calibrada===true)return {classe:'alert-s',titulo:'Ficha calibrada',texto:'Esta ficha possui sobreimpressão calibrada no sistema.'};
   return {classe:'alert-i',titulo:'Ficha específica por agravo',texto:'Este agravo possui modelo próprio. O sistema vai gerar o PDF específico preenchido com os dados disponíveis e manter os campos específicos no próprio documento/folha complementar quando ainda não houver coordenada fina calibrada.'};
 }
@@ -4273,7 +4277,8 @@ function sinanCampoEspecificoHtml(f,campo){
 function sinanRenderCamposEspecificos(f){
   const alvo=sinanEl('sinan-campos-especificos');if(!alvo)return;
   if(!f){alvo.innerHTML='<div class="f span3"><label>Selecione uma ficha</label><textarea placeholder="Escolha o agravo na primeira aba para abrir as perguntas oficiais da ficha."></textarea></div>';return}
-  const campos=SINAN_FICHA_CAMPOS_ESPECIFICOS[f.id]||[];
+  const evento=window.SINAN_GEOMETRIA?.[f.id]?.eventField;
+  const campos=(SINAN_FICHA_CAMPOS_ESPECIFICOS[f.id]||[]).filter(([id])=>id!==evento && !(f.id==='gestante-hiv' && id==='data-diagnostico-hiv'));
   alvo.innerHTML=[
     `<div class="f span3"><label for="sinan-esp-resumo">Resumo clínico / suspeita que motivou a notificação</label><textarea id="sinan-esp-resumo" placeholder="Ex.: sinais, sintomas, exposição, resultado de teste, vínculo epidemiológico..."></textarea></div>`,
     `<div class="f"><label>Data da investigação</label><input type="date" id="sinan-esp-data-investigacao"></div>`,
@@ -4300,17 +4305,21 @@ function sinanValoresCamposEspecificos(){
 function sinanRenderFichaSelecionada(){
   const f=sinanFichaAtual(),status=sinanEl('sinan-ficha-status'),painel=sinanEl('sinan-ficha-especifica-painel'),campos=sinanEl('sinan-esp-campos');
   const adquirida=f?.id==='sifilis-adquirida';
-  for(const [id,exibir] of [['sinan-primeiros-sintomas',!adquirida],['sinan-data-diagnostico',adquirida]]){
-    const input=sinanEl(id);
+  const mapa=window.SINAN_GEOMETRIA?.[f?.id];
+  const evento=adquirida?'data-diagnostico':mapa?.eventField||'primeiros-sintomas';
+  for(const campo of ['primeiros-sintomas','data-diagnostico','data-acidente','data-atendimento','gestante','escolaridade']){
+    const input=sinanEl('sinan-'+campo);
+    const exibir=['gestante','escolaridade'].includes(campo)?!mapa?.excluded?.includes(campo):campo===evento;
     input.disabled=!exibir;input.parentElement.hidden=!exibir;input.parentElement.style.display=exibir?'':'none';
   }
+  sinanEl('sinan-data-diagnostico').parentElement.querySelector('small').hidden=!adquirida;
   const tipo=sinanEl('sinan-tipo');
-  if(adquirida&&!tipo.disabled){tipo.dataset.anterior=tipo.value;tipo.value='2';tipo.disabled=true;}
-  if(!adquirida&&tipo.disabled){tipo.disabled=false;tipo.value=tipo.dataset.anterior||'';}
+  if(f){if(!tipo.disabled)tipo.dataset.anterior=tipo.value;tipo.value='2';tipo.disabled=true;}
+  else if(tipo.disabled){tipo.disabled=false;tipo.value=tipo.dataset.anterior||'';}
   const o=sinanOrientacaoFicha(f);
   const html=`<div class="alert ${o.classe}"><div><strong>${escTR(o.titulo)}:</strong> ${escTR(o.texto)}${f?`<br><small>Modelo selecionado: ${escTR(f.nome)} · Fonte interna: catálogo oficial da Prefeitura de Toledo/Vigilância em Saúde</small>`:''}</div></div>`;
   if(status)status.innerHTML=html+(adquirida?'<small>Para sífilis em gestante, use a ficha própria disponível no <a href="https://www.toledo.pr.gov.br/node/12562" target="_blank" rel="noopener noreferrer">catálogo de notificações de Toledo</a>.</small>':'');
-  if(painel) painel.innerHTML=html+(f&&!adquirida?`<div class="vac-table-wrap" style="margin-top:10px"><table class="vac-table"><thead><tr><th>Campo específico esperado</th><th>Uso no sistema</th></tr></thead><tbody>${sinanCamposEspecificosSugeridos(f).map(c=>`<tr><td>${escTR(c)}</td><td>Registrar no campo específico e transcrever para a ficha oficial até calibrarmos este modelo.</td></tr>`).join('')}</tbody></table></div>`:'');
+  if(painel) painel.innerHTML=html;
   if(campos&&!campos.value&&f)campos.placeholder='Campos esperados para '+f.nome+': '+sinanCamposEspecificosSugeridos(f).join('; ')+'.';
   sinanRenderCamposEspecificos(f);
 }
@@ -4318,7 +4327,7 @@ function sinanGerarChecklistEspecifica(){
   const f=sinanFichaAtual(),out=sinanEl('sinan-checklist-especifica');
   if(!out)return;
   if(!f){out.innerHTML='<div class="alert alert-w"><div>Selecione uma ficha oficial primeiro.</div></div>';return}
-  const campos=sinanCamposEspecificosSugeridos(f),gerais=['Tipo de notificação','Agravo/doença','Data da notificação','Município/UF','Unidade notificadora',f.id==='sifilis-adquirida'?'Data do diagnóstico':'Primeiros sintomas','Nome','Nascimento/idade','Sexo','Gestante','Raça/cor','Escolaridade','CNS','Nome da mãe','Endereço/telefone','Notificante'];
+  const campos=sinanCamposEspecificosSugeridos(f),gerais=['Tipo de notificação','Agravo/doença','Data da notificação','Município/UF','Unidade notificadora',sinanEl('sinan-'+(f.id==='sifilis-adquirida'?'data-diagnostico':window.SINAN_GEOMETRIA?.[f.id]?.eventField||'primeiros-sintomas')).dataset.label,'Nome','Nascimento/idade','Sexo','Gestante','Raça/cor','Escolaridade','CNS','Nome da mãe','Endereço/telefone','Notificante'];
   out.innerHTML=`<div class="alert alert-i"><div><strong>Checklist para ${escTR(f.nome)}</strong><br>Use este roteiro para garantir que os dados necessários ao modelo específico estejam no sistema antes de gerar.</div></div><div class="vac-table-wrap"><table class="vac-table"><thead><tr><th>Bloco</th><th>Itens</th></tr></thead><tbody><tr><td>Dados gerais</td><td>${gerais.map(escTR).join(' · ')}</td></tr><tr><td>Campos específicos</td><td>${campos.map(escTR).join(' · ')}</td></tr><tr><td>Modelo selecionado</td><td>${escTR(f.nome)}</td></tr></tbody></table></div>`;
 }
 let sinanRevisaoLegado=false;
@@ -4376,192 +4385,13 @@ async function sinanObterModeloEspecifico(f){
     throw new Error('Modelo específico de '+f.nome+' ainda não está disponível offline. Baixe/embuta esta ficha antes de gerar.');
   }
 }
-function sinanTextoLinhas(texto,max=95){
-  const words=sinanSeguro(texto).split(/\s+/).filter(Boolean),linhas=[];let l='';
-  words.forEach(w=>{if((l+' '+w).trim().length>max){if(l)linhas.push(l);l=w}else l=(l+' '+w).trim()});
-  if(l)linhas.push(l);return linhas;
-}
-const SINAN_FICHAS_INVESTIGACAO=new Set([
-  'ac-animal','ac-trabalho','material-biologico','aids-adulto','aids-crianca','antirrabico','botulismo','cancer-trabalho','caxumba','chagas-aguda','chagas-cronica','colera','coqueluche','crianca-hiv','dermatose-trabalho','difteria','dta','epizootia','esavi','esquistossomose','febre-amarela','febre-nilo','febre-maculosa','febre-tifoide','gestante-hiv','hanseniase','hantavirose','hepatites','intoxicacao','lta','lv','leptospirose','ler-dort','malaria','meningite','mini-saia','mpox','pfa','pneumoconiose','pair','peste','raiva','rotavirus','sarampo-rubeola','sifilis-adquirida','sifilis-congenita','sifilis-gestante','src','corrimento-uretral','srag','tetano-acidental','tetano-neonatal','toxoplasmose-adquirida','toxoplasmose-congenita','toxoplasmose-gestacional','mental-trabalho','tuberculose','varicela','violencia','zika'
-]);
-function sinanDesenharDadosGerais(pdf,pages,font,bold,color){
-  const p1=pages[0],p2=pages[1]||pages[0];
-  const at=(page,x,y,text,size=6.3,max=80,b=false)=>{text=sinanSeguro(text).slice(0,max);if(text)page.drawText(text,{x,y,size,font:b?bold:font,color})};
-  const spaced=(page,x,y,text,step=10.5,size=6.2,max=60)=>{sinanSeguro(text).slice(0,max).split('').forEach((c,i)=>{if(c!==' ')at(page,x+i*step,y,c,size,1)})};
-  const digits=(page,x,y,text,step=14,size=6.3,max=20)=>spaced(page,x,y,sinanSomenteNumeros(text),step,size,max);
-  const digitsAt=(page,y,text,xs,size=6.3)=>{sinanSomenteNumeros(text).slice(0,xs.length).split('').forEach((c,i)=>at(page,xs[i],y,c,size,1))};
-  const dateAt=(page,y,value,xs)=>digitsAt(page,y,sinanData(value),xs,6.2);
-  const codeAt=(page,x,y,id,transform)=>{let v=sinanVal(id);if(transform)v=transform[v]||v;at(page,x,y+3,v,7,2,true)};
-  const dateMain=[453,467.5,482.5,496.8,511.3,525.8,540.2,554.6];
-  const dateSurto=[72,86.5,101,115.5,130,144.5,159,173.5];
-  const dateComp1=[58,72.5,87,101.5,116,130.5,145,159.5];
-  const dateComp2=[180,194.5,209,223.5,238,252.5,267,281.5];
-  const dateCompExantema=[257,271.5,286,300.5,315,329.5,344,358.5];
-  const dateCompVacina=[217,231.5,246,260.5,275,289.5,304,318.5];
-  const dateCompHosp=[463,477.5,492,506.5,521,535.5,550,564.5];
-  digits(p1,455,800,sinanVal('sinan-num-notificacao'),13.5,6.4,12);
-  codeAt(p1,550,758,'sinan-tipo');
-  at(p1,70,727,sinanVal('sinan-agravo'),7,70,true);dateAt(p1,729,sinanVal('sinan-data-notif'),dateMain);
-  spaced(p1,58,697,sinanVal('sinan-uf-notif'),14,6.5,2);at(p1,91,697,sinanVal('sinan-mun-notif'),7,55);digits(p1,487,697,sinanVal('sinan-mun-notif-cod'),14.45,6.3,7);
-  at(p1,71,669,sinanVal('sinan-unidade'),7,70);digits(p1,346,669,sinanVal('sinan-unidade-cod'),14.45,6.3,7);dateAt(p1,671,sinanVal('sinan-primeiros-sintomas'),dateMain);
-  spaced(p1,70,639,sinanVal('sinan-nome'),10.5,6.3,72);dateAt(p1,641,sinanVal('sinan-nasc'),dateMain);digitsAt(p1,615,sinanVal('sinan-idade'),[61,75],6.3);
-  codeAt(p1,137,623,'sinan-idade-unidade');codeAt(p1,236,623,'sinan-sexo',{M:'M',F:'F',I:'I'});codeAt(p1,432,623,'sinan-gestante');codeAt(p1,556,623,'sinan-raca');codeAt(p1,557,596,'sinan-escolaridade');
-  digits(p1,56,550,sinanVal('sinan-cns'),11.45,6.2,15);at(p1,244,550,sinanVal('sinan-mae'),6.4,55);
-  if(p2!==p1||pages.length>1){
-    dateAt(p2,727,sinanVal('sinan-comp-sorologia'),dateComp1);dateAt(p2,726,sinanVal('sinan-comp-outra-data'),dateComp2);at(p2,312,724,sinanVal('sinan-comp-exame'),6.5,75);
-    codeAt(p2,297,708,'sinan-comp-obito');codeAt(p2,559,708,'sinan-comp-contato');codeAt(p2,216,678,'sinan-comp-exantema');dateAt(p2,662,sinanVal('sinan-comp-exantema-data'),dateCompExantema);codeAt(p2,560,678,'sinan-comp-petequias');
-    codeAt(p2,192,643,'sinan-comp-liquor');at(p2,230,640,sinanVal('sinan-comp-bacterioscopia'),6.3,75);codeAt(p2,190,607,'sinan-comp-vacina');dateAt(p2,596,sinanVal('sinan-comp-vacina-data'),dateCompVacina);codeAt(p2,444,607,'sinan-comp-hospitalizacao');dateAt(p2,593,sinanVal('sinan-comp-hosp-data'),dateCompHosp);
-  }
-  dateAt(p1,519,sinanVal('sinan-surto-data'),dateSurto);digits(p1,73,489,sinanVal('sinan-surto-casos'),14.4,6.2,8);codeAt(p1,550,489,'sinan-surto-local');at(p1,420,487,sinanVal('sinan-surto-outro'),6.2,40);
-  spaced(p1,57,454,sinanVal('sinan-uf-res'),14,6.3,2);at(p1,92,454,sinanVal('sinan-mun-res'),6.3,48);digits(p1,329,454,sinanVal('sinan-mun-res-cod'),14.45,6.2,7);at(p1,424,454,sinanVal('sinan-distrito'),6.3,34);
-  at(p1,64,435,sinanVal('sinan-bairro'),6.3,35);spaced(p1,203,435,sinanVal('sinan-logradouro'),9.2,6.1,60);digits(p1,493,435,sinanVal('sinan-logradouro-cod'),14.4,6.1,6);
-  at(p1,65,410,sinanVal('sinan-numero'),6.3,10);at(p1,119,410,sinanVal('sinan-complemento'),6.3,48);at(p1,420,410,sinanVal('sinan-geo1'),6.3,32);
-  at(p1,65,384,sinanVal('sinan-geo2'),6.3,32);at(p1,226,384,sinanVal('sinan-referencia'),6.3,50);digits(p1,466,384,sinanVal('sinan-cep'),14.4,6.2,8);
-  digits(p1,64,360,sinanVal('sinan-telefone'),14.4,6.2,11);codeAt(p1,386,368,'sinan-zona');at(p1,367,360,sinanVal('sinan-pais'),6.3,45);
-  at(p1,56,320,sinanVal('sinan-notificante-unidade'),6.5,80);at(p1,56,288,sinanVal('sinan-notificante-nome'),6.5,55);at(p1,254,288,sinanVal('sinan-notificante-funcao'),6.5,55);
-}
-function sinanDesenharDadosInvestigacao(pdf,pages,font,bold,color){
-  const p1=pages[0];
-  const at=(page,x,y,text,size=6.1,max=80,b=false)=>{text=sinanSeguro(text).slice(0,max);if(text)page.drawText(text,{x,y,size,font:b?bold:font,color})};
-  const spaced=(page,x,y,text,step=9.7,size=5.9,max=72)=>{sinanSeguro(text).slice(0,max).split('').forEach((c,i)=>{if(c!==' ')at(page,x+i*step,y,c,size,1)})};
-  const digitsAt=(page,y,text,xs,size=5.9)=>{sinanSomenteNumeros(text).slice(0,xs.length).split('').forEach((c,i)=>at(page,xs[i],y,c,size,1))};
-  const dateAt=(page,y,value,xs)=>digitsAt(page,y,sinanData(value),xs,5.8);
-  const codeAt=(page,x,y,id,transform)=>{let v=sinanVal(id);if(transform)v=transform[v]||v;at(page,x,y,v,6.4,2,true)};
-  const dataX=[430,444,458,475,489,506,520,534];
-  const ufY=637, unidadeY=609, nomeY=584, demY=547, escY=513, cnsY=486;
-  const munY=455, endY=426, compY=398, refY=371, telY=343;
-
-  digitsAt(p1,763,sinanVal('sinan-num-notificacao'),[506,520,534,548,562,576,590],6.2);
-  dateAt(p1,664,sinanVal('sinan-data-notif'),dataX);
-  spaced(p1,58,ufY,sinanVal('sinan-uf-notif'),13.8,6,2);
-  at(p1,90,ufY,sinanVal('sinan-mun-notif'),6.4,48);
-  digitsAt(p1,ufY,sinanVal('sinan-mun-notif-cod'),[452,465,478,491,504,517,530],6);
-  at(p1,66,unidadeY,sinanVal('sinan-unidade'),6.2,64);
-  digitsAt(p1,unidadeY,sinanVal('sinan-unidade-cod'),[334,347,360,373,386,399,412],6);
-  dateAt(p1,unidadeY,sinanVal('sinan-primeiros-sintomas'),dataX);
-  spaced(p1,65,nomeY,sinanVal('sinan-nome'),9.35,5.9,86);
-  dateAt(p1,nomeY,sinanVal('sinan-nasc'),dataX);
-  digitsAt(p1,demY,sinanVal('sinan-idade'),[62,76],6);
-  codeAt(p1,111,demY+1,'sinan-idade-unidade');
-  codeAt(p1,222,demY+1,'sinan-sexo',{M:'M',F:'F',I:'I'});
-  codeAt(p1,421,demY+1,'sinan-gestante');
-  codeAt(p1,532,demY+1,'sinan-raca');
-  codeAt(p1,532,escY,'sinan-escolaridade');
-  digitsAt(p1,cnsY,sinanVal('sinan-cns'),[56,67.8,79.6,91.4,103.2,115,126.8,138.6,150.4,162.2,174,185.8,197.6,209.4,221.2],5.8);
-  at(p1,235,cnsY,sinanVal('sinan-mae'),6.1,62);
-  spaced(p1,58,munY,sinanVal('sinan-uf-res'),13.8,6,2);
-  at(p1,91,munY,sinanVal('sinan-mun-res'),6.2,46);
-  digitsAt(p1,munY,sinanVal('sinan-mun-res-cod'),[326,339,352,365,378,391,404],5.9);
-  at(p1,425,munY,sinanVal('sinan-distrito'),6.1,35);
-  at(p1,65,endY,sinanVal('sinan-bairro'),5.9,34);
-  spaced(p1,202,endY,sinanVal('sinan-logradouro'),8.8,5.7,62);
-  digitsAt(p1,endY,sinanVal('sinan-logradouro-cod'),[472,485,498,511,524,537],5.7);
-  at(p1,65,compY,sinanVal('sinan-numero'),6,10);
-  at(p1,119,compY,sinanVal('sinan-complemento'),5.9,55);
-  at(p1,420,compY,sinanVal('sinan-geo1'),5.9,32);
-  at(p1,65,refY,sinanVal('sinan-geo2'),5.9,32);
-  at(p1,226,refY,sinanVal('sinan-referencia'),5.9,48);
-  digitsAt(p1,refY,sinanVal('sinan-cep'),[450,462,474,486,498,510,522,534],5.9);
-  digitsAt(p1,telY,sinanVal('sinan-telefone'),[64,78.5,93,107.5,122,136.5,151,165.5,180,194.5,209],5.8);
-  codeAt(p1,389,telY+1,'sinan-zona');
-  at(p1,367,telY,sinanVal('sinan-pais'),5.9,45);
-}
-function sinanDesenharDadosInvestigacaoPorMapa(pdf,pages,font,bold,color,map){
-  const p1=pages[0], y=map?.y||{};
-  const compact=map?.xVariant==='compact';
-  const dy=compact?4.2:0;
-  const dcode=compact?5.2:0;
-  const at=(page,x,yy,text,size=6.1,max=80,b=false)=>{text=sinanSeguro(text).slice(0,max);if(text&&Number.isFinite(yy))page.drawText(text,{x,y:yy,size,font:b?bold:font,color})};
-  const spaced=(page,x,yy,text,step=9.7,size=5.9,max=72)=>{if(!Number.isFinite(yy))return;sinanSeguro(text).slice(0,max).split('').forEach((c,i)=>{if(c!==' ')at(page,x+i*step,yy,c,size,1)})};
-  const digitsAt=(page,yy,text,xs,size=5.9)=>{if(!Number.isFinite(yy))return;sinanSomenteNumeros(text).slice(0,xs.length).split('').forEach((c,i)=>at(page,xs[i],yy,c,size,1))};
-  const dateAt=(page,yy,value,xs)=>digitsAt(page,yy,sinanData(value),xs,5.8);
-  const codeAt=(page,x,yy,id,transform)=>{let v=sinanVal(id);if(transform)v=transform[v]||v;at(page,x,yy,v,6.4,2,true)};
-  const xs=compact?{
-    num:[506,520,534,548,562,576,590],
-    data:[430,444,458,475,489,506,520,534],
-    munNotif:[452,465,478,491,504,517,530],
-    unidade:[334,347,360,373,386,399,412],
-    nasc:[430,444,458,475,489,506,520,534],
-    cns:[56,67.8,79.6,91.4,103.2,115,126.8,138.6,150.4,162.2,174,185.8,197.6,209.4,221.2],
-    munRes:[326,339,352,365,378,391,404],
-    logrCod:[472,485,498,511,524,537],
-    cep:[450,462,474,486,498,510,522,534],
-    tel:[64,78.5,93,107.5,122,136.5,151,165.5,180,194.5,209]
-  }:{
-    num:[486,499,512,525,538,551,564],
-    data:[453,467.5,482,496.5,511,525.5,540,554.5],
-    munNotif:[487,501.5,516,530.5,545,559.5,574],
-    unidade:[346,360.5,375,389.5,404,418.5,433],
-    nasc:[453,467.5,482,496.5,511,525.5,540,554.5],
-    cns:[56,67.5,79,90.5,102,113.5,125,136.5,148,159.5,171,182.5,194,205.5,217],
-    munRes:[329,343.5,358,372.5,387,401.5,416],
-    logrCod:[493,507.5,522,536.5,551,565],
-    cep:[466,480.5,495,509.5,535,549.5,564,578.5],
-    tel:[64,78.5,93,107.5,122,136.5,151,165.5,180,194.5,209]
-  };
-  const numY=Number.isFinite(map?.h)?(compact?map.h-28:map.h-41):(compact?763:800);
-  digitsAt(p1,numY,sinanVal('sinan-num-notificacao'),xs.num,6.2);
-  dateAt(p1,y.dataNotif+dy,sinanVal('sinan-data-notif'),xs.data);
-  spaced(p1,compact?58:58,y.uf+dy,sinanVal('sinan-uf-notif'),13.8,6,2);
-  at(p1,compact?90:91,y.uf+dy,sinanVal('sinan-mun-notif'),6.4,48);
-  digitsAt(p1,y.uf+dy,sinanVal('sinan-mun-notif-cod'),xs.munNotif,6);
-  at(p1,compact?66:70,y.unidade+dy,sinanVal('sinan-unidade'),6.2,64);
-  digitsAt(p1,y.unidade+dy,sinanVal('sinan-unidade-cod'),xs.unidade,6);
-  dateAt(p1,y.unidade+dy,sinanVal('sinan-primeiros-sintomas'),xs.data);
-  spaced(p1,compact?65:67,y.nome+dy,sinanVal('sinan-nome'),compact?9.35:9.5,5.9,86);
-  dateAt(p1,y.nome+dy,sinanVal('sinan-nasc'),xs.nasc);
-  digitsAt(p1,y.dem+dcode,sinanVal('sinan-idade'),compact?[62,76]:[62,76],6);
-  codeAt(p1,compact?111:113,y.dem+dcode,'sinan-idade-unidade');
-  codeAt(p1,compact?222:226,y.dem+dcode,'sinan-sexo',{M:'M',F:'F',I:'I'});
-  codeAt(p1,compact?421:425,y.dem+dcode,'sinan-gestante');
-  codeAt(p1,compact?532:532,y.dem+dcode,'sinan-raca');
-  codeAt(p1,compact?532:532,y.esc+dcode,'sinan-escolaridade');
-  digitsAt(p1,y.cns+dy,sinanVal('sinan-cns'),xs.cns,5.8);
-  at(p1,compact?235:244,y.cns+dy,sinanVal('sinan-mae'),6.1,62);
-  spaced(p1,compact?58:58,y.mun+dy,sinanVal('sinan-uf-res'),13.8,6,2);
-  at(p1,compact?91:91,y.mun+dy,sinanVal('sinan-mun-res'),6.2,46);
-  digitsAt(p1,y.mun+dy,sinanVal('sinan-mun-res-cod'),xs.munRes,5.9);
-  at(p1,compact?425:424,y.mun+dy,sinanVal('sinan-distrito'),6.1,35);
-  at(p1,compact?65:64,y.end+dy,sinanVal('sinan-bairro'),5.9,34);
-  spaced(p1,compact?202:203,y.end+dy,sinanVal('sinan-logradouro'),compact?8.8:9.1,5.7,62);
-  digitsAt(p1,y.end+dy,sinanVal('sinan-logradouro-cod'),xs.logrCod,5.7);
-  at(p1,compact?65:65,y.comp+dy,sinanVal('sinan-numero'),6,10);
-  at(p1,compact?119:119,y.comp+dy,sinanVal('sinan-complemento'),5.9,55);
-  at(p1,compact?420:420,y.comp+dy,sinanVal('sinan-geo1'),5.9,32);
-  at(p1,compact?65:65,y.ref+dy,sinanVal('sinan-geo2'),5.9,32);
-  at(p1,compact?226:226,y.ref+dy,sinanVal('sinan-referencia'),5.9,48);
-  digitsAt(p1,y.ref+dy,sinanVal('sinan-cep'),xs.cep,5.9);
-  digitsAt(p1,y.tel+dy,sinanVal('sinan-telefone'),xs.tel,5.8);
-  codeAt(p1,compact?389:386,y.tel+dcode,'sinan-zona');
-  at(p1,compact?367:367,y.tel+dy,sinanVal('sinan-pais'),5.9,45);
-}
 function sinanEspVal(f,id){return sinanEl(`sinan-esp-${f.id}-${id}`)?.value?.trim()||''}
-function sinanDesenharDadosPorFicha(pdf,pages,font,bold,color,f){
-  if(f?.id==='sifilis-adquirida')return sinanDesenharSifilisAdquirida(pdf,pages,font,bold,color,f);
-  if(f&&SINAN_FICHAS_INVESTIGACAO.has(f.id)){
-    const map=window.SINAN_COORDS_ESPECIFICOS?.[f.id];
-    if(map)sinanDesenharDadosInvestigacaoPorMapa(pdf,pages,font,bold,color,map);
-    else sinanDesenharDadosInvestigacao(pdf,pages,font,bold,color);
-    return;
-  }
-  return sinanDesenharDadosGerais(pdf,pages,font,bold,color);
-}
-function sinanAdicionarComplementoEspecifico(pdf,font,bold,color,f){
-  const especificos=sinanValoresCamposEspecificos().map(x=>[x.label,x.value]);
-  const resumo=[['FICHA SELECIONADA',f?.nome],['PACIENTE',sinanVal('sinan-nome')],['AGRAVO',sinanVal('sinan-agravo')],['RESUMO CLINICO / SUSPEITA',sinanVal('sinan-esp-resumo')],['DATA DA INVESTIGACAO',sinanVal('sinan-esp-data-investigacao')],['CLASSIFICACAO INICIAL',sinanVal('sinan-esp-classificacao')],['LOCAL PROVAVEL',sinanVal('sinan-esp-local-provavel')],...especificos,['OUTROS CAMPOS / OBSERVACOES',sinanVal('sinan-esp-campos')]].filter(([,v])=>String(v||'').trim());
-  if(!resumo.length)return;
-  let page;
-  const at=(x,y,t,s=9,b=false)=>page.drawText(sinanSeguro(t),{x,y,size:s,font:b?bold:font,color});
-  const novaPagina=()=>{page=pdf.addPage([595.28,841.89]);at(46,800,'COMPLEMENTO DE PREENCHIMENTO - FICHA ESPECIFICA SINAN',12,true);at(46,782,'Dados gerados pelo sistema para transcricao/conferencia dos campos especificos do agravo.',8,false);return 748};
-  novaPagina();
-  let y=748;
-  resumo.forEach(([k,v])=>{if(y<72)y=novaPagina();at(46,y,k+':',8,true);y-=14;sinanTextoLinhas(v,100).forEach(l=>{if(y<60)y=novaPagina();at(62,y,l,8,false);y-=11});y-=8});
-}
 async function gerarFichaSinanEspecifica(){
   if(!exigirPermissao('gerar_documentos'))return;if(!sinanValidar(true))return;
   const f=sinanFichaAtual();
   if(!f||f.id==='individual-geral'){alert('Selecione a ficha específica do agravo. A ficha geral antiga não será mais usada.');return}
   try{
+    if(f.id==='gestante-hiv' && sinanVal('sinan-sexo')!=='F')throw new Error('Confira o campo 11. O impresso de gestante HIV indica F no campo Sexo.');
     if(f.id==='sifilis-adquirida' && ['1','2','3','4'].includes(sinanVal('sinan-gestante'))){
       throw new Error('O modelo de sífilis adquirida traz “Não se aplica” impresso no campo Gestante. Confira o agravo e a ficha de sífilis em gestante antes de gerar.');
     }
@@ -4569,8 +4399,13 @@ async function gerarFichaSinanEspecifica(){
     if(!window.PDFLib?.PDFDocument)throw new Error('O gerador de PDF não foi carregado.');
     const modelo=await sinanObterModeloEspecifico(f);
     const {PDFDocument,StandardFonts,rgb}=window.PDFLib,pdf=await PDFDocument.load(modelo.bytes),pages=pdf.getPages(),font=await pdf.embedFont(StandardFonts.Helvetica),bold=await pdf.embedFont(StandardFonts.HelveticaBold),color=rgb(.02,.08,.32);
-    sinanDesenharDadosPorFicha(pdf,pages,font,bold,color,f);
-    if(f.id!=='sifilis-adquirida')sinanAdicionarComplementoEspecifico(pdf,font,bold,color,f);
+    if(f.id==='sifilis-adquirida')sinanDesenharSifilisAdquirida(pdf,pages,font,bold,color,f);
+    else {
+      const mapa=window.SINAN_GEOMETRIA[f.id];
+      const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',modelo.bytes)),b=>b.toString(16).padStart(2,'0')).join('');
+      if(!mapa || mapa.sha256!==hash)throw new Error('O impresso deste agravo mudou. Confira o modelo antes de gerar o PDF preenchido.');
+      sinanImprimirInvestigacao(pdf,pages,font,bold,color,f,mapa);
+    }
     const bytes=await pdf.save(),blob=new Blob([bytes],{type:'application/pdf'}),url=URL.createObjectURL(blob),a=document.createElement('a'),nome=sinanSeguro(sinanVal('sinan-nome')).toLowerCase().replace(/[^a-z0-9]+/g,'-'),agr=sinanSeguro(f.nome).toLowerCase().replace(/[^a-z0-9]+/g,'-');
     a.href=url;a.download='sinan-'+agr+'-'+(nome||'notificacao')+'.pdf';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);if(f.id==='sifilis-adquirida')sinanRevisaoLegado=false;sinanSalvarRascunho();showToast('Ficha específica SINAN gerada.');
   }catch(e){alert((e?.message&&e.message!=='Failed to fetch')?e.message:'Modelo específico indisponível. A ficha geral antiga não será usada como substituta.')}
@@ -4591,8 +4426,15 @@ function sinanInicializar(){
   sinanSet('sinan-unidade',sinanVal('sinan-unidade')||u?.unidade||PROTO?.unit?.nome||'');sinanSet('sinan-notificante-unidade',sinanVal('sinan-notificante-unidade')||u?.unidade||PROTO?.unit?.nome||'');sinanSet('sinan-notificante-nome',sinanVal('sinan-notificante-nome')||u?.nome||'');sinanSet('sinan-notificante-funcao',sinanVal('sinan-notificante-funcao')||u?.cargo||'');
   sinanSincronizarAgravo();
   try{sinanPreencher(rascunho)}catch(e){}
-  if(sinanFichaAtual()?.id==='sifilis-adquirida'){
-    sinanSet('sinan-tipo','2');
+  const restaurada=sinanFichaAtual();
+  if(restaurada)sinanSet('sinan-tipo','2');
+  if(window.SINAN_GEOMETRIA?.[restaurada?.id]?.eventField==='data-acidente' && !sinanVal('sinan-data-acidente')){
+    sinanSet('sinan-data-acidente',rascunho['sinan-esp-'+restaurada.id+'-data-acidente']||'');
+  }
+  if(restaurada?.id==='gestante-hiv' && !sinanVal('sinan-data-diagnostico')){
+    sinanSet('sinan-data-diagnostico',rascunho['sinan-esp-gestante-hiv-data-diagnostico-hiv']||'');
+  }
+  if(restaurada?.id==='sifilis-adquirida'){
     sinanRevisaoLegado=!rascunho.resultadosSifilisConferidos && ['teste-nao-treponemico','teste-treponemico','data-teste-nao-treponemico'].some(id=>sinanEspVal(sinanFichaAtual(),id));
   }
 }
