@@ -118,7 +118,7 @@
     const get=id=>v(id),display=id=>$(id)?.tagName==='SELECT'?$(id).selectedOptions[0]?.textContent:get(id),rows=ids=>ids.filter(id=>get(id)).map(id=>`${labels.get(id)||document.querySelector(`label[for="smu-${id}"]`)?.textContent||id}: ${display(id)}`).join('\n');
     const saved=records(),diagnosis=get('criterios-confirmados')==='Sim'?get('diagnostico-confirmado'):'';
     const sections={
-      s:[rows(['motivo-consulta']),get('queixa-principal'),get('complaints'),get('historia-atual'),rows(['dum','gestante','ig','lactante','vida-sexual','antecedentes-gineco','medicamentos','comorbidades','alergia-medicamentos','violencia']),get('corrimento-caracteristicas'),get('contra-preferencias')].filter(Boolean),
+      s:[rows(['motivo-consulta']),get('queixa-principal'),[get('complaints'),get('protocolo-queixas')].filter(Boolean).join('; '),get('historia-atual'),rows(['dum','gestante','ig','lactante','vida-sexual','antecedentes-gineco','antecedentes-familiares','habitos-contexto','medicamentos','comorbidades','alergia-medicamentos','violencia']),get('corrimento-caracteristicas'),get('contra-preferencias')].filter(Boolean),
       o:[rows(['pa','fc','fr','sat','temp','exame-especular']),get('achados-exame'),get('exame-complementar'),dischargeSummary(),v('contra-metodo')||v('contra-peso')?contraceptionSummary():''].filter(Boolean),
       a:[diagnosis&&!diagnosis.startsWith('Não definido')?`Diagnóstico confirmado pelo profissional: ${diagnosis}.`:'',...saved.filter(r=>r.a).map(r=>`CIAP-2 ${r.ciap}: ${r.a}`)].filter(Boolean),
       p:[get('conduta'),...saved.map(r=>(r.ciap?'CIAP-2 '+r.ciap+' — ':'')+r.title+'\n'+r.plan),get('orientacoes'),get('encaminhamento'),get('retorno')?'Retorno: '+get('retorno'):'',get('sinais-alerta-orientados')].filter(Boolean)

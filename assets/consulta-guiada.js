@@ -17,7 +17,7 @@
   function findings(p,page){
     if(!page)return '';
     const structured=[...page.querySelectorAll('.complaint-chip.selected,.clinical-chip.selected,[id$="-queixas-clin"] input:checked,[id$="-queixas-gin"] input:checked')].map(e=>e.dataset.text||e.closest('label')?.textContent||e.textContent);
-    const content=[...kinds.map(key=>value(p,key)),...structured].filter(Boolean);
+    const content=[...kinds.map(key=>value(p,key)),value(p,'protocolo-queixas'),...structured].filter(Boolean);
     if(p==='pnc'&&window.FluxoAPS?.perdaAtiva()){
       const perda=value(p,'perda-tipo');
       if(/sangue/i.test(perda))content.push('sangramento vaginal');
@@ -144,7 +144,12 @@
     const options=R.rules.filter(r=>!existing.some(label=>r.rx.test(label)));
     const picker=tag('details','protocol-picker'),summary=tag('summary','',existing.length?'Outras queixas do protocolo':'Selecionar queixa do protocolo');
     const list=tag('div','protocol-options');picker.append(summary,list);
-    const lines=()=>field.value.split(/\r?\n/);
+    // Na entrevista ginecológica, a fala da paciente é um registro literal.
+    let selecao=field;
+    if(p==='smu'){
+      selecao=tag('input','aps-new');selecao.type='hidden';selecao.id='smu-protocolo-queixas';picker.append(selecao);
+    }
+    const lines=()=>selecao.value.split(/\r?\n/);
     picker.addEventListener('toggle',()=>{
       if(!picker.open)return;
       if(!list.childElementCount)for(const {title} of options){
@@ -156,8 +161,8 @@
     list.addEventListener('click',event=>{
       const title=event.target.closest('button')?.dataset.reason;if(!title)return;
       const previous=lines();
-      field.value=previous.includes(title)?previous.filter(line=>line!==title).join('\n'):[field.value,title].filter(Boolean).join('\n');
-      field.dispatchEvent(new Event('input',{bubbles:true}));picker.open=false;picker.after(model.box);refresh(p);summary.focus({preventScroll:true});
+      selecao.value=previous.includes(title)?previous.filter(line=>line!==title).join('\n'):[selecao.value,title].filter(Boolean).join('\n');
+      selecao.dispatchEvent(new Event('input',{bubbles:true}));picker.open=false;picker.after(model.box);refresh(p);summary.focus({preventScroll:true});
       const rect=summary.getBoundingClientRect();if(rect.bottom<0||rect.top>innerHeight)summary.scrollIntoView({block:'center'});
     });
     if(pane.contains(field)&&!field.closest('details,.extra-record')&&field.closest('.f'))field.closest('.f').before(picker);else pane.prepend(picker);

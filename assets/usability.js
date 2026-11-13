@@ -47,9 +47,11 @@
       const e = byId(id);
       if (!e || !page.contains(e) || ['file','password','button','submit'].includes(e.type)) return;
       if (v && typeof v === 'object' && 'checked' in v) e.checked = !!v.checked;
-      else if (typeof v === 'string' || typeof v === 'number') e.value = v;
+      else if (typeof v === 'string' || typeof v === 'number') atribuirValorCadastro(e,v);
     });
     window.ESFCiap?.restoreFromPage(prefix(page));
+    const cpf=byId(prefix(page)+'-cpf');if(cpf)cpf.dataset.cpfCarregado=normalizarCPF(cpf.value);
+    window.EntrevistaAPS?.atualizar(prefix(page));
     if(page?.id==='pg-pn-consulta')window.FluxoAPS?.syncPerda();
   }
   function beforeRestore(page) {
@@ -136,12 +138,12 @@
     window.ESFCiap?.restore(p,[]);
     const keep = /-(nome|cpf|cns|nasc|telefone|cep|logradouro|numero|bairro|municipio|uf)$/;
     page.querySelectorAll('input,select,textarea').forEach(e => {
-      if (keep.test(e.id) || ['button','submit','hidden','file'].includes(e.type)) return;
+      if (keep.test(e.id) || e.dataset.cadastral || ['button','submit','hidden','file'].includes(e.type)) return;
       if (['checkbox','radio'].includes(e.type)) e.checked = false; else e.value = '';
     });
     page.querySelectorAll('[data-ux-key],.clinical-chip,.complaint-chip,.alert-chip,.quick-care').forEach(e => e.classList.remove('selected'));
     page.querySelectorAll('input[type=file]').forEach(e => e.value = '');
-    for(const suffix of ['abertura-ref','vinculo-coleta','complaints','alerts','exkit-cart','exkit-order']){
+    for(const suffix of ['abertura-ref','vinculo-coleta','complaints','protocolo-queixas','alerts','exkit-cart','exkit-order']){
       const field=byId(p+'-'+suffix);if(field)field.value='';
     }
     window.ESFConsultaGuiada?.reset(p);

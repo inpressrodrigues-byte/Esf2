@@ -918,6 +918,7 @@ body.sidebar-collapsed .dev-nav{display:none}
 <script defer src="assets/protocolo-consulta.js"></script>
 <script defer src="assets/queixas-gestacao.js"></script>
 <script defer src="assets/consulta-guiada.js"></script>
+<script defer src="assets/entrevista.js"></script>
 <script defer src="assets/crescimento.js"></script>
 <script defer src="assets/fluxo-assistencial.js"></script>
 </head>
@@ -7921,15 +7922,37 @@ function coletarDadosPaciente(prefix){
   dados.cpf=normalizarCPF(dados.cpf);
   return dados;
 }
+function atribuirValorCadastro(el,valor){
+  if(el.dataset.cadastral&&el.tagName==='SELECT'){
+    el.querySelector('option[data-cadastro-original]')?.remove();
+    if(valor&&![...el.options].some(o=>o.value===valor)){
+      const original=new Option(valor,valor);original.dataset.cadastroOriginal='1';el.add(original);
+    }
+  }
+  el.value=valor;
+}
 function preencherDadosPaciente(prefix,dados){
   const mapa=CAMPOS_PACIENTE[prefix]||{};
-  Object.entries(mapa).forEach(([k,id])=>{const el=document.getElementById(id);if(el&&dados?.[k]&&!['cronicas','risco_queda','fragilidade','polifarmacia','visita_domiciliar'].includes(k))el.value=k==='cpf'?formatarCPF(dados[k]):dados[k];});
+  Object.entries(mapa).forEach(([k,id])=>{
+    const el=document.getElementById(id),v=dados?.[k];
+    if(!el||!v||['cronicas','risco_queda','fragilidade','polifarmacia','visita_domiciliar'].includes(k))return;
+    atribuirValorCadastro(el,k==='cpf'?formatarCPF(v):v);
+  });
+  window.EntrevistaAPS?.atualizar(prefix);
   if(prefix==='pna')idadeGest(); if(prefix==='pu'){idadeCrianca();updateAntropometria();checkMCHATIdade();} if(prefix==='prev'){idadePrev();prevVerificaIdade();} if(prefix==='id')idadeIdoso(); if(prefix==='sm')idadeSM();
 }
 async function buscarPacientePorCPF(input){
   const cpf=normalizarCPF(input?.value);if(cpf.length!==11)return;
   input.value=formatarCPF(cpf);
   const prefix=input.id.split('-')[0], locais=carregarPacientes(),escopo=escopoDadosClinicos().chave;
+  if(input.dataset.cpfCarregado&&input.dataset.cpfCarregado!==cpf){
+    for(const [chave,id] of Object.entries(CAMPOS_PACIENTE[prefix]||{})){
+      const el=document.getElementById(id);
+      if(el&&chave!=='cpf')atribuirValorCadastro(el,'');
+    }
+    window.EntrevistaAPS?.atualizar(prefix);
+  }
+  input.dataset.cpfCarregado=cpf;
   let dados=locais[cpf]||null;
   if(_sb&&CURRENT_AUTH_USER_ID&&navigator.onLine){
     try{const r=await _sb.from('pacientes').select('dados,unidade').eq('cpf',cpf).maybeSingle();if(escopo!==escopoDadosClinicos().chave||normalizarCPF(input.value)!==cpf)return;if(r.error)throw r.error;dados=r.data?{...r.data.dados,unidade:r.data.unidade}:null;if(dados)locais[cpf]=dados;else delete locais[cpf];salvarPacientesLocal(locais);}catch(e){showToast('Não foi possível conferir o cadastro na nuvem.');return;}
@@ -8011,7 +8034,7 @@ function abrirPaciente(cpf){
   PACIENTE_MODAL_CPF=cpf;
   document.getElementById('pac-modal-titulo').textContent=d.nome||'Paciente';
   const item=(l,v)=>v?`<div class="pac-detail-item"><b>${l}</b>${escTR(v)}</div>`:'';
-  document.getElementById('pac-modal-conteudo').innerHTML=`<div class="pac-detail-grid">${item('CPF',formatarCPF(cpf))}${item('CNS',d.cns)}${item('Nascimento',d.nasc?formatarDataBR(d.nasc):'')}${item('Prontuário',d.prontuario)}${item('Telefone',d.telefone)}${item('Endereço',enderecoPaciente(d))}${item('Microárea',d.microarea)}${item('ACS responsável',d.acs)}${item('Família',d.familia)}${item('Vulnerabilidade',d.vulnerabilidade)}${item('Necessita visita',d.visita_domiciliar)}${item('Raça/cor',d.raca)}${item('Escolaridade',d.escolaridade)}${item('Ocupação',d.ocupacao)}${item('Responsável',d.responsavel)}${item('Nome da mãe',d.nome_mae)}${item('Parceiro(a)',d.parceiro_nome)}${item('Nascimento do parceiro',d.parceiro_nasc?formatarDataBR(d.parceiro_nasc):'')}${item('Prontuário do parceiro',d.parceiro_prontuario)}${item('Última consulta',ult?`${ult.tipo} em ${new Date(ult.data).toLocaleString('pt-BR')}`:'Sem consulta')}</div><div class="ct"><span class="dot db"></span>Consultas relacionadas</div><div class="pac-consultas">${cs.length?cs.map(a=>`<div class="pac-consulta"><strong>${escTR(a.tipo)}</strong> · ${new Date(a.data).toLocaleString('pt-BR')}<button class="hist-btn hist-btn-edit" style="float:right" onclick="fecharPaciente();reabrirAtendimento('${a.id}')">Reabrir</button><div style="color:var(--tx3);margin-top:3px">${escTR(a.profissional||'')}</div></div>`).join(''):'<div class="pac-consulta">Nenhuma consulta relacionada.</div>'}</div>`;
+  document.getElementById('pac-modal-conteudo').innerHTML=`<div class="pac-detail-grid">${item('CPF',formatarCPF(cpf))}${item('CNS',d.cns)}${item('Nascimento',d.nasc?formatarDataBR(d.nasc):'')}${item('Prontuário',d.prontuario)}${item('Telefone',d.telefone)}${item('Endereço',enderecoPaciente(d))}${item('Microárea',d.microarea)}${item('ACS responsável',d.acs)}${item('Família',d.familia)}${item('Vulnerabilidade',d.vulnerabilidade)}${item('Necessita visita',d.visita_domiciliar)}${item('Estado civil',d.estado_civil)}${item('Naturalidade',d.naturalidade)}${item('Religião',d.religiao)}${item('Raça/cor',d.raca)}${item('Escolaridade',d.escolaridade)}${item('Ocupação',d.ocupacao)}${item('Responsável',d.responsavel)}${item('Nome da mãe',d.nome_mae)}${item('Parceiro(a)',d.parceiro_nome)}${item('Nascimento do parceiro',d.parceiro_nasc?formatarDataBR(d.parceiro_nasc):'')}${item('Prontuário do parceiro',d.parceiro_prontuario)}${item('Última consulta',ult?`${ult.tipo} em ${new Date(ult.data).toLocaleString('pt-BR')}`:'Sem consulta')}</div><div class="ct"><span class="dot db"></span>Consultas relacionadas</div><div class="pac-consultas">${cs.length?cs.map(a=>`<div class="pac-consulta"><strong>${escTR(a.tipo)}</strong> · ${new Date(a.data).toLocaleString('pt-BR')}<button class="hist-btn hist-btn-edit" style="float:right" onclick="fecharPaciente();reabrirAtendimento('${a.id}')">Reabrir</button><div style="color:var(--tx3);margin-top:3px">${escTR(a.profissional||'')}</div></div>`).join(''):'<div class="pac-consulta">Nenhuma consulta relacionada.</div>'}</div>`;
   document.getElementById('pac-modal').classList.add('open');
 }
 function fecharPaciente(){document.getElementById('pac-modal').classList.remove('open');PACIENTE_MODAL_CPF=''}
@@ -8021,6 +8044,7 @@ const PACIENTE_CAMPOS_EDICAO=[
   ['numero','Número','text'],['complemento','Complemento','text'],['bairro','Bairro','text'],['municipio','Município','text'],
   ['endereco','Endereço / referência complementar','text'],['microarea','Microárea','text'],['acs','ACS responsável','text'],['familia','Família','text'],
   ['responsavel_familiar','Responsável familiar','text'],['raca','Raça/cor','text'],['escolaridade','Escolaridade','text'],['ocupacao','Ocupação','text'],
+  ['estado_civil','Estado civil','text'],['naturalidade','Naturalidade','text'],['religiao','Religião, se desejar informar','text'],
   ['condicao_moradia','Condição de moradia','text'],['rede_apoio','Rede de apoio','text'],['vulnerabilidade','Vulnerabilidade social','text'],['beneficio_social','Benefício social','text'],
   ['dificuldade_acesso','Dificuldade de acesso à UBS','text'],['visita_domiciliar','Necessidade de visita domiciliar','text'],['responsavel','Responsável/cuidador','text'],['nome_mae','Nome da mãe','text'],
   ['parceiro_nome','Nome do parceiro(a)','text'],['parceiro_cpf','CPF do parceiro(a)','text'],['parceiro_nasc','Nascimento do parceiro(a)','date'],['parceiro_prontuario','Prontuário do parceiro(a)','text'],
@@ -8375,6 +8399,7 @@ function sanitizarRegrasSAEProtocoladas(p,regras){
 }
 function aplicarSugestaoSAE(p,chave){const s=SAE_SUGESTOES[chave];if(!s)return;const regras=sanitizarRegrasSAEProtocoladas(p,[s]);preencherCamposSAE(p,regras);renderizarPreviewSAE(p,regras);showToast('Sugestão SAE aplicada. Revise e valide antes de salvar.')}
 function campoClinicoDerivavel(e){
+  if(e.dataset.cadastral||e.closest('[data-entrevista-complementar]'))return false;
   if(e.closest('[data-clinico-inativo]'))return false;
   if(e.hidden||e.type==='hidden'||e.type==='file'||e.closest('[data-ciap],.exam-kits,.consultation-guide'))return false;
   if((e.type==='checkbox'||e.type==='radio')&&!e.checked)return false;
@@ -8900,8 +8925,10 @@ function restaurarDadosModulo(prefix,dados){
   const pagina=document.getElementById('pg-'+moduloPorPrefixo(prefix)?.page), controles=window.ESFUsability?.legacyControls(prefix)||pagina?.querySelectorAll('input,select,textarea')||[];
   window.ESFUsability?.beforeRestore(pagina);
   if(prefix==='pu')window.FluxoAPS?.prepararHistoricoInfantil(dados);
-  Object.entries(dados||{}).forEach(([id,v])=>{const el=id.startsWith('@')?controles[Number(id.slice(1))]:document.getElementById(id);if(!el)return;if(typeof v==='object'&&v!==null&&'checked'in v){el.checked=!!v.checked;}else el.value=v??'';});
+  Object.entries(dados||{}).forEach(([id,v])=>{const el=id.startsWith('@')?controles[Number(id.slice(1))]:document.getElementById(id);if(!el)return;if(typeof v==='object'&&v!==null&&'checked'in v){el.checked=!!v.checked;}else atribuirValorCadastro(el,v??'');});
   window.ESFUsability?.restore(pagina,dados?.__interface);
+  const campoCpf=document.getElementById(prefix+'-cpf');if(campoCpf)campoCpf.dataset.cpfCarregado=normalizarCPF(campoCpf.value);
+  window.EntrevistaAPS?.atualizar(prefix);
   if(window.ESFCiap)window.ESFCiap.restore(prefix,dados?.__ciap2||[]);
   if(prefix==='pna'){idadeGest();calcIG('pna');avaliarProtocolosPna();atualizarTestesRapidosPna();}
   if(prefix==='pnc'){calcAge('pnc-nasc','pnc-idade');calcIG('pnc');checkPncQueixas();checkPncVitais();}
@@ -11423,7 +11450,7 @@ function gerarSoapGenerico(p){
   const protocolo=renderCondutaProtocoladaModulo(p,[queixas,alertas,dados,guia.alertas,pri.motivos.join(' ')].join(' '));
   const resumoProtocolo=!guia.condutas?resumoDecisaoProtocolar(protocolo,{fonte:false}):'',condutaTR=tr&&/REAGENTE/.test(tr.texto)?resumoLinhasOperacionais(tr.conduta||'',3):'',condutaAutomatica=[resumoProtocolo,condutaTR].filter(Boolean).join('\n'),acaoPrioridade=pri.grau!=='Rotina'&&pri.acao&&pri.acao!==resumoProtocolo&&pri.acao!==guia.condutas?`Prioridade: ${fraseProtocolarCurta(pri.acao,220)}`:'';
   const motivo=val(`${p}-motivo`)||val(`${p}-queixa`),queixa=val(`${p}-queixa`)||queixas,retorno=val(`${p}-retorno`),orientacoes=val(`${p}-orientacoes`);
-  montarSoapClinico({nome:val(`${p}-nome`),idade:idadePorNascimento(val(`${p}-nasc`)),modulo:p,ids:{s:`${p}-s`,o:`${p}-o`,a:`${p}-a`,p:`${p}-p`},descricao:[cfg.titulo,motivo?`Motivo do atendimento: ${motivo}.`:'',p==='ger'&&val('ger-chegada')?`Chegada às ${val('ger-chegada')}.`:''].filter(Boolean).join(' '),hma:[queixa?`Comparece referindo ${queixa}.`:'',val(`${p}-hma`),val(`${p}-inicio`)?`Início/tempo de evolução: ${val(`${p}-inicio`)}.`:'',val(`${p}-sintomas`)?`Sintomas associados: ${val(`${p}-sintomas`)}.`:''].filter(Boolean).join('\n'),hp:[val(`${p}-antecedentes`)?`Antecedentes pessoais: ${val(`${p}-antecedentes`)}.`:'',val(`${p}-comorbidades`)?`Comorbidades: ${val(`${p}-comorbidades`)}.`:'',val(`${p}-medicamentos`)?`Medicamentos em uso: ${val(`${p}-medicamentos`)}.`:'',val(`${p}-alergias`)?`Alergias: ${val(`${p}-alergias`)}.`:'',val(`${p}-familiar`)?`Histórico familiar: ${val(`${p}-familiar`)}.`:'',val(`${p}-social`)?`Condições sociais: ${val(`${p}-social`)}.`:''].filter(Boolean).join('\n'),exame:[vitais,val(`${p}-exame-complementar`),demanda?`Classificação Toledo 2026: ${demanda.cor}.`:'' ].filter(Boolean).join('\n'),objetivo:tr?`Testes rápidos: ${tr.texto}`:'',hd:[val(`${p}-problemas`),val(`${p}-necessidade`),demanda?`Fluxo aplicado: ${queixas||'demanda espontânea'}. Classificação ${demanda.cor}, justificada por: ${demanda.criterio}.`:'',demanda&&demanda.cor!==demanda.corSugerida?`Classificação sugerida pelo sistema: ${demanda.corSugerida}. Justificativa técnica registrada para classificação manual: ${val('ger-justificativa-rebaixamento')}.`:'' ].filter(Boolean).join('\n'),avaliacao:[pri.motivos.length?`Motivo da prioridade: ${pri.motivos.join('; ')}.`:'',alertas?`Alertas selecionados: ${alertas}.`:'',demanda?.mods?.length?`Módulos/fluxos acionados ou sugeridos: ${demanda.mods.join('; ')}.`:''].filter(Boolean).join('\n'),cd:[val(`${p}-conduta`),condutaAutomatica,acaoPrioridade,val('ger-monitoramento')?`Monitoramento/medidas de conforto: ${val('ger-monitoramento')}.`:'',val('ger-responsavel-reavaliacao')?`Responsável pela reavaliação: ${val('ger-responsavel-reavaliacao')}.`:'',val(`${p}-encaminhamento`)?`Encaminhamento registrado pelo profissional: ${val(`${p}-encaminhamento`)}.`:'',demanda?.desfecho?`Desfecho: ${demanda.desfecho}.`:'',retorno?`Retorno pactuado: ${retorno}.`:'',p==='ger'?'Base protocolar: Protocolo Municipal de Enfermagem — Avaliação e Manejo da Demanda Espontânea na APS, Toledo/PR, 1ª edição, 2026.':(protocolo.protocolada?`Fonte verificada: ${tr?'Protocolo IST Toledo 2020':protocolo.fonte}.`:'') ].filter(Boolean).join('\n'),plano:[orientacoes,val(`${p}-sinais-alerta-orientados`)?`Sinais de alerta orientados: ${val(`${p}-sinais-alerta-orientados`)}.`:''].filter(Boolean).join('\n')});
+  montarSoapClinico({nome:val(`${p}-nome`),idade:idadePorNascimento(val(`${p}-nasc`)),modulo:p,ids:{s:`${p}-s`,o:`${p}-o`,a:`${p}-a`,p:`${p}-p`},descricao:[cfg.titulo,motivo?`Motivo do atendimento: ${motivo}.`:'',p==='ger'&&val('ger-chegada')?`Chegada às ${val('ger-chegada')}.`:''].filter(Boolean).join(' '),hma:[queixa?`Comparece referindo ${queixa}.`:'',val(`${p}-hma`),val(`${p}-inicio`)?`Início/tempo de evolução: ${val(`${p}-inicio`)}.`:'',val(`${p}-sintomas`)?`Sintomas associados: ${val(`${p}-sintomas`)}.`:''].filter(Boolean).join('\n'),hp:[p==='ist'&&val('ist-historia-sexual')?'História sexual referida: '+val('ist-historia-sexual'):'',p==='ist'&&val('ist-prevencao-historico')?'Prevenção e antecedentes: '+val('ist-prevencao-historico'):'',val(`${p}-antecedentes`)?`Antecedentes pessoais: ${val(`${p}-antecedentes`)}.`:'',val(`${p}-comorbidades`)?`Comorbidades: ${val(`${p}-comorbidades`)}.`:'',val(`${p}-medicamentos`)?`Medicamentos em uso: ${val(`${p}-medicamentos`)}.`:'',val(`${p}-alergias`)?`Alergias: ${val(`${p}-alergias`)}.`:'',val(`${p}-familiar`)?`Histórico familiar: ${val(`${p}-familiar`)}.`:'',val(`${p}-social`)?`Condições sociais: ${val(`${p}-social`)}.`:''].filter(Boolean).join('\n'),exame:[vitais,val(`${p}-exame-complementar`),demanda?`Classificação Toledo 2026: ${demanda.cor}.`:'' ].filter(Boolean).join('\n'),objetivo:tr?`Testes rápidos: ${tr.texto}`:'',hd:[val(`${p}-problemas`),val(`${p}-necessidade`),demanda?`Fluxo aplicado: ${queixas||'demanda espontânea'}. Classificação ${demanda.cor}, justificada por: ${demanda.criterio}.`:'',demanda&&demanda.cor!==demanda.corSugerida?`Classificação sugerida pelo sistema: ${demanda.corSugerida}. Justificativa técnica registrada para classificação manual: ${val('ger-justificativa-rebaixamento')}.`:'' ].filter(Boolean).join('\n'),avaliacao:[pri.motivos.length?`Motivo da prioridade: ${pri.motivos.join('; ')}.`:'',alertas?`Alertas selecionados: ${alertas}.`:'',demanda?.mods?.length?`Módulos/fluxos acionados ou sugeridos: ${demanda.mods.join('; ')}.`:''].filter(Boolean).join('\n'),cd:[val(`${p}-conduta`),condutaAutomatica,acaoPrioridade,val('ger-monitoramento')?`Monitoramento/medidas de conforto: ${val('ger-monitoramento')}.`:'',val('ger-responsavel-reavaliacao')?`Responsável pela reavaliação: ${val('ger-responsavel-reavaliacao')}.`:'',val(`${p}-encaminhamento`)?`Encaminhamento registrado pelo profissional: ${val(`${p}-encaminhamento`)}.`:'',demanda?.desfecho?`Desfecho: ${demanda.desfecho}.`:'',retorno?`Retorno pactuado: ${retorno}.`:'',p==='ger'?'Base protocolar: Protocolo Municipal de Enfermagem — Avaliação e Manejo da Demanda Espontânea na APS, Toledo/PR, 1ª edição, 2026.':(protocolo.protocolada?`Fonte verificada: ${tr?'Protocolo IST Toledo 2020':protocolo.fonte}.`:'') ].filter(Boolean).join('\n'),plano:[orientacoes,val(`${p}-sinais-alerta-orientados`)?`Sinais de alerta orientados: ${val(`${p}-sinais-alerta-orientados`)}.`:''].filter(Boolean).join('\n')});
   const orientacaoPaciente=document.getElementById(`${p}-orientacao-paciente`);if(orientacaoPaciente)orientacaoPaciente.value=[orientacoes,retorno?`Retorno: ${retorno}.`:'' ].filter(Boolean).join('\n');showToast('SOAP técnico e orientação gerados. Revise antes de salvar.');
 }
 function montarPrioridadeExistentes(){PLANO_MODULOS.filter(([p])=>!MODULOS_CLINICOS[p]).forEach(([p,alvo])=>{const a=document.getElementById(alvo);if(!a||document.getElementById(`${p}-prioridade-comum`))return;const c=document.createElement('div');c.className='card';c.id=`${p}-prioridade-comum`;c.innerHTML=`<div class="ct"><span class="dot dr"></span>Classificação de prioridade do atendimento</div>${prioridadeModuloHtml(p)}`;a.appendChild(c)})}
@@ -11578,7 +11605,7 @@ async function buscarCepAutomatico(prefix){
 function montarAutomacoesBasicas(){
   AUTOMACAO_PREFIXOS.forEach(prefix=>{montarAntropometriaAutomatica(prefix);montarEnderecoAutomatico(prefix)});
   document.querySelectorAll('[id$="-cep"]').forEach(el=>{if(el.dataset.cepAuto)return;const prefix=el.id==='prev-cep'?'prev':el.id==='sinan-cep'?'sinan':el.id.replace(/-cep$/,'');if(prefix==='prev'||prefix==='sinan')return;el.dataset.cepAuto='1';el.addEventListener('blur',()=>buscarCepAutomatico(prefix));el.addEventListener('input',()=>{const n=el.value.replace(/\D/g,'').slice(0,8);el.value=n.length>5?`${n.slice(0,5)}-${n.slice(5)}`:n;if(n.length===8)buscarCepAutomatico(prefix)})});
-  AUTOMACAO_PREFIXOS.forEach(prefix=>{const c=camposEnderecoPrefixo(prefix);[c.logradouro,c.numero,c.complemento,c.bairro,c.municipio,c.uf].forEach(id=>document.getElementById(id)?.addEventListener('input',()=>sincronizarEnderecoCompleto(prefix)))});
+  [...AUTOMACAO_PREFIXOS,'smu'].forEach(prefix=>{const c=camposEnderecoPrefixo(prefix);[c.logradouro,c.numero,c.complemento,c.bairro,c.municipio,c.uf].forEach(id=>document.getElementById(id)?.addEventListener('input',()=>sincronizarEnderecoCompleto(prefix)))});
 }
 
 // Segurança clínica, privacidade e auditoria local.
