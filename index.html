@@ -921,6 +921,7 @@ body.sidebar-collapsed .dev-nav{display:none}
 <script defer src="assets/entrevista.js"></script>
 <script defer src="assets/crescimento.js"></script>
 <script defer src="assets/fluxo-assistencial.js"></script>
+<script defer src="assets/seguimento.js"></script>
 </head>
 <body>
 
@@ -6600,6 +6601,7 @@ function finalizarSoapModulo(prefix,descricao=''){
   const ids=SOAP_IDS_MODULO[prefix];if(!ids)return;
   const s=document.getElementById(ids.s),o=document.getElementById(ids.o),a=document.getElementById(ids.a),p=document.getElementById(ids.p);if(!s||!o||!a||!p)return;
   const desc=extrairDescricaoSoapAtual(s.value,descricao);
+  window.SeguimentoAPS?.removerBloco(o);
   let subj=limparTextoSoap(extrairCorpoSecaoSoapAtual(s.value,'S')).replace(/^DESCRI(?:Ç|C)(?:Ã|A)O DA CONSULTA\s*/i,'').trim(),obj=limparTextoSoap(extrairCorpoSecaoSoapAtual(o.value,'O')),ava=limparTextoSoap(extrairCorpoSecaoSoapAtual(a.value,'A')),plano=limparTextoSoap(extrairCorpoSecaoSoapAtual(p.value,'P'));
   const exames=resumoExamesSoapEstruturado(prefix);
   obj=substituirBlocoFinalSoap(obj,'EXAMES LABORATORIAIS — RESUMO:',exames.objetivo);
@@ -6616,6 +6618,7 @@ function finalizarSoapModulo(prefix,descricao=''){
   a.value=secaoSoapSemiNarrativa('A',ava);
   p.value=secaoSoapSemiNarrativa('P',plano);
   aplicarModoSoap(prefix);renderAlertasVermelhosSoap(prefix);renderPendenciasSoap(prefix);renderInconsistenciasSoap(prefix);atualizarIndicadorPreenchimento();
+  window.SeguimentoAPS?.sincronizarSoap(prefix);
 }
 function montarSoapClinico(cfg) {
   const nome = cfg.nome || '';
@@ -7957,9 +7960,9 @@ async function buscarPacientePorCPF(input){
   if(_sb&&CURRENT_AUTH_USER_ID&&navigator.onLine){
     try{const r=await _sb.from('pacientes').select('dados,unidade').eq('cpf',cpf).maybeSingle();if(escopo!==escopoDadosClinicos().chave||normalizarCPF(input.value)!==cpf)return;if(r.error)throw r.error;dados=r.data?{...r.data.dados,unidade:r.data.unidade}:null;if(dados)locais[cpf]=dados;else delete locais[cpf];salvarPacientesLocal(locais);}catch(e){showToast('Não foi possível conferir o cadastro na nuvem.');return;}
   }
-  window.FluxoAPS?.historico(prefix);
   if(dados){preencherDadosPaciente(prefix,dados);showToast('✓ Cadastro do paciente localizado e preenchido.');}
   else showToast('CPF ainda não cadastrado. Os dados serão salvos ao finalizar o atendimento.');
+  window.FluxoAPS?.historico(prefix);
 }
 async function salvarCadastroPaciente(prefix){
   if(!escopoDadosClinicos().permitido)return showToast('Peça à administração para definir sua UBS antes de cadastrar pacientes.');
@@ -8399,7 +8402,7 @@ function sanitizarRegrasSAEProtocoladas(p,regras){
 }
 function aplicarSugestaoSAE(p,chave){const s=SAE_SUGESTOES[chave];if(!s)return;const regras=sanitizarRegrasSAEProtocoladas(p,[s]);preencherCamposSAE(p,regras);renderizarPreviewSAE(p,regras);showToast('Sugestão SAE aplicada. Revise e valide antes de salvar.')}
 function campoClinicoDerivavel(e){
-  if(e.dataset.cadastral||e.closest('[data-entrevista-complementar]'))return false;
+  if(e.dataset.cadastral||e.closest('[data-entrevista-complementar],[data-seguimento]'))return false;
   if(e.closest('[data-clinico-inativo]'))return false;
   if(e.hidden||e.type==='hidden'||e.type==='file'||e.closest('[data-ciap],.exam-kits,.consultation-guide'))return false;
   if((e.type==='checkbox'||e.type==='radio')&&!e.checked)return false;
@@ -8706,6 +8709,7 @@ function aplicarTextoCompletoAISoap(prefix,novoSOAP,pendencias){
     p.value=`P:${partes.p?`\n${partes.p.trim()}`:''}`;
   }
   if(window.ESFExames?.order(prefix))window.ESFExames.appendSoap(prefix);
+  window.SeguimentoAPS?.sincronizarSoap(prefix);
   renderPendenciasIASoap(prefix,pendencias||[]);renderAlertasVermelhosSoap(prefix);renderPendenciasSoap(prefix);renderInconsistenciasSoap(prefix);atualizarIndicadorPreenchimento();
   return true;
 }
@@ -8952,6 +8956,7 @@ function criarAtendimento(tipo) {
   const cfg=MODULOS_ATENDIMENTO[tipo], prefix=cfg.prefix;
   const nome = document.getElementById(cfg.nome)?.value?.trim() || 'Paciente não identificado';
   const cpf=normalizarCPF(document.getElementById(cfg.cpf)?.value);
+  window.SeguimentoAPS?.sincronizarSoap(prefix);
   const soap = coletarSOAP(cfg.soap);
   if (!soap) { showToast('Gere o SOAP antes de salvar. Toque em GERAR EVOLUÇÃO primeiro.'); return null; }
   const conselho = u.conselho ? ` (${u.conselho})` : '';

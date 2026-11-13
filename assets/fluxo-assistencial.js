@@ -14,6 +14,7 @@ function syncField(key,v){const field=id(key);if(!field||!v||field.value)return;
 const triagens=['pezinho','orelhinha','olhinho','coracao','lingua'];
 function historico(p){
  const box=id(p+'-historico-consulta');if(!box)return;box.replaceChildren();const records=registros(p);box.hidden=!records.length;
+ window.SeguimentoAPS?.mostrar(p,records);
  if(p==='pu')for(const k of triagens){
    const hint=id('pu-anterior-'+k),a=records.find(a=>a.tipo==='Puericultura'&&(a.dados['pu-t-'+k]||a.dados['cm1m-t-'+k]));
    if(hint)hint.textContent=a?'Registrado em '+dateOf(a)+': '+(a.dados['pu-t-'+k]||a.dados['cm1m-t-'+k])+'. Preencha se houver atualização.':'';
@@ -122,6 +123,7 @@ function mount(){
  if(/^(Dados da Gestação e Parto|Anexar Laudo em PDF|Resultados de Exames — Criança|Histórico de rastreamento e antecedentes cervicais)/.test(title))fold(card,title);}
  const mode=button('Modo ampliado',()=>{const wide=mode.getAttribute('aria-pressed')!=='true';mode.setAttribute('aria-pressed',String(wide));mode.textContent=wide?'Voltar ao modo objetivo':'Modo ampliado';page.querySelectorAll('details[data-complementar]').forEach(d=>d.open=wide);});
  mode.setAttribute('aria-pressed','false');mode.classList.add('mode-switch');tabs.before(mode);
+ page.addEventListener('input',e=>{if(e.target.id===p+'-nasc')historico(p);});
  page.addEventListener('input',e=>{if(e.target.id===p+'-cpf'){historico(p);for(const k of [p+'-abertura-ref',p+'-vinculo-coleta'])if(id(k))id(k).value='';if(p==='prev')id('prev-origem-resultado').textContent='';}});
  }
  for(const [host,key,label] of [['pnc-2','pnc-abertura-ref','Antecedentes da abertura confirmada'],['prev-5','prev-vinculo-coleta','Coleta vinculada']]){

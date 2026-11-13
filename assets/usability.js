@@ -52,6 +52,7 @@
     window.ESFCiap?.restoreFromPage(prefix(page));
     const cpf=byId(prefix(page)+'-cpf');if(cpf)cpf.dataset.cpfCarregado=normalizarCPF(cpf.value);
     window.EntrevistaAPS?.atualizar(prefix(page));
+    window.FluxoAPS?.historico(prefix(page));
     if(page?.id==='pg-pn-consulta')window.FluxoAPS?.syncPerda();
   }
   function beforeRestore(page) {
@@ -154,6 +155,7 @@
     if (typeof ATENDIMENTO_EM_EDICAO !== 'undefined') ATENDIMENTO_EM_EDICAO = null;
     riskSignature = ''; saved.delete(stateKey(page)); touch(page); recalculate(page); saveDraft(page);
     window.ESFExames?.render(p);window.ESFConsultaGuiada?.refresh(p);
+    window.FluxoAPS?.historico(p);
     closeMenus(); showToast('Avaliação e seleções limpas. Identificação do paciente mantida.');
   }
 

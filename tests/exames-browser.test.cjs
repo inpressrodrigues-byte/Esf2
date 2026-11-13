@@ -106,5 +106,6 @@ const root=path.resolve(__dirname,'..'),server=http.createServer((req,res)=>{con
  const out=process.env.ESF_SCREENSHOT_DIR;if(out){fs.mkdirSync(out,{recursive:true});await page.screenshot({path:path.join(out,'consulta-desktop.png'),fullPage:false});}
  await page.setViewportSize({width:390,height:844});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);if(out)await page.screenshot({path:path.join(out,'consulta-mobile.png'),fullPage:false});
  await page.setViewportSize({width:1440,height:1000});await require('./entrevista.cjs')(page);
+ await require('./seguimento.cjs')(page);
  assert.deepEqual(errors,[]);console.log('PASS Layout responsivo sem rolagem horizontal e sem erros de JavaScript');
  }finally{await browser?.close();server.close();}})().catch(e=>{console.error(e);process.exitCode=1;});
