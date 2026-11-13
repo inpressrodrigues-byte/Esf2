@@ -916,6 +916,7 @@ body.sidebar-collapsed .dev-nav{display:none}
 <script defer src="assets/escopo.js"></script>
 <link rel="stylesheet" href="assets/consulta-guiada.css">
 <script defer src="assets/protocolo-consulta.js"></script>
+<script defer src="assets/queixas-gestacao.js"></script>
 <script defer src="assets/consulta-guiada.js"></script>
 <script defer src="assets/crescimento.js"></script>
 <script defer src="assets/fluxo-assistencial.js"></script>
@@ -5033,7 +5034,7 @@ function avaliarProtocolosPna(){
     if(sintomasPE)vitais.innerHTML+='<div class="alert alert-e"><strong>Possíveis sinais de gravidade de pré-eclâmpsia:</strong> aferir PA e realizar avaliação médica/obstétrica imediata.</div>';
     if(/sangramento|perda de líquido|perda de liquido|contraç|contrac/.test(queixas))vitais.innerHTML+='<div class="alert alert-e"><strong>Sinal de alerta obstétrico informado:</strong> realizar avaliação obstétrica imediata conforme quadro clínico.</div>';
   }
-  checkPnaQueixas();avaliarMovimentosFetaisPna();avaliarVacinacaoPna();
+  avaliarMovimentosFetaisPna();avaliarVacinacaoPna();
   window.ultimoRiscoPna={nivel,label:labels[nivel],criterios,conduta:conduta?.innerText||''};
   window.ESFUsability?.renderRisk(window.ultimoRiscoPna);
   return window.ultimoRiscoPna;
@@ -5043,63 +5044,9 @@ document.addEventListener('input',e=>{if(e.target.closest?.('#pg-pn-abertura')&&
 setTimeout(()=>avaliarProtocolosPna(),0);
 
 function checkPnaQueixas() {
-  const c=document.getElementById('pna-queixas-condutas');if(!c)return '';c.innerHTML='';
-  const marcadas=Array.from(document.querySelectorAll('#clinical-guide-pna-anamnesis .clinical-chip.selected')).map(e=>e.dataset.text).filter(Boolean);
-  const livre=(document.getElementById('pna-queixas')?.value||'').toLowerCase();
-  const tem=(nome,re)=>marcadas.includes(nome)||(re&&re.test(livre));
-  const add=(classe,titulo,texto)=>{
-    const frases=texto.split(/\.\s+/).map(x=>x.trim().replace(/\.$/,'')).filter(Boolean);
-    const grupo=(tipo,filtro,rotulo)=>{const itens=frases.filter(filtro);return itens.length?`<div class="complaint-action ${tipo}"><strong>${rotulo}</strong>${itens.map(x=>`<div>• ${x}.</div>`).join('')}</div>`:'';};
-    const urg=f=>/imediat|encaminhar|exige|instabilidade|progressiva|sinais associados|persistência|recorrência|vômitos contínuos|após 36 semanas/.test(f.toLowerCase());
-    const med=f=>/\d+\s?mg|escolha|prescri|medica|antibiograma|nitrofuranto|cefalexina|amoxicilina|hidróxido|paracetamol|dipirona|bromoprida|metoclopramida|ondansetrona/.test(f.toLowerCase());
-    const orient=f=>/orientar|repouso|hidrata|aliment|calor local|massagem|fibras|higiene|banho|movimentos lentos/.test(f.toLowerCase());
-    c.innerHTML+=`<div class="complaint-protocol"><div class="complaint-protocol-head">${titulo}</div><div class="complaint-protocol-grid">${grupo('now',urg,'Avaliar / encaminhar')}${grupo('guide',f=>!urg(f)&&orient(f),'Orientações')}${grupo('med',f=>!urg(f)&&med(f),'Medicação prevista no protocolo')}${grupo('',f=>!urg(f)&&!orient(f)&&!med(f),'Avaliação clínica')}</div></div>`;
-  };
-  if(tem('Náuseas / vômitos',/náuse|nause|vômit|vomit/))add('alert-w','Náuseas/vômitos — Protocolo Pré-Natal Toledo','avaliar hidratação, perda de peso, alterações urinárias/metabólicas e hiperêmese. Orientar refeições pequenas a cada 3 horas, alimento leve ao acordar e antes de dormir, evitar jejum, gorduras, temperos, doces e odores fortes, e manter hidratação. Se medidas falharem e riscos forem afastados: avaliação profissional para bromoprida 10 mg 8/8h; segunda escolha metoclopramida 10 mg 8/8h; terceira escolha ondansetrona 8 mg 8/8h, meia hora antes das refeições. Vômitos contínuos/intensos, desidratação ou perda de peso exigem avaliação médica.');
-  if(tem('Cefaleia',/cefale|dor de cabeça/))add('alert-w','Cefaleia — Protocolo Toledo','aferir e repetir PA, afastar sinais de pré-eclâmpsia e investigar outras causas. Orientar repouso, hidratação e alimentação. Se recorrente, solicitar avaliação médica; com riscos afastados e persistência, avaliação profissional para paracetamol 500 mg 6/6h se dor ou, como segunda escolha, dipirona 500 mg 6/6h.');
-  if(tem('Tontura / desmaio / fraqueza',/tontur|desmai|fraqueza/))add('alert-w','Tontura/desmaio/fraqueza — Protocolo Toledo','aferir PA e avaliar anemia, hipoglicemia e instabilidade. Colocar em decúbito lateral esquerdo, orientar movimentos lentos, ambiente ventilado, alimentação fracionada e hidratação. Persistência, recorrência ou instabilidade requer avaliação médica.');
-  if(tem('Pirose / azia',/pirose|azia/))add('alert-w','Pirose/azia — Protocolo Toledo','aferir PA se houver dor epigástrica. Orientar alimentação fracionada, não deitar após comer, elevar cabeceira e evitar frituras, café, doces, gordurosos e picantes. Sem melhora: avaliação profissional para hidróxido de alumínio 10–15 mL após refeições e ao deitar.');
-  if(tem('Dor abdominal / cólicas',/dor abdominal|cólic|colic/))add('alert-e','Dor abdominal/cólicas — avaliar agora','verificar febre, sinais peritoneais, sangramento, ITU, dinâmica uterina e contrações. Dor progressiva, sinais de alerta ou suspeita de trabalho de parto prematuro exigem avaliação obstétrica imediata.');
-  if(tem('Dor lombar / pélvica',/dor lombar|dor pélvic|dor pelvic/))add('alert-w','Dor lombar/pélvica — Protocolo Toledo','avaliar febre, sintomas urinários, contrações, déficit neurológico e trauma. Orientar postura, calor local, massagens e alongamento; sinais associados exigem avaliação médica/obstétrica.');
-  if(tem('Cãibras',/cãibra|caibra/))add('alert-i','Cãibras — Protocolo Toledo','orientar calor local, massagem, extensão/flexão e alimentos ricos em potássio. Dor unilateral persistente, edema ou calor exige avaliação vascular.');
-  if(tem('Constipação / flatulência',/constipa|flatul/))add('alert-w','Constipação/flatulência — Protocolo Toledo','orientar fibras, frutas, verduras, grãos integrais, hidratação, rotina de evacuação e atividade física tolerada. Sem melhora, solicitar avaliação médica antes de tratamento farmacológico.');
-  if(tem('Hemorroidas',/hemorroid/))add('alert-w','Hemorroidas — Protocolo Toledo','avaliar dor, endurecimento e sangramento retal. Orientar fibras, hidratação, higiene e banho de assento morno. Alteração importante requer avaliação médica.');
-  if(tem('Dispneia',/dispne|falta de ar/))add('alert-e','Dispneia — Protocolo Toledo','realizar ausculta cardíaca e pulmonar, sinais vitais e oximetria quando disponível. Dor torácica, início súbito, hipoxemia ou desconforto importante exige avaliação médica imediata.');
-  if(tem('Sangramento vaginal',/sangramento|sangue vaginal/))add('alert-e','Sangramento vaginal','verificar sinais vitais, intensidade, dor e estabilidade; encaminhar imediatamente à maternidade de referência para avaliação obstétrica.');
-  if(tem('Perda de líquido',/perda de líquido|perda de liquido|líquido amniótico|liquido amniotico/))add('alert-e','Suspeita de perda de líquido amniótico','verificar BCF, movimentos fetais e sinais vitais; encaminhar imediatamente para avaliação obstétrica.');
-  if(tem('Corrimento vaginal alterado',/corrimento/))add('alert-w','Corrimento vaginal alterado — Protocolo Toledo','caracterizar cor, odor, prurido, ardência, dor e sangramento pós-coito; realizar avaliação/exame especular e tratamento específico após avaliação profissional.');
-  if(tem('Diminuição de MF',/diminui.*movimento|ausência.*movimento|ausencia.*movimento/))add('alert-e','Movimentos fetais reduzidos/ausentes','realizar avaliação obstétrica imediata; não aguardar mobilograma domiciliar quando houver redução ou ausência percebida.');
-  if(tem('Contrações antes de 37s',/contraç|contrac/))add('alert-e','Suspeita de trabalho de parto prematuro','avaliar dinâmica uterina e encaminhar para avaliação hospitalar imediata.');
-  if(tem('Alterações visuais / escotomas',/visual|escotoma/)||tem('Dor epigástrica / hipocôndrio direito',/epigastr|hipocôndrio|hipocondrio/)||tem('Edema de face/mãos',/edema.*(face|mão|mao)/))add('alert-e','Possíveis sinais de gravidade de pré-eclâmpsia','aferir e repetir PA e realizar avaliação médica/obstétrica imediata.');
-  return c.innerText.trim();
+  return window.ESFConsultaGuiada?.orientacoes('pna')||'';
 }
-
 function checkPncQueixas() {
-  const c = document.getElementById('pnc-queixas-alerts'); if(!c)return; c.innerHTML='';
-  const q = Array.from(document.querySelectorAll('#pnc-queixas-clin input:checked, #pnc-queixas-gin input:checked')).map(e=>e.closest('.cki').textContent.trim());
-  const mf=document.getElementById('pnc-mf')?.value||'';
-  const perdaAtiva=window.FluxoAPS?.perdaAtiva()!==false;
-  const perdaTipo=perdaAtiva?val('pnc-perda-tipo'):'', perdaQtd=perdaAtiva?val('pnc-perda-qtd'):'';
-  const add=(classe,titulo,texto)=>c.innerHTML+=`<div class="alert ${classe}"><strong>${titulo}:</strong> ${texto}</div>`;
-  if(q.includes('Náuseas / vômitos')) add('alert-w','Náuseas/vômitos — Protocolo Toledo','avaliar vômitos contínuos/intensos, desidratação, perda de peso e alterações urinárias/metabólicas. Orientar refeições pequenas a cada 3 horas, alimento leve ao acordar e antes de dormir, evitar jejum, gorduras, temperos, doces e odores fortes, e manter hidratação. Se medidas falharem e riscos forem afastados, realizar avaliação profissional para prescrição escalonada: bromoprida 10 mg 8/8h; segunda escolha metoclopramida 10 mg 8/8h; terceira escolha ondansetrona 8 mg 8/8h, meia hora antes das refeições. Suspeita de hiperêmese gravídica exige avaliação médica.');
-  if(q.includes('Cefaleia')) add('alert-w','Cefaleia — Protocolo Toledo','aferir e repetir PA, afastar sinais de pré-eclâmpsia e investigar enxaqueca/outras causas e medicamentos. Orientar repouso em local pouco iluminado e ventilado, hidratação, alimentação adequada e relaxamento. Se recorrente, solicitar avaliação médica. Com riscos afastados e persistência: avaliação profissional para paracetamol 500 mg 6/6h se dor; segunda escolha dipirona 500 mg 6/6h se dor.');
-  if(q.includes('Tontura / desmaio / fraqueza')) add('alert-w','Tontura/desmaio/fraqueza — Protocolo Toledo','aferir PA e avaliar anemia, hipoglicemia e sinais de instabilidade. Colocar em decúbito lateral esquerdo, orientar movimentos lentos, ambiente ventilado, alimentação fracionada rica em ferro/vitamina C e hidratação. Episódio persistente, recorrente ou com instabilidade requer avaliação médica.');
-  if(q.includes('Pirose / azia')) add('alert-w','Pirose/azia — Protocolo Toledo','aferir PA se houver dor epigástrica ou suspeita de pré-eclâmpsia. Orientar alimentação fracionada, evitar líquidos durante refeições, não deitar logo após comer, elevar cabeceira e evitar frituras, café, chá preto/mate, doces, gordurosos e picantes. Sem risco e sem melhora: avaliação profissional para hidróxido de alumínio 10–15 mL após refeições e ao deitar; sem melhora, avaliação médica.');
-  if(q.includes('Dor abdominal / cólicas')) add('alert-e','Dor abdominal/cólicas — avaliar agora','verificar febre, Blumberg, sangramento, ITU, dinâmica uterina e contrações. Dor progressiva, sinais de alerta ou suspeita de trabalho de parto prematuro exigem avaliação obstétrica imediata. Sem sinais de risco: repouso em decúbito lateral esquerdo, hidratação e prevenção de constipação/flatulência; medicação somente após avaliação profissional.');
-  if(q.includes('Dor lombar / pélvica')) add('alert-w','Dor lombar/pélvica — Protocolo Toledo','caracterizar dor e avaliar febre, mal-estar, sintomas urinários, enrijecimento/contrações, déficit neurológico e trauma. Orientar postura, sapatos confortáveis, calor local, massagens e alongamento; encaminhar à fisioterapia se necessário. Sinais associados exigem avaliação médica/obstétrica.');
-  if(q.includes('Cãibras')) add('alert-i','Cãibras — Protocolo Toledo','orientar calor local, massagem, movimentos passivos de extensão/flexão, evitar posição prolongada e excesso de exercício, e estimular alimentos ricos em potássio. Avaliar se dor unilateral persistente, edema, calor ou outros sinais vasculares.');
-  if(q.includes('Constipação / flatulência')) add('alert-w','Constipação/flatulência — Protocolo Toledo','orientar fibras, frutas, verduras e grãos integrais, hidratação, alimentação fracionada, rotina de evacuação e atividade física tolerada. Evitar alimentos flatulentos e óleo mineral de rotina. Se cuidados não forem efetivos, solicitar avaliação médica antes de tratamento farmacológico.');
-  if(q.includes('Hemorroidas')) add('alert-w','Hemorroidas — Protocolo Toledo','avaliar aumento da dor, endurecimento e sangramento retal. Orientar fibras, hidratação, higiene após evacuação e banho de assento morno. Qualquer alteração importante requer avaliação médica.');
-  if(q.includes('Dispneia')) add('alert-e','Dispneia — Protocolo Toledo','realizar ausculta cardíaca e pulmonar, sinais vitais e oximetria quando disponível. Manter repouso em decúbito lateral esquerdo e elevar cabeceira. Alteração na ausculta, hipoxemia, dor torácica, início súbito ou desconforto importante exige avaliação médica imediata.');
-  if(q.includes('Sangramento vaginal')||/Sangue/.test(perdaTipo)) c.innerHTML+=`<div class="alert alert-e"><strong>Sangramento vaginal:</strong> verificar sinais vitais e estabilidade; realizar avaliação obstétrica imediata na maternidade de referência. Antes de 20 semanas, considerar ameaça de aborto; aferir sinais vitais, avaliar intensidade/volume, dor e estabilidade e encaminhar imediatamente à maternidade de referência.</div>`;
-  if(q.includes('Perda de líquido')||/Líquido/.test(perdaTipo)) c.innerHTML+=`<div class="alert alert-e"><strong>Suspeita de perda de líquido amniótico:</strong> verificar BCF, movimentos fetais e sinais vitais; encaminhar imediatamente para avaliação obstétrica.</div>`;
-  if(q.includes('Corrimento vaginal alterado')||perdaTipo==='Corrimento') add('alert-w','Corrimento vaginal alterado — Protocolo Toledo','caracterizar cor, odor, prurido, ardência, dor, sangramento pós-coito e dispareunia; realizar avaliação/exame especular e bacterioscopia conforme achados. Fluxo sem prurido, desconforto ou odor pode ser fisiológico. Achado compatível com candidíase, vaginose, tricomoníase ou cervicite deve seguir tratamento específico após avaliação profissional e incluir parceria quando indicado.');
-  if(q.includes('Perda de tampão mucoso')||perdaTipo==='Tampão mucoso') c.innerHTML+=`<div class="alert alert-w"><strong>Perda de tampão mucoso:</strong> avaliar idade gestacional, contrações, dilatação e outros sinais de trabalho de parto.</div>`;
-  if(perdaQtd==='Grande') c.innerHTML+=`<div class="alert alert-e"><strong>Perda vaginal em grande quantidade:</strong> avaliar estabilidade e encaminhar imediatamente para urgência obstétrica.</div>`;
-  if(q.includes('Diminuição de MF')||/Diminuídos|Ausentes/.test(mf)) c.innerHTML+=`<div class="alert alert-e"><strong>Movimentos fetais reduzidos/ausentes:</strong> avaliação obstétrica imediata.</div>`;
-  if(q.includes('Contrações antes de 37s')) c.innerHTML+=`<div class="alert alert-e"><strong>Suspeita de trabalho de parto prematuro:</strong> encaminhar para avaliação hospitalar imediata.</div>`;
-  const gravidade=q.some(x=>/Cefaleia|Alterações visuais|Dor epigástrica|Edema de face/.test(x));
-  if(gravidade) c.innerHTML+=`<div class="alert alert-e"><strong>Possíveis sinais de gravidade de pré-eclâmpsia:</strong> aferir/repetir PA e realizar avaliação médica/obstétrica imediata.</div>`;
   checkPncVitais();
 }
 function checkPncVitais() {
@@ -6813,7 +6760,7 @@ function gerarSoapAutomatoPnc() {
   checkPncQueixas(); checkPncVitais();
   const queixasMarcadas=Array.from(document.querySelectorAll('#pnc-queixas-clin input:checked, #pnc-queixas-gin input:checked')).map(e=>e.closest('.cki')?.textContent.trim()).filter(Boolean);
   const perda=window.FluxoAPS?.perdaAtiva()===false?'':[val('pnc-perda-tipo'),val('pnc-perda-qtd'),val('pnc-perda-obs')].filter(Boolean).join(' | ');
-  const alertas=[document.getElementById('pnc-queixas-alerts')?.innerText,document.getElementById('pnc-vitais-alerts')?.innerText].filter(Boolean).join('\n');
+  const alertas=[window.ESFConsultaGuiada?.orientacoes('pnc'),document.getElementById('pnc-vitais-alerts')?.innerText].filter(Boolean).join('\n');
   const medidas=[['IG',val('pnc-ig'),''],['PA',val('pnc-pa'),'mmHg'],['BCF',val('pnc-bcf'),'bpm'],['AU',val('pnc-au'),'cm'],['Apresentação',val('pnc-apres'),'']].filter(x=>x[1]).map(([n,v,u])=>`${n} ${v}${u?' '+u:''}`).join(', ');
   montarSoapClinico({
     nome, idade, modulo:'pnc',
@@ -6822,7 +6769,7 @@ function gerarSoapAutomatoPnc() {
     hma:[queixas?`Gestante refere ${queixas.charAt(0).toLowerCase()+queixas.slice(1)}.`:'',queixasMarcadas.length?`Queixas selecionadas: ${queixasMarcadas.join('; ')}.`:'',perda?`Perda vaginal caracterizada: ${perda}.`:''].filter(Boolean).join('\n'),
     hp:'',
     exame:medidas,
-    hd:`Pre-natal em seguimento. Evolucao e risco reavaliados conforme dados clínicos e exames disponíveis.${alertas?`\nAchados protocolados: ${alertas}`:''}`,
+    hd:'Pré-natal em seguimento. Avaliar evolução e risco conforme os dados clínicos e exames disponíveis.',
     cd:`Mantidas orientacoes de rotina, sinais de alerta obstetrico, suplementacao/vacinacao conforme necessidade, avaliacao de exames e retorno agendado.${alertas?`\nCondutas indicadas pelo protocolo municipal:\n${alertas}`:''}`
   });
   mudarParaAbaSoap('[onclick*="pnc-6"]','pnc-6');

@@ -43,9 +43,17 @@
     const current=reported;
     const danger=/\b(febre|dor lombar|delirium|instabilidade|giordano positivo)\b/;
     const markedDanger=selected.some(text=>danger.test(text))||current.some(text=>danger.test(text));
-    c.urgent=temp>=38||markedDanger||['dor','perdaliquido','sangra','mobilizacao'].some(k=>native(p,'corr-'+k)==='Sim')||c.alerta==='Sim';
+    c.febre=temp>=38||selected.concat(current).some(text=>/\b(?:febre|febril)\b/.test(text));
+    c.alarmeSistemico=selected.concat(current).some(text=>/\b(?:delirium|instabilidade|giordano positivo|convulsao|choque|rigidez de nuca|deficit neurologico|sangramento intenso)\b/.test(text))||
+      ['dor','perdaliquido','sangra','mobilizacao'].some(k=>native(p,'corr-'+k)==='Sim')||c.alerta==='Sim';
+    c.alarmeGeral=c.febre||c.alarmeSistemico;
+    c.urgent=c.alarmeGeral||markedDanger;
     if(c.urgent)c.alerta='Sim';
     const today=new Date();c.consultaDate=/^\d{4}-\d{2}-\d{2}$/.test(native(p,'data'))?native(p,'data'):[today.getFullYear(),String(today.getMonth()+1).padStart(2,'0'),String(today.getDate()).padStart(2,'0')].join('-');
+    if(nasc){
+      const [y,m,d]=c.consultaDate.split('-').map(Number),[by,bm,bd]=nasc.split('-').map(Number);
+      c.idadeMeses=(y-by)*12+m-bm-(d<bd?1:0);
+    }
     return c;
   }
   function signature(p){const contextSnapshot=context(p);return JSON.stringify({patient:[native(p,'nome'),native(p,'cpf'),native(p,'nasc')],date:native(p,'data')||native(p,'data-hora'),context:Object.fromEntries([...ctxKeys,'consultaDate'].map(key=>[key,contextSnapshot[key]])),complaint:complaint(p),indication:v(p,'indicacao'),cart:cart(p)});}

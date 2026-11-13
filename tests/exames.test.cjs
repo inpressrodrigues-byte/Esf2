@@ -66,3 +66,14 @@ test('A orientação distingue pediculose, escabiose e a elegibilidade para esqu
  assert.equal(protocol.specificCare('Herpes labial','herpes labial',{...adult,gestante:'Sim'}),'');
  assert.match(protocol.urinary({pregnancyConflict:true,urgent:true}).priority,/prioritária/);
 });
+test('Exibe esquema obstétrico de ITU conforme IG e suprime doses quando há alarme',()=>{
+ const protocolo=require('../assets/protocolo-consulta.js');
+ const caso={gestante:'Sim',adult:true,ig:20};
+ assert.match(protocolo.urinary(caso).medication,/nitrofurantoína 100 mg/i);
+ assert.doesNotMatch(protocolo.urinary({...caso,ig:37}).medication,/nitrofurantoína|amoxicilina/i);
+ assert.match(protocolo.urinary({...caso,ig:37}).medication,/cefalexina 500 mg/i);
+ assert.doesNotMatch(protocolo.urinary({...caso,ig:NaN}).medication,/\d+ mg/);
+ assert.equal(protocolo.urinary({...caso,urgent:true}).medication,'');
+ assert.doesNotMatch(protocolo.medicacaoDemanda('Febre','febre',{child:true,idadeMeses:2}),/gota\/kg/);
+ assert.match(protocolo.medicacaoDemanda('Febre','febre',{child:true,idadeMeses:24}),/gota\/kg/);
+});

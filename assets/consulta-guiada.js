@@ -18,6 +18,12 @@
     if(!page)return '';
     const structured=[...page.querySelectorAll('.complaint-chip.selected,.clinical-chip.selected,[id$="-queixas-clin"] input:checked,[id$="-queixas-gin"] input:checked')].map(e=>e.dataset.text||e.closest('label')?.textContent||e.textContent);
     const content=[...kinds.map(key=>value(p,key)),...structured].filter(Boolean);
+    if(p==='pnc'&&window.FluxoAPS?.perdaAtiva()){
+      const perda=value(p,'perda-tipo');
+      if(/sangue/i.test(perda))content.push('sangramento vaginal');
+      if(/líquido/i.test(perda))content.push('perda de líquido');
+      if(/corrimento|tampão/i.test(perda))content.push(perda);
+    }
     for(const [key,label] of Object.entries(binaryFindings[p]||{}))if(value(p,key)==='Sim')content.push(label);
     if(p==='puerp')content.push(value(p,'dor'),value(p,'sangramento'));
     if(p==='fer'&&value(p,'tipo'))content.push('Ferida '+value(p,'tipo'),value(p,'tecido'));
@@ -35,14 +41,30 @@
     const priority=value(p,'prioridade');
     const immediate=priority==='Vermelho'||/anafilaxia|instabilidade hemodinamica|choque anafilatico/.test(current);
     const alerts=[...pages.get(p).page.querySelectorAll('.alert-chip.selected,[data-priority]:checked')].map(e=>R.norm(e.dataset.priority||e.textContent)).join(' ');
-    const redFlag=immediate||/sangramento intenso|instabilidade|choque|violencia sexual|dor pelvica importante|perda de liquido/.test(alerts);
-    const output=[],matches=R.match(text);
+    const perigo=/sangramento intenso|instabilidade|choque|violencia sexual|dor pelvica importante|perda de liquido|vomitos? persistentes?|desidratacao|dor abdominal intensa|alteracao neurologica|saturacao baixa|dispneia intensa|dificuldade importante para engolir|edema de (?:lingua|glote)/;
+    const redFlag=immediate||perigo.test(alerts)||perigo.test(current);
+    const gestacao=ctx.gestante==='Sim'&&!ctx.pregnancyConflict;
+    const pa=value(p,'pa').match(/(\d{2,3})\s*[x/]\s*(\d{2,3})/i);
+    const obstetricos=[current];
+    if(value(p,'sang-atual')==='Sim')obstetricos.push('sangramento vaginal');
+    if(/diminu[ií]dos|ausentes/i.test(value(p,'mf')))obstetricos.push('movimentos fetais reduzidos');
+    const declarados=R.norm(findings(p,pages.get(p).page));
+    if(/(?:nao tolera liquidos|nao consegue ingerir)/.test(declarados))obstetricos.push('incapacidade de ingerir');
+    const febre=Number((value(p,'temp')||'').replace(',','.'))>=38;
+    const alarme=redFlag||ctx.alarmeGeral||febre||/febre|instabilidade|giordano|convulsao|hemorragia|dispneia intensa/.test(alerts)||value(p,'exkit-alerta')==='Sim'||(pa&&(Number(pa[1])>=140||Number(pa[2])>=90))||
+      ['dor','perdaliquido','sangra','mobilizacao'].some(k=>value(p,'corr-'+k)==='Sim');
+    const pn=gestacao?QueixasGestacao.avaliar(obstetricos.join(' | '),{ig:ctx.ig,alarme}):null;
+    const output=pn?.items.slice()||[],matches=R.match(text);
     for(const rule of matches){
-      if(rule.kit==='itu'){output.push(R.urinary({...ctx,urgent:ctx.urgent||redFlag}));continue;}
+      if(pn?.cobertas.has(rule.title))continue;
+      if(rule.kit==='itu'){output.push(R.urinary({...ctx,urgent:ctx.urgent||redFlag||pn?.alarme}));continue;}
       const item={title:rule.title,treatment:(!redFlag&&R.specificCare(rule.title,current,ctx))||rule.treatment,exams:rule.assessment,kit:rule.kit,refs:[addRef('Protocolo municipal · manejo p. '+rule.carePage,R.demanda+'#page='+rule.carePage)]};
-      if(immediate){
+      if(!redFlag&&!pn?.alarme) item.medication=R.medicacaoDemanda(rule.title,current,{...ctx,
+        urgent:ctx.alarmeSistemico||ctx.febre&&rule.title!=='Febre'||ctx.urgent&&matches.some(r=>r.kit==='itu')});
+      if(item.medication)item.refs.push(addRef('Quadro de prescrição · p. '+R.paginaMedicacao(rule.title),R.demanda+'#page='+R.paginaMedicacao(rule.title)));
+      if(redFlag||pn?.alarme){
         item.kit=null;
-        item.priority='Atendimento imediato. Acionar a equipe e seguir o fluxo de urgência.';
+        item.priority=immediate?'Atendimento imediato. Acionar a equipe e seguir o fluxo de urgência.':'Priorizar avaliação '+(gestacao?'médica/obstétrica':'médica')+' pelo sinal de alerta associado.';
         item.treatment=rule.care;
       }
       if(rule.kit==='corrimento'){
@@ -55,7 +77,7 @@
           const data=p==='smu'?ESFSaudeMulher.dischargeData():['pna','pnc'].includes(p)?ESFCorrimentoPN.data(p):{};
           const evaluation=women.discharge({...data,gestante:ctx.gestante,lactante:value(p,'lactante')||data.lactante,diagnostico:id});
           const first=evaluation.regimens[0];
-          if(ctx.urgent||redFlag||evaluation.urgent.length)item.treatment='Priorizar avaliação médica por sinal de alarme antes de iniciar tratamento para corrimento.';
+          if(ctx.urgent||redFlag||pn?.alarme||evaluation.urgent.length)item.treatment='Priorizar avaliação médica por sinal de alarme antes de iniciar tratamento para corrimento.';
           else if(ctx.child||ctx.pregnancyConflict||data.complicado==='Sim'||data.alergia==='Sim'||/candidiase (?:complicada|recorrente)|vaginose bacteriana recorrente/.test(current))item.treatment='Individualizar a conduta após avaliar faixa etária, gestação, alergia e recorrência.';
           else if(first&&!ctx.adult&&ctx.gestante!=='Sim')item.treatment='Se confirmado: '+first.drug+'. Conferir idade, gestação/lactação e contraindicações para definir o esquema.';
           else if(first){
@@ -70,7 +92,7 @@
     }
     const explicit=value(p,'motivo-consulta');
     const motive=['iniciar','acompanhar','trocar','emergencia','preconcepcao'].includes(explicit)?explicit:/contracepcao de emergencia/.test(current)?'emergencia':/planejamento reprodutivo/.test(current)?'iniciar':'';
-    if(/dor pelvica/.test(current))output.push({title:'Dor pélvica',exams:'Investigar possibilidade de gestação, sangramento, corrimento e dor à mobilização do colo. Avaliar teste de gravidez conforme o quadro.',treatment:'Suspeita de gravidez ectópica, DIP ou complicação puerperal exige avaliação médica. Na dor cíclica estável, investigar dismenorreia e orientar tratamento conforme a causa.',refs:[addRef('Saúde da Mulher · dor pélvica',R.mulher+'#page=38')]});
+    if(!gestacao&&/dor pelvica/.test(current))output.push({title:'Dor pélvica',exams:'Investigar possibilidade de gestação, sangramento, corrimento e dor à mobilização do colo. Avaliar teste de gravidez conforme o quadro.',treatment:'Suspeita de gravidez ectópica, DIP ou complicação puerperal exige avaliação médica. Na dor cíclica estável, investigar dismenorreia e orientar tratamento conforme a causa.',refs:[addRef('Saúde da Mulher · dor pélvica',R.mulher+'#page=38')]});
     if(/climaterio|menopausa/.test(current))output.push({title:'Climatério / menopausa',exams:'Após os 45 anos, sintomas típicos com alteração do ciclo permitem avaliação clínica. Exames laboratoriais dependem de indicação específica.',treatment:'Avaliar fogachos, sono e sintomas geniturinários. Orientar atividade física, alimentação e medidas para o sintoma predominante. Avaliar individualmente a indicação de terapia hormonal.',refs:[addRef('Saúde da Mulher · climatério',R.mulher+'#page=84')]});
     if(p==='smu'&&['iniciar','acompanhar','trocar','emergencia','preconcepcao'].includes(motive)){
       const emergency=motive==='emergencia',pre=motive==='preconcepcao';
@@ -97,6 +119,16 @@
     if(['pna','pnc'].includes(p)&&Number.isFinite(ctx.ig)){
       const id=ctx.ig<14?'pn1':ctx.ig<28?'pn2':'pn3',built=ExamesRegras.build(id,ctx);
       output.push({title:built.name,exams:built.items.filter(x=>x.selected).map(x=>x.name).join(' · '),kit:id,refs:[addRef('Pré-natal · exames por trimestre',ExamesRegras.sources.pn.url+'#page=29')]});
+    }
+    const alergias=R.norm([value(p,'alergia'),value(p,'alergias')].join(' '));
+    if(alergias.trim()){
+      const farmacos=['amoxicilina','cefalexina','nitrofurantoina','bromoprida','metoclopramida','ondansetrona','dipirona','paracetamol','escopolamina','lactulose','aciclovir','loratadina','albendazol','permetrina','metronidazol','fluconazol','miconazol'];
+      for(const item of output){
+        for(const campo of ['treatment','medication']){
+          const esquema=R.norm(item[campo]);
+          if(farmacos.some(nome=>alergias.includes(nome)&&esquema.includes(nome)))item[campo]='Há referência a este medicamento no campo de alergias. Revisar a alergia e o quadro do protocolo antes de escolher uma alternativa.';
+        }
+      }
     }
     return output;
   }
@@ -146,6 +178,7 @@
       const section=tag('article','care-item');
       section.append(tag('h3','',item.title));
       if(item.priority)section.append(tag('p','care-priority',item.priority));
+      line(section,'Medicação prevista no protocolo',item.medication);
       line(section,'Conduta',item.care);line(section,'Tratamento / manejo',item.treatment);line(section,'Exames e avaliação',item.exams);
       if(item.note)section.append(tag('p','care-note',item.note));
       const links=tag('div','care-links');
@@ -249,5 +282,12 @@
     matchMedia('(max-width:760px)').addEventListener('change',e=>{if(e.matches)alternarMenuLateral(true);});
     refresh(prefixoPaginaAtual());
   }
-  window.ESFConsultaGuiada={refresh,reset,findings};document.addEventListener('DOMContentLoaded',mount);
+  function orientacoes(p){
+    const modelo=pages.get(p);
+    if(!modelo)return '';
+    return activeDecisions(p,inputText(p,modelo.page),ESFExames.context(p))
+      .filter(item=>!item.kit?.startsWith('pn'))
+      .map(item=>[item.title,item.priority,item.care,item.treatment,item.medication&&'Opção do protocolo para avaliação: '+item.medication].filter(Boolean).join(' — ')).join('\n');
+  }
+  window.ESFConsultaGuiada={refresh,reset,findings,orientacoes};document.addEventListener('DOMContentLoaded',mount);
 })();

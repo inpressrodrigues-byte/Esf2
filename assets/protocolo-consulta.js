@@ -112,6 +112,37 @@
     }
     return result;
   }
+  const analgesiaAdulto='Para dor ou febre, quando indicada após avaliação: paracetamol 500 mg VO a cada 8 horas por até 3 dias. Conferir hepatopatia, alergia e uso de outros produtos com paracetamol.';
+  const quadros={
+    'Cefaleia':[23,'Para adulto com mais de 35 kg, após aferir a PA e afastar alarme. '+analgesiaAdulto],
+    'Cólica menstrual':[25,'Na dismenorreia habitual, após excluir gestação: butilbrometo de escopolamina simples 10 mg VO, a cada 8 horas por até 3 dias.'],
+    'Dor abdominal':[45,analgesiaAdulto], 'Dor articular':[47,analgesiaAdulto], 'Dor lombar':[51,analgesiaAdulto],
+    'Dor osteomuscular':[53,analgesiaAdulto],
+    'Constipação':[29,'Após afastar obstrução e avaliar risco de aspiração, o quadro prevê óleo mineral, 1 colher de sopa à noite por até 3 dias. Reforçar líquidos e fibras.'],
+    'Febre':[62,analgesiaAdulto], 'Hemorroida/doenças orificiais':[74,analgesiaAdulto],
+    'Mastalgia':[82,analgesiaAdulto], 'Otalgia':[92,analgesiaAdulto], 'Queimadura':[107,analgesiaAdulto],
+    'Síndrome pé-mão-boca':[115,analgesiaAdulto],
+    'Diarreia e/ou náusea/vômito':[37,'Para náuseas ou vômitos em adulto: metoclopramida 10 mg VO a cada 8 horas por até 3 dias, se indicada. Avaliar hidratação, obstrução ou sangramento digestivo e antecedentes extrapiramidais.'],
+    'Pirose':[98,'Hidróxido de alumínio 60 mg/mL, 10 mL VO a cada 8 horas por até 14 dias. Avaliar função renal, interações e sinais de alarme.'],
+    'Odinofagia/síndrome gripal':[89,analgesiaAdulto],
+    'Reação alérgica':[110,'Reação leve, sem acometimento respiratório ou circulatório: loratadina 10 mg VO uma vez ao dia por até 5 dias.'],
+    'Herpes genital':[67,'Primeiro episódio: encaminhar para avaliação médica. Esquema de referência para o adulto: aciclovir 200 mg VO cinco vezes ao dia por 7 a 10 dias. Conferir função renal e imunossupressão.'],
+    'Herpes zoster':[70,'Encaminhar para avaliação médica precoce. O quadro cita aciclovir 800 mg VO cinco vezes ao dia por 7 dias. Conferir função renal. Acometimento ocular, disseminação ou sinais neurológicos exigem urgência.'],
+    'Parasitoses intestinais':[95,'Escolher pelo agente. O quadro prevê albendazol 400 mg VO em dose única para ascaridíase, enterobíase ou ancilostomíase; para giardíase, 400 mg VO uma vez ao dia por 5 dias.'],
+    'Problemas oftalmológicos':[105,'Na irritação leve ou suspeita de corpo estranho superficial, lavagem ocular abundante com soro fisiológico 0,9%.']
+  };
+  const paginaMedicacao=title=>quadros[title]?.[0]||rules.find(r=>r.title===title)?.carePage;
+  function medicacaoDemanda(title,text,c){
+    if(!quadros[title]||c.pregnancyConflict||c.gestante==='Sim'||c.urgent||c.lactante==='Sim')return '';
+    if(c.child){
+      if(!Number.isFinite(c.idadeMeses)||c.idadeMeses<=6||c.idadeMeses>=144)return 'Conferir idade e peso no quadro de prescrição antes de selecionar uma opção para esta faixa etária.';
+      if(['Cefaleia','Febre','Otalgia','Odinofagia/síndrome gripal'].includes(title))return 'Referência pediátrica para crianças acima de 6 meses até 11 anos, após avaliar gravidade: paracetamol gotas 200 mg/mL, 1 gota/kg/dose por via oral a cada 6 horas, por até 3 dias. '+(title==='Cefaleia'?'Máximo de 35 gotas por dose. ':'')+'Conferir idade, peso, equivalência do gotejador e limite da bula antes da prescrição.';
+      return '';
+    }
+    if(title==='Diarreia e/ou náusea/vômito'&&!/nause|vomit/.test(text))return '';
+    if(!c.adult||!(c.male||c.gestante==='Não'))return 'Informe a data de nascimento e confira a possibilidade de gestação para visualizar o esquema aplicável. O quadro de prescrição está disponível abaixo.';
+    return quadros[title][1];
+  }
   function specificCare(title,text,c){
     const adult=c.adult&&!c.child&&!c.urgent&&!c.pregnancyConflict&&(c.gestante==='Não'||c.male&&c.gestante!=='Sim');
     if(title==='Problemas de pele'){
@@ -130,9 +161,9 @@
     if(c.gestante==='Sim'){
       return {...base,title:'Queixa urinária na gestação',priority:c.urgent?'Avaliação médica prioritária por sinal de alarme.':'Atendimento prioritário na gestação. Investigar infecção alta.',
         exams:'EAS e urocultura com antibiograma. Colher a cultura antes do antibiótico quando possível, sem atrasar o atendimento.',
-        care:c.urgent?'Febre, dor lombar ou comprometimento sistêmico exigem avaliação médica. Priorizar encaminhamento e tratamento.':'Providenciar avaliação médica para definir antibioticoterapia e revisar cultura e sensibilidade. O fluxograma cita cefalexina e nitrofurantoína, com restrição obstétrica para esta última no fim da gestação e na lactação.',
-        treatment:c.urgent||c.child?'':c.lactante==='Sim'||Number.isFinite(c.ig)&&c.ig>=36?'Para avaliação médica, o quadro cita cefalexina 500 mg VO de 6/6 h por 7–10 dias. Conferir alergias, cultura e sensibilidade.':'Entre as opções do fluxograma para avaliação médica estão cefalexina 500 mg VO de 6/6 h por 7–10 dias e nitrofurantoína 100 mg VO de 6/6 h por 7 dias. Conferir IG, alergias e função renal. O documento restringe a nitrofurantoína após a 36ª semana e na lactação.',
-        note:'A seção 2.4 descreve esquemas na gestação, mas explicita a prescrição de enfermagem para cistite simples em não gestantes. Conferir o fluxo obstétrico com a equipe.',refs:[source,...base.refs]};
+        care:c.urgent?'Febre, dor lombar ou comprometimento sistêmico exigem avaliação médica. Priorizar encaminhamento e tratamento.':'Disúria ou hematúria na gestação requer avaliação médica, mesmo sem febre. Para ITU confirmada, o quadro de pré-natal orienta selecionar o tratamento pela urocultura e antibiograma, considerando alergias, função renal e idade gestacional.',
+        medication:c.urgent||c.child?'':!Number.isFinite(c.ig)?'Confirmar a idade gestacional para consultar as opções do quadro obstétrico.':c.lactante==='Sim'||c.ig>=36?'Para ITU confirmada e sensível: cefalexina 500 mg por via oral a cada 6 horas por 7 dias. Após 36 semanas, o quadro restringe a escolha à cefalexina.':'Na ITU confirmada e conforme sensibilidade: 1ª opção, nitrofurantoína 100 mg a cada 6 horas por 7 dias. 2ª, cefalexina 500 mg a cada 6 horas por 7 dias. 3ª, amoxicilina/clavulanato 500/125 mg a cada 8 horas por 7 dias, com as refeições. Encaminhar para avaliação médica se houver resistência às opções do quadro.',
+        refs:[{title:'Pré-natal de Toledo · quadro 4, p. 24',url:'https://www.toledo.pr.gov.br/sites/default/files/paginabasica-2022-08/protocolo_pre-natal_alteracao_2021_versao_final-2_pdf.pdf#page=24'},source,...base.refs]};
     }
     if(c.child)return {...base,priority:'Avaliar idade, estado geral, febre e sinais sistêmicos. Criança em idade escolar consta entre os critérios de prioridade.',
       exams:'A investigação depende da idade e do quadro. Avaliar coleta de urina conforme o fluxo pediátrico.',care:'Encaminhar para avaliação pediátrica conforme gravidade. A tabela de antibióticos para disúria se refere a adultos.'};
@@ -141,5 +172,5 @@
     return {...base,treatment:c.scope==='mulher'&&c.adult&&!c.male&&c.gestante==='Não'&&c.lactante!=='Sim'&&c.ituSimples==='Sim'&&c.ituCultura==='Não'&&c.alerta==='Não'?'Na cistite simples confirmada, o quadro de disúria lista nitrofurantoína 100 mg VO a cada 6 horas por 7 dias. Verificar alergia, função renal e lactação antes de prescrever.':'',exams:'Avaliar EAS. A exceção é a mulher jovem não grávida com cistite típica e sem risco de resistência. Cultura em homens, recorrência, complicação ou risco de resistência. Em falha ou retorno rápido, cultura com antibiograma.',
       care:c.male?'Avaliar infecção complicada e encaminhar para definição terapêutica.':c.scope==='mulher'&&c.adult?'Na cistite simples de mulher adulta não gestante, confirmar critérios, alergias, lactação e contraindicações. O fluxo descreve nitrofurantoína ou sulfametoxazol + trimetoprima conforme avaliação e protocolo institucional. Encaminhar se houver piora ou persistência.':'Confirmar faixa etária, perfil e ausência de complicação. O esquema de cistite simples depende dessa avaliação.',refs:[...base.refs,source]};
   }
-  return {rules,match,positive,norm,testResults,specificCare,urinary,demanda,mulher};
+  return {rules,match,positive,norm,testResults,specificCare,medicacaoDemanda,paginaMedicacao,urinary,demanda,mulher};
 });
