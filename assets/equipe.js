@@ -4,28 +4,32 @@
   const flows={
     'Aguardando vaga':['Agendado','Aguardando atendimento','Cancelado'],
     'Agendado':['Agendado','Aguardando atendimento','Faltou','Cancelado'],
-    'Aguardando atendimento':['Em escuta','Em atendimento','Cancelado'],
-    'Em escuta':['Em atendimento','Compartilhado','Concluído'],
+    'Aguardando atendimento':['Em escuta','Cancelado'],
+    'Em escuta':['Triagem concluída','Compartilhado','Concluído'],
+    'Triagem concluída':['Em atendimento','Cancelado'],
     'Em atendimento':['Em observação','Compartilhado','Concluído'],
     'Em observação':['Em atendimento','Compartilhado','Concluído'],
     'Compartilhado':['Respondido','Cancelado'],'Respondido':['Em atendimento','Concluído']
   };
   const id=key=>document.getElementById('eq-'+key);
-  let generation=0,timer,sequence=0;
+  let generation=0,timer,sequence=0,retomar;
   function node(tag,text){const n=document.createElement(tag);if(text)n.textContent=text;return n;}
   function btn(text,action){const b=node('button',text);b.type='button';b.className='btn btn-s';b.onclick=action;return b;}
   function field(parent,label,type,key,choices) {
     const l=node('label',label),c=node(choices?'select':type==='textarea'?'textarea':'input');
-    l.className='f';if(choices)for(const name of choices)c.append(new Option(name,name));
+    c.setAttribute('aria-label',label);l.className='f';if(choices)for(const name of choices)c.append(new Option(name,name));
     else if(type!=='textarea')c.type=type;
     if(key)c.id='eq-'+key;l.append(c);parent.append(l);return c;
   }
   function today(){return new Date().toLocaleDateString('sv-SE');}
-  function localDateTime(ts){const d=new Date(ts);return new Date(d-d.getTimezoneOffset()*60000).toISOString().slice(0,16);}
-  function limpar(){generation++;sequence++;clearInterval(timer);host()?.replaceChildren();}
+  function limpar(){retomar=null;generation++;sequence++;clearInterval(timer);host()?.replaceChildren();}
   const active=(g,scope)=>g===generation&&document.getElementById('pg-equipe')?.classList.contains('on')
     && temPermissao('ver_historico')&&escopoDadosClinicos().chave===scope;
   function navegar(page){
+    if(page==='prontuario')return;
+    if(page==='equipe'&&retomar&&retomar.scope===escopoDadosClinicos().chave&&temPermissao('ver_historico')){
+      retomar.atualizar();return;
+    }
     limpar();if(page!=='equipe'||!temPermissao('ver_historico'))return;
     const s=escopoDadosClinicos(),g=generation,root=host();
     if(!s.permitido||!_sb||window.MODO_OFFLINE){root.append(node('p','Entre com uma conta conectada à UBS para consultar a agenda compartilhada.'));return;}
@@ -39,7 +43,7 @@
     const search=field(toolbar,'Buscar por nome, CPF, responsável ou descrição','search','busca');
     const state=node('p');state.setAttribute('role','status');
     const entry=node('details'),list=node('div');entry.className='card';list.className='card';root.append(toolbar,entry,state,list);
-    let rows=[],patients={},viewKey='',writeLock=false;
+    let rows=[],vagasDia=[],patients={},viewKey='',writeLock=false;
     const current=()=>active(g,s.chave);
     const filterKey=()=>JSON.stringify([unit.value,mode.value,day.value]);
     function patientName(cpf,row){return row?.pacientes?.nome||patients[cpf]?.nome||cpf;}
@@ -51,7 +55,7 @@
         if(!current()||key!==filterKey())return;
         if(r.error)throw r.error;
         if(!r.data)throw Error('conflito');
-        onOk?.();state.textContent='Registro salvo.';await refresh(false);
+        onOk?.();if(!current())return;state.textContent='Registro salvo.';await refresh(false);
       } catch(e) {
         if(current()&&key===filterKey())state.textContent=e.code==='23505'?'Este horário já está reservado ou o registro já foi recebido. Atualize a lista.':
           e.message==='conflito'?'Outro profissional atualizou o registro. Atualize a lista antes de tentar novamente.':'Registro não confirmado. Confira os campos, o vínculo do paciente e a conexão.';
@@ -73,13 +77,13 @@
         return;
       }
       const isDose=modeName==='Vacinação',group=modeName==='Atividades coletivas',operational=!group&&!isDose;
-      let cpf,estado,horario,prof,dia,dose,lote,fabricante,proxima,count,members;
+      let cpf,estado,vagas,prof,dia,dose,lote,fabricante,proxima,count,members;
       if(!group){cpf=field(grid,'CPF do paciente cadastrado','text');cpf.required=true;cpf.inputMode='numeric';}
       if(operational){
         estado=field(grid,'Entrada','','',modeName==='Cuidado compartilhado'?['Compartilhado']:modeName==='Aguardando vaga'?['Aguardando vaga']:['Aguardando atendimento','Agendado','Aguardando vaga','Compartilhado']);
         prof=field(grid,'Profissional responsável','text');prof.required=true;prof.maxLength=160;prof.value=CURRENT_USER_PROFILE?.nome||'';
-        horario=field(grid,'Dia e horário da consulta','datetime-local');
-        const sync=()=>{horario.parentElement.hidden=estado.value!=='Agendado';horario.required=!horario.parentElement.hidden;};
+        vagas=AgendaClinica.picker(grid,unit,day);
+        const sync=()=>{const agendar=estado.value==='Agendado';vagas.toggle(agendar);prof.required=!agendar;prof.parentElement.hidden=agendar;};
         estado.onchange=sync;sync();
       } else {
         dia=field(grid,'Data de realização','date');dia.value=today();dia.max=today();dia.required=true;
@@ -96,7 +100,9 @@
         e.preventDefault();const patient=cpf&&normalizarCPF(cpf.value),u=unit.value;
         if(cpf&&patient.length!==11){state.textContent='Informe o CPF com 11 dígitos.';cpf.focus();return;}
         if(isDose&&proxima.value&&proxima.value<=dia.value){state.textContent='A próxima dose precisa ter uma data posterior à realização.';return;}
-        const payload=operational?{id:key,cpf:patient,unidade:u,estado:estado.value,profissional:prof.value.trim(),motivo:motivo.value.trim(),horario:estado.value==='Agendado'?new Date(horario.value).toISOString():null}
+        const vaga=estado?.value==='Agendado'?vagas?.value():null;
+        if(estado?.value==='Agendado'&&!vaga){state.textContent='Selecione uma vaga disponível.';return;}
+        const payload=operational?{id:key,cpf:patient,unidade:u,estado:estado.value,profissional:vaga?.profissional||prof.value.trim(),motivo:motivo.value.trim(),horario:vaga?.inicio||null,horario_id:vaga?.id||null}
           :{id:key,unidade:u,tipo:isDose?estado.value:'Atividade coletiva',dia:dia.value,descricao:motivo.value.trim(),cpf:patient||null,
             participantes:group?Number(count.value):null,participantes_cpf:group?members.value.split(/\n/).filter(v=>v.trim()).map(v=>normalizarCPF(v)):[],
             dose:dose?.value.trim()||null,lote:lote?.value.trim()||null,fabricante:fabricante?.value.trim()||null,proxima:proxima?.value||null};
@@ -104,24 +110,30 @@
       };
     }
     function transitions(row,line){
-      const options=flows[row.estado];if(!options)return;
-      const details=node('details');details.append(node('summary','Atualizar ou passar o caso'));line.append(details);
+      const options=flows[row.estado]?.filter(o=>row.estado!=='Triagem concluída'||o!=='Em atendimento');if(!options?.length)return;
+      const details=node('details');details.append(node('summary',row.estado==='Agendado'?'Reagendar ou registrar chegada':row.estado==='Em escuta'?'Registrar triagem':'Atualizar ou passar o caso'));line.append(details);
       const form=node('form');details.append(form);
       const next=field(form,'Próxima situação','','',options),prof=field(form,'Passar para / responsável','text');
       prof.required=true;prof.value=row.profissional;prof.maxLength=160;
-      const time=field(form,'Novo horário','datetime-local');if(row.horario)time.value=localDateTime(row.horario);
+      const vagas=AgendaClinica.picker(form,unit,day,row),ssvv=AgendaClinica.triage(form);
       const note=field(form,'Escuta ou devolutiva','textarea');note.maxLength=2000;note.value=row.devolutiva||'';
-      const sync=()=>{time.required=next.value==='Agendado';time.parentElement.hidden=!time.required;note.required=next.value==='Respondido';};
-      next.onchange=sync;sync();
+      const sync=()=>{const booking=next.value==='Agendado';vagas.toggle(booking&&details.open);prof.required=!booking;prof.parentElement.hidden=booking;ssvv.toggle(next.value==='Triagem concluída');note.required=next.value==='Respondido';};
+      next.onchange=sync;details.ontoggle=sync;sync();
       const save=node('button','Confirmar mudança');save.type='submit';save.className='btn btn-s';form.append(save);
       form.onsubmit=e=>{e.preventDefault();const patch={estado:next.value,profissional:prof.value.trim(),devolutiva:note.value.trim()};
-        if(next.value==='Agendado')patch.horario=new Date(time.value).toISOString();
+        if(next.value==='Agendado'){const vaga=vagas.value();if(!vaga)return;Object.assign(patch,{horario:vaga.inicio,horario_id:vaga.id,profissional:vaga.profissional});}
+        if(next.value==='Triagem concluída'){patch.triagem=ssvv.value();if(!Object.keys(patch.triagem).length){state.textContent='Registre os sinais vitais ou o motivo de não aferição.';return;}}
         escrever(save,()=>_sb.from('agenda_ubs').update(patch).eq('id',row.id).eq('versao',row.versao).select('id').maybeSingle());
       };
     }
     function draw(){
       list.replaceChildren();const q=search.value.trim().toLocaleLowerCase('pt-BR');
       const filtered=rows.filter(r=>professional.hidden||!professional.value||r.profissional===professional.value).filter(r=>[r.cpf,patientName(r.cpf,r),r.descricao,r.profissional,r.motivo,r.estado,r.microarea,r.endereco,r.complemento].join(' ').toLocaleLowerCase('pt-BR').includes(q));
+      if(mode.value==='Agenda e fila'&&!search.value.trim()){
+        const livres=vagasDia.filter(x=>Date.parse(x.inicio)>Date.now()&&(!professional.value||x.profissional===professional.value)&&!x.agenda_ubs?.some(a=>!['Cancelado','Faltou'].includes(a.estado)));
+        if(livres.length){const free=node('details');free.append(node('summary','Horários livres ('+livres.length+')'));
+          for(const prof of new Set(livres.map(x=>x.profissional)))free.append(node('p',prof+' · '+livres.filter(x=>x.profissional===prof).map(x=>AgendaClinica.clock(x.inicio)).join(', ')));list.append(free);}
+      }
       if(mode.value==='Produção'){
         const counts=new Map();for(const r of filtered){const tipo=r.tipo||r.estado;counts.set(tipo,(counts.get(tipo)||0)+1);}
         for(const [tipo,total] of counts)list.append(node('p',tipo+' · '+total+' registro(s)'));
@@ -146,6 +158,21 @@
             if(error){state.textContent='Falha ao consultar histórico. Feche e reabra para tentar novamente.';return;}
             for(const event of data)history.append(node('p',[new Date(event.registrado_em).toLocaleString('pt-BR'),event.estado,event.responsavel,event.anotacao].filter(Boolean).join(' · ')));
           };card.append(history);
+          if(row.estado==='Agendado'||row.estado==='Aguardando atendimento'){
+            const next=row.estado==='Agendado'?'Aguardando atendimento':'Em escuta';
+            const quick=btn(row.estado==='Agendado'?'Registrar chegada':'Iniciar triagem',()=>escrever(quick,()=>_sb.from('agenda_ubs').update({estado:next}).eq('id',row.id).eq('versao',row.versao).select('id').maybeSingle()));
+            card.append(quick);
+          }
+          if(row.triagem)card.append(node('p','Triagem · '+new Date(row.triado_em).toLocaleString('pt-BR')+' — '+AgendaClinica.summary(row)));
+          if(['Triagem concluída','Em atendimento'].includes(row.estado)){
+            const type=field(card,'Tipo de consulta','','',Object.keys(MODULOS_ATENDIMENTO).filter(t=>moduloAtivo(MODULOS_ATENDIMENTO[t].page)));
+            type.value='Consulta Geral';
+            const open=btn(row.estado==='Em atendimento'?'Abrir atendimento':'Iniciar atendimento',()=>{
+              if(!type.value)return;
+              if(row.estado==='Em atendimento')AgendaClinica.encounter(row,type.value);
+              else escrever(open,()=>_sb.from('agenda_ubs').update({estado:'Em atendimento'}).eq('id',row.id).eq('versao',row.versao).select('id').maybeSingle(),()=>AgendaClinica.encounter(row,type.value));
+            });card.append(open);
+          }
           transitions(row,card);
         } else card.append(node('strong',row.descricao+' · '+(row.cpf?patientName(row.cpf):row.participantes+' participantes')),
           node('p',[row.dia,row.tipo,row.dose,row.lote&&'Lote '+row.lote,row.fabricante,row.proxima&&'Próxima dose '+row.proxima].filter(Boolean).join(' · ')));
@@ -153,7 +180,7 @@
           for(const cpf of row.participantes_cpf)members.append(node('p',patientName(cpf)));card.append(members);}
         list.append(card);
       }
-      if(!filtered.length)list.append(node('p','Nenhum registro neste recorte.'));
+      if(!filtered.length&&!list.childElementCount)list.append(node('p','Nenhum registro neste recorte.'));
     }
     async function loadPages(build){
       const result=[];
@@ -162,7 +189,7 @@
     }
     async function refresh(reset=true){
       const ticket=++sequence,key=filterKey(),u=unit.value,m=mode.value,d=day.value;
-      if(reset){rows=[];list.replaceChildren();state.textContent='Carregando…';}
+      if(reset){rows=[];vagasDia=[];list.replaceChildren();state.textContent='Carregando…';}
       if(!current()||!d||!u)return;
       try{
         const start=new Date(d+'T00:00:00'),finish=new Date(start);finish.setDate(finish.getDate()+1);
@@ -186,15 +213,17 @@
           const scheduled=await loadPages(()=>queue().or('and(horario.gte.'+a+',horario.lt.'+b+'),and(horario.is.null,criado_em.gte.'+a+',criado_em.lt.'+b+')'));
           data=prod?[...scheduled,...await loadPages(tasks)]:scheduled;
           if(!prod&&d===today()) {
-            const open=await loadPages(()=>queue().in('estado',['Aguardando atendimento','Em escuta','Em atendimento','Em observação']));
+            const open=await loadPages(()=>queue().in('estado',['Aguardando atendimento','Em escuta','Triagem concluída','Em atendimento','Em observação']));
             data=[...new Map([...data,...open].map(r=>[r.id,r])).values()];
           }
         }
         if(!current()||ticket!==sequence||key!==filterKey())return;
-        patients=carregarPacientes();data.sort((a,b)=>(a.horario||a.criado_em).localeCompare(b.horario||b.criado_em));
+        const vagas=m==='Agenda e fila'?await AgendaClinica.slots(u,d):[];
+        if(!current()||ticket!==sequence||key!==filterKey())return;
+        vagasDia=vagas;patients=carregarPacientes();data.sort((a,b)=>(a.horario||a.criado_em).localeCompare(b.horario||b.criado_em));
         rows=data;viewKey=key;
         if(!professional.hidden){
-          const selected=professional.value,names=[...new Set(rows.map(r=>r.profissional).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+          const selected=professional.value,names=[...new Set([...rows,...vagasDia].map(r=>r.profissional).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
           professional.replaceChildren(new Option('Todos os profissionais',''),...names.map(name=>new Option(name,name)));
           professional.value=names.includes(selected)?selected:'';
         }
@@ -203,7 +232,9 @@
     }
     function switchView(){professional.hidden=professional.parentElement.hidden=mode.value!=='Agenda e fila';fillForm();day.parentElement.hidden=['Aguardando vaga','Cuidado compartilhado','Imóveis'].includes(mode.value);refresh();}
     unit.onchange=()=>{professional.value='';switchView();};mode.onchange=switchView;professional.onchange=draw;day.onchange=()=>refresh();search.oninput=draw;
+    AgendaClinica.availability(toolbar,unit,day,current,()=>{refresh();fillForm();});
     toolbar.append(btn('Atualizar lista',()=>refresh()));switchView();
+    retomar={scope:s.chave,atualizar:()=>refresh(false)};
     timer=setInterval(()=>{if(current()&&!document.hidden&&!entry.open&&!list.querySelector('details[open]')&&!writeLock)refresh(false);},20000);
   }
   window.EquipeAPS={navegar,limpar};

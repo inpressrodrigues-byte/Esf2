@@ -51,19 +51,21 @@
     });
     window.ESFCiap?.restoreFromPage(prefix(page));
     const cpf=byId(prefix(page)+'-cpf');if(cpf)cpf.dataset.cpfCarregado=normalizarCPF(cpf.value);
+    window.AgendaClinica?.renderEncounter(prefix(page));
     window.EntrevistaAPS?.atualizar(prefix(page));
     window.FluxoAPS?.historico(prefix(page));
     if(page?.id==='pg-pn-consulta')window.FluxoAPS?.syncPerda();
   }
   function beforeRestore(page) {
     if (!page) return;
+    window.SolicitacoesAPS?.limpar(prefix(page));
     const defaults=initial.get(page.id)||{};
     for(const e of page.querySelectorAll('.aps-new')){if(e.type==='checkbox')e.checked=false;else e.value='';}
     for(const field of page.querySelectorAll('[id^="cm-"] input,[id^="cm-"] select,[id^="cm-"] textarea')){
       if(Object.hasOwn(defaults,field.id))continue;
       if(['radio','checkbox'].includes(field.type))field.checked=false;else field.value='';
     }
-    restoreValues(page,initial.get(page.id));
+    restoreValues(page,initial.get(page.id));window.AgendaClinica?.renderEncounter(prefix(page));
     window.ESFConsultaGuiada?.reset(prefix(page));
     page.querySelectorAll('[data-ux-key]').forEach(e=>e.classList.remove('selected'));
     if (page.id==='pg-pn-abertura' && byId('ux-risk-reviewed')) byId('ux-risk-reviewed').checked=false;

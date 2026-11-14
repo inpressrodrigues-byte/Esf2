@@ -9,10 +9,18 @@
     if(/^\d{4}-\d{2}-\d{2}$/.test(value))return value.split('-').reverse().join('/');
     const d=new Date(value);return Number.isNaN(+d)?String(value):d.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'});
   };
-  let trigger;
+  let origin='pacientes',trigger,scrollYBefore=0;
+  const sections={
+    'Identificação':['identificacao','user'],'Consultas':['consultas','clipboard'],
+    'Exames solicitados':['exames','flask'],'Medicações prescritas':['medicacoes','pill'],'Vacinas':['vacinas','syringe']
+  };
+  function icon(name){
+    const n=element('span');n.className='chart-icon';n.setAttribute('aria-hidden','true');n.innerHTML=ic(name);return n;
+  }
   function section(root,title){
     const box=element('section');box.className='prontuario-secao';
-    box.append(element('h4',title));root.append(box);return box;
+    const [key,glyph]=sections[title];box.id='prontuario-'+key;
+    const h=element('h2',title);h.prepend(icon(glyph));box.append(h);root.append(box);return box;
   }
   function line(box,title,detail){
     const item=element('article');item.className='pac-consulta';item.append(element('strong',title));
@@ -20,14 +28,17 @@
   }
   function identify(root,p,cpf){
     byId('pac-modal-titulo').textContent=p.nome||'Paciente sem nome';
+    const words=(p.nome||'').trim().split(/\s+/);
+    byId('pg-prontuario').querySelector('.chart-avatar').textContent=((words[0]?.[0]||'')+(words.length>1?words.at(-1)[0]:'')).toLocaleUpperCase('pt-BR');
+    const unit=byId('prontuario-unidade');unit.hidden=!p.unidade;unit.textContent=p.unidade||'';
     const box=section(root,'Identificação'),grid=element('div');grid.className='pac-detail-grid';box.append(grid);
     const field=(label,value)=>{const n=element('div');n.className='pac-detail-item';n.append(element('b',label),document.createTextNode(value||'Não informado'));grid.append(n);};
-    field('Nome',p.nome);field('Nascimento',p.nasc&&formatarDataBR(p.nasc));field('Cartão SUS (CNS)',p.cns);field('CPF',formatarCPF(cpf));
-    if(p.unidade)field('UBS',p.unidade);
+    field('Nascimento',p.nasc&&formatarDataBR(p.nasc));field('Cartão SUS (CNS)',p.cns);field('CPF',formatarCPF(cpf));
+    if(p.prontuario)field('Registro local',p.prontuario);
     if(p.telefone)field('Telefone',p.telefone);
     const extra=element('details');extra.append(element('summary','Mais dados do cadastro'));
     for(const [key,label,type] of PACIENTE_CAMPOS_EDICAO){
-      if(['nome','nasc','cns','cpf','telefone'].includes(key)||!p[key])continue;
+      if(['nome','nasc','cns','cpf','telefone','prontuario'].includes(key)||!p[key])continue;
       extra.append(element('p',label+' — '+(type==='date'?formatarDataBR(p[key]):p[key])));
     }
     if(extra.childElementCount>1)box.append(extra);
@@ -48,7 +59,13 @@
     for(const r of rows){
       const details=element('details');details.className='pac-consulta';
       const author=r.profissional||'Profissional não registrado',when=join(date(r.data),author);
-      details.append(element('summary',join(date(r.data),r.tipo||'Consulta',author)),element('p',r.soap||'SOAP não registrado nesta consulta.'));
+      const summary=element('summary'),info=element('span'),time=element('span',date(r.data)),chevron=element('span','⌄');
+      info.className='chart-visit-info';time.className='chart-time';chevron.className='chart-chevron';chevron.setAttribute('aria-hidden','true');
+      info.append(element('strong',r.tipo||'Consulta'),element('small',author));
+      summary.append(time,info,chevron);details.classList.add('chart-visit');
+      details.append(summary,element('p',r.soap||'SOAP não registrado nesta consulta.'));
+      const tri=json(r.dados?.[MODULOS_ATENDIMENTO[r.tipo]?.prefix+'-triagem-agenda']);
+      if(tri?.cpf===cpf&&tri.medidas)details.append(element('p','Triagem · '+date(tri.em)+' — '+AgendaClinica.summary({triagem:tri.medidas})));
       if(meus.has(r.id)&&MODULOS_ATENDIMENTO[r.tipo]&&Object.keys(r.dados||{}).length){
         const reopen=element('button','Reabrir minha consulta');reopen.type='button';reopen.className='btn btn-s';
         reopen.onclick=()=>{fecharPaciente();reabrirAtendimento(r.id);};details.append(reopen);
@@ -103,20 +120,49 @@
     }
     if(!seen.size&&!failed)box.append(element('p','Nenhuma dose registrada.'));
   }
-  function devolverFoco(){if(trigger?.isConnected)trigger.focus({preventScroll:true});trigger=null;}
+  function limpar(){
+    PACIENTE_MODAL_CPF='';
+    byId('pac-modal-conteudo').replaceChildren();byId('pac-modal-titulo').textContent='Prontuário';
+    byId('prontuario-unidade').replaceChildren();byId('prontuario-unidade').hidden=true;
+    byId('pg-prontuario').querySelector('.chart-avatar').replaceChildren();
+    byId('prontuario-acoes').hidden=true;byId('prontuario-acoes').open=false;
+    trigger=null;origin='pacientes';scrollYBefore=0;
+  }
+  function voltar(){
+    const focus=trigger,offset=scrollYBefore;
+    const target=moduloAtivo(origin)?origin:'inicio';
+    go(target,document.querySelector('.nb[data-ux-page="'+target+'"]'));
+    if(focus?.isConnected)focus.focus({preventScroll:true});
+    window.scrollTo({top:offset,behavior:'instant'});
+  }
+  function shortcuts(root){
+    const nav=element('nav');nav.className='chart-jumps';nav.setAttribute('aria-label','Seções do prontuário');
+    for(const [label,[key,glyph]] of Object.entries(sections).slice(1)){
+      const link=element('a',label),target=byId('prontuario-'+key);link.href='#'+target.id;link.prepend(icon(glyph));
+      link.onclick=e=>{e.preventDefault();target.tabIndex=-1;target.focus({preventScroll:true});target.scrollIntoView({block:'start'});};nav.append(link);
+    }
+    root.querySelector('section').after(nav);
+  }
   async function abrir(cpf,selectedUnit){
     const scope=escopoDadosClinicos();
     if(!scope.permitido||!temPermissao('ver_historico'))return;
     const cached=carregarPacientes()[cpf],unit=selectedUnit||cached?.unidade||scope.unidade;
     if(!scope.municipal&&unit!==scope.unidade)return;
-    const root=element('div'),modal=byId('pac-modal');
-    if(!modal.classList.contains('open'))trigger=document.activeElement;
+    const root=element('div'),page=byId('pg-prontuario');
+    if(!page.classList.contains('on')){
+      origin=document.querySelector('.pg.on')?.id.slice(3)||'pacientes';
+      trigger=document.activeElement;scrollYBefore=window.scrollY;
+    }
+    byId('prontuario-voltar').textContent='← '+({equipe:'Voltar à agenda',pacientes:'Voltar aos pacientes','busca-ativa':'Voltar à busca ativa',territorio:'Voltar ao território'}[origin]||'Voltar');
+    byId('prontuario-unidade').hidden=true;byId('prontuario-unidade').textContent='';page.querySelector('.chart-avatar').replaceChildren(icon('user'));
+    byId('prontuario-acoes').open=false;
     PACIENTE_MODAL_CPF=cpf;
     const current=()=>root.isConnected&&PACIENTE_MODAL_CPF===cpf&&escopoDadosClinicos().chave===scope.chave&&temPermissao('ver_historico');
     byId('pac-modal-conteudo').replaceChildren(root);byId('pac-modal-titulo').textContent='Prontuário';
     const actions=(enabled)=>{for(const id of ['pac-editar-btn','pac-excluir-btn'])byId(id).disabled=!enabled;};
-    actions(false);modal.classList.add('open');modal.querySelector('.edit-panel').scrollTop=0;
-    modal.querySelector('.edit-cancel-btn').focus({preventScroll:true});
+    actions(false);byId('prontuario-acoes').hidden=true;byId('pac-excluir-btn').hidden=!scope.municipal;
+    if(!page.classList.contains('on'))go('prontuario');
+    byId('pac-modal-titulo').focus({preventScroll:true});window.scrollTo({top:0,behavior:'instant'});
     const online=!!_sb&&!window.MODO_OFFLINE&&navigator.onLine;
     const message=element('p','Carregando prontuário…');message.setAttribute('role','status');root.append(message);
     let patient=cached;
@@ -134,7 +180,7 @@
       }catch{if(current())message.textContent='Não foi possível verificar o cadastro. Feche e abra o prontuário para tentar novamente.';return;}
     }
     if(!patient||(!scope.municipal&&patient.unidade!==scope.unidade)){message.textContent='Cadastro indisponível nesta UBS.';return;}
-    root.replaceChildren();identify(root,patient,cpf);actions(true);
+    root.replaceChildren();identify(root,patient,cpf);actions(true);byId('prontuario-acoes').hidden=false;
     registrarAuditoria('Prontuário consultado','CPF final '+String(cpf).slice(-4));
     const local=carregarAtendimentos().filter(r=>r.cpf===cpf&&(r.unidade||null)===(patient.unidade||null));
     let visits=local,doses=[],warning='Histórico local. Conecte-se para consultar a equipe.',doseError=true;
@@ -153,11 +199,10 @@
     }
     visits.sort((a,b)=>(Date.parse(b.data)||0)-(Date.parse(a.data)||0));
     const transcribed=consultations(root,visits,cpf,patient.nasc,warning);
-    renderDoses(root,[...doses,...transcribed],doseError);
+    renderDoses(root,[...doses,...transcribed],doseError);shortcuts(root);
   }
   document.addEventListener('DOMContentLoaded',()=>{
     for(const cfg of Object.values(MODULOS_ATENDIMENTO)){
-      if(cfg.prefix==='ist')continue; // O módulo já possui um campo de tratamento realizado.
       const plan=byId(cfg.soap[3]);if(!plan)continue;
       const box=element('details'),label=element('label','Medicamento, apresentação e posologia'),input=element('textarea');
       box.className='support-section';input.className='aps-new';input.rows=2;input.id=cfg.prefix+'-prescricoes-registradas';
@@ -166,7 +211,7 @@
     }
   });
   document.addEventListener('keydown',e=>{
-    if(e.key==='Escape'&&byId('pac-modal')?.classList.contains('open')){e.preventDefault();fecharPaciente();}
+    if(e.key==='Escape'&&byId('pg-prontuario')?.classList.contains('on')){e.preventDefault();fecharPaciente();}
   });
-  window.ProntuarioAPS={abrir,devolverFoco};
+  window.ProntuarioAPS={abrir,voltar,limpar};
 })();

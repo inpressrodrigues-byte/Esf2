@@ -11,7 +11,7 @@
     const page=document.getElementById('pg-'+cfg.page);window.ESFUsability?.beforeRestore(page);window.ESFCiap?.restore(cfg.prefix,[]);
     page?.querySelectorAll('.ux-draft-prompt').forEach(e=>e.remove());
    }
-   ATENDIMENTO_EM_EDICAO=null;fecharPaciente();limparCadastroTerritorial();
+   ATENDIMENTO_EM_EDICAO=null;window.ProntuarioAPS?.limpar();limparCadastroTerritorial();
    document.querySelectorAll('.edit-modal.open').forEach(e=>e.classList.remove('open'));
    for(const id of ['pac-lista','hist-lista','rel-conteudo','terr-lista','ind-ciap'])document.getElementById(id)?.replaceChildren();
   }
@@ -29,12 +29,10 @@
  }
  function mostrarVinculo(cpf,p,out){
    if(!escopoDadosClinicos().municipal)return;
-   const box=document.createElement('div');box.className='alert alert-i';
-   const label=document.createElement('label');label.textContent='UBS do cadastro: '+(p.unidade||'Não vinculada — acesso restrito à gestão municipal');box.append(label);
-   {
-    const select=document.createElement('select');select.id='pac-vinculo-ubs';select.setAttribute('aria-label','UBS do cadastro');select.innerHTML=ESFUnidades.options(p.unidade||'');
-    const button=document.createElement('button');button.type='button';button.className='btn btn-s';button.textContent='Salvar vínculo de UBS';button.onclick=()=>vincular(cpf);box.append(select,button);
-   }
+   const box=document.createElement('details');box.className='chart-transfer';
+   const title=document.createElement('summary');title.textContent='Alterar vínculo de UBS';box.append(title);
+   const select=document.createElement('select');select.id='pac-vinculo-ubs';select.setAttribute('aria-label','UBS do cadastro');select.innerHTML=ESFUnidades.options(p.unidade||'');
+   const button=document.createElement('button');button.type='button';button.className='btn btn-s';button.textContent='Salvar vínculo de UBS';button.onclick=()=>vincular(cpf);box.append(select,button);
    out.append(box);
  }
  window.ESFEscopo={atualizar,vincular,mostrarVinculo};

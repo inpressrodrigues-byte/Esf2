@@ -66,6 +66,32 @@ test('Equipe da UBS compartilha agenda, mantém histórico e protege vaga, vers�
  });
 });
 async function as(who,fn){await db.query("select set_config('request.jwt.claim.sub',$1,false)",[ids[who]||'']);await db.exec('set role '+(who==='anon'?'anon':'authenticated'));try{return await fn();}finally{await db.exec('reset role');}}
+test('Agenda individual valida vagas, sobreposição, reagendamento e triagem antes da consulta',async()=>{
+ await db.exec('alter table public.perfis add column nome text');
+ await db.query('update perfis set nome=$1 where user_id=$2',['Nome A',ids.a]);
+ await db.exec(fs.readFileSync(require('node:path').join(__dirname,'../supabase/migrations/202611140002_agenda_triagem.sql'),'utf8'));
+ let first,second,id;
+ await as('a',async()=>{
+   const add="insert into agenda_horarios(unidade,profissional,inicio,duracao) values($1,'Nome A',$2,30) returning id";
+   first=(await db.query(add,[A,'2099-09-10 09:00Z'])).rows[0].id;
+   await assert.rejects(db.query(add,[A,'2099-09-10 09:15Z']),/unique/i);
+   second=(await db.query(add,[A,'2099-09-10 10:00Z'])).rows[0].id;
+ });
+ await as('colega',async()=>{
+   const book="insert into agenda_ubs(unidade,cpf,estado,profissional,horario,horario_id,motivo) values($1,'11111111111','Agendado','Nome A',$2,$3,'Retorno') returning id";
+   await assert.rejects(db.query(book,[A,'2099-09-10 09:15Z',first]),/horário/i);
+   id=(await db.query(book,[A,'2099-09-10 09:00Z',first])).rows[0].id;
+   await assert.rejects(db.query(book,[A,'2099-09-10 09:00Z',first]),/unique/i);
+   await db.query("update agenda_ubs set horario_id=$1,horario='2099-09-10 10:00Z' where id=$2",[second,id]);
+   await db.query("update agenda_ubs set estado='Aguardando atendimento' where id=$1",[id]);
+   await assert.rejects(db.query("update agenda_ubs set estado='Em atendimento' where id=$1",[id]),/Transição/);
+   await db.query("update agenda_ubs set estado='Em escuta' where id=$1",[id]);
+   await assert.rejects(db.query("update agenda_ubs set estado='Triagem concluída' where id=$1",[id]),/medidas/);
+   await db.query("update agenda_ubs set estado='Triagem concluída',triagem=$1 where id=$2",[JSON.stringify({pas:'120',pad:'80'}),id]);
+ });
+ await as('a',async()=>{const r=(await db.query("update agenda_ubs set estado='Em atendimento' where id=$1 returning triagem,triado_por",[id])).rows[0];assert.equal(r.triagem.pas,'120');assert.equal(r.triado_por,ids.colega);});
+ await as('b',async()=>assert.equal((await db.query('select * from agenda_horarios')).rows.length,0));
+});
 test('UBS: leitura separada por unidade; sem UBS e bloqueado não leem; gestão vê pendentes',async()=>{
  for(const [who,expected]of [['a',['11111111111']],['b',['22222222222']],['none',[]],['blocked',[]],['admin',['11111111111','22222222222','33333333333']]])await as(who,async()=>assert.deepEqual((await db.query('select cpf from pacientes order by cpf')).rows.map(r=>r.cpf),expected));
  await as('anon',()=>assert.rejects(db.query('select * from pacientes'),/permission denied/));

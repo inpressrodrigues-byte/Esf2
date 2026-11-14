@@ -926,8 +926,10 @@ body.sidebar-collapsed .dev-nav{display:none}
 <script defer src="assets/estratificacao.js"></script>
 <script defer src="assets/continuidade.js"></script>
 <script defer src="assets/avaliacoes-aps.js"></script>
+<script defer src="assets/agenda-clinica.js"></script>
 <script defer src="assets/equipe.js"></script>
 <script defer src="assets/prontuario.js"></script>
+<script defer src="assets/solicitacoes.js"></script>
 </head>
 <body>
 
@@ -4037,11 +4039,20 @@ body.sidebar-collapsed .dev-nav{display:none}
   </div>
 </div>
 
-<div class="edit-modal" id="pac-modal" role="dialog" aria-modal="true" aria-labelledby="pac-modal-titulo" onclick="if(event.target===this)fecharPaciente()">
-  <div class="edit-panel" style="max-width:760px">
-    <h3 id="pac-modal-titulo">Paciente</h3>
+<div class="pg" id="pg-prontuario" aria-labelledby="pac-modal-titulo">
+  <div class="chart-layout">
+    <div class="chart-toolbar">
+      <button type="button" id="prontuario-voltar" onclick="fecharPaciente()">← Voltar</button>
+      <details id="prontuario-acoes" hidden><summary>Gerenciar cadastro</summary><div>
+        <button type="button" id="pac-editar-btn" onclick="editarCadastroPacienteAtual()">Editar cadastro</button>
+        <button type="button" id="pac-excluir-btn" onclick="excluirCadastroPacienteAtual()">Excluir cadastro</button>
+      </div></details>
+    </div>
+    <header class="chart-header"><div class="chart-avatar" aria-hidden="true"></div><div>
+      <span>Prontuário do paciente</span><h1 id="pac-modal-titulo" tabindex="-1">Prontuário</h1>
+      <p id="prontuario-unidade" hidden></p>
+    </div></header>
     <div id="pac-modal-conteudo"></div>
-    <div class="edit-actions"><button class="btn btn-s" id="pac-editar-btn" onclick="editarCadastroPacienteAtual()">Editar cadastro</button><button class="btn" id="pac-excluir-btn" onclick="excluirCadastroPacienteAtual()" style="background:#fff0f3;border-color:#b32848;color:#8d1537">Excluir cadastro</button><button class="edit-cancel-btn" onclick="fecharPaciente()">Fechar</button></div>
   </div>
 </div>
 
@@ -4539,6 +4550,8 @@ function go(id,btn){
   if(['busca-ativa','indicadores','territorio','relatorios','equipe'].includes(id)&&!exigirPermissao('ver_historico','Seu perfil não possui permissão para visualizar dados de gestão assistencial.'))return;
   if(id==='editor'&&!exigirPermissao('editar_protocolos','Seu perfil não possui permissão para editar protocolos.'))return;
   if(id==='reportes'&&!exigirPermissao('reportar_erro','Seu perfil não possui permissão para enviar relatos.'))return;
+  if(id==='prontuario'&&(!PACIENTE_MODAL_CPF||!temPermissao('ver_historico')))return;
+  if(id!=='prontuario'&&PACIENTE_MODAL_CPF)window.ProntuarioAPS?.limpar();
   window.ESFUsability?.beforeNavigate();
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
@@ -7963,6 +7976,7 @@ async function buscarPacientePorCPF(input){
   input.value=formatarCPF(cpf);
   const prefix=input.id.split('-')[0], locais=carregarPacientes(),escopo=escopoDadosClinicos().chave;
   if(input.dataset.cpfCarregado&&input.dataset.cpfCarregado!==cpf){
+    window.SolicitacoesAPS?.limpar(prefix);
     const prescricao=document.getElementById(prefix+'-prescricoes-registradas');if(prescricao)prescricao.value='';
     for(const [chave,id] of Object.entries(CAMPOS_PACIENTE[prefix]||{})){
       const el=document.getElementById(id);
@@ -8049,13 +8063,7 @@ let PACIENTE_MODAL_CPF='';
 function abrirPaciente(cpf,unidade){
   window.ProntuarioAPS.abrir(cpf,unidade);
 }
-function fecharPaciente(){
-  document.getElementById('pac-modal').classList.remove('open');
-  document.getElementById('pac-modal-conteudo').replaceChildren();
-  document.getElementById('pac-modal-titulo').textContent='Prontuário';
-  PACIENTE_MODAL_CPF='';
-  window.ProntuarioAPS?.devolverFoco();
-}
+function fecharPaciente(){window.ProntuarioAPS?.voltar();}
 const PACIENTE_CAMPOS_EDICAO=[
   ['nome','Nome completo','text'],['cpf','CPF','text'],['cns','CNS','text'],['nasc','Data de nascimento','date'],
   ['prontuario','Prontuário / registro local','text'],['telefone','Telefone / WhatsApp','text'],['cep','CEP','text'],['logradouro','Logradouro','text'],
@@ -8070,7 +8078,8 @@ const PACIENTE_CAMPOS_EDICAO=[
 ];
 function editarCadastroPacienteAtual(){
   const cpf=PACIENTE_MODAL_CPF,d=carregarPacientes()[cpf];if(!d)return;
-  document.getElementById('pac-modal-titulo').textContent='Editar cadastro do paciente';
+  document.getElementById('prontuario-acoes').open=false;
+  document.getElementById('prontuario-acoes').hidden=true;
   const campo=([k,l,t])=>`<div class="f ${k==='endereco'||k==='cronicas'?'span2':''}"><label>${escTR(l)}</label>${t==='textarea'?`<textarea id="pac-edit-${k}">${escTR(d[k]||'')}</textarea>`:`<input id="pac-edit-${k}" type="${t}" value="${escTR(k==='cpf'?formatarCPF(cpf):(d[k]||''))}">`}</div>`;
   document.getElementById('pac-modal-conteudo').innerHTML=`<div class="alert alert-i">Atualize documentação, endereço, território e informações familiares. O histórico de consultas é preservado.</div><div class="patient-edit-grid">${PACIENTE_CAMPOS_EDICAO.map(campo).join('')}</div><div class="edit-actions"><button class="btn btn-p" onclick="salvarEdicaoPaciente()">Salvar alterações</button><button class="btn btn-s" onclick="abrirPaciente('${cpf}')">Cancelar</button></div>`;
 }
@@ -8948,6 +8957,7 @@ function restaurarDadosModulo(prefix,dados){
   window.ESFUsability?.restore(pagina,dados?.__interface);
   const campoCpf=document.getElementById(prefix+'-cpf');if(campoCpf)campoCpf.dataset.cpfCarregado=normalizarCPF(campoCpf.value);
   window.EntrevistaAPS?.atualizar(prefix);
+  window.AgendaClinica?.renderEncounter(prefix);
   if(window.ESFCiap)window.ESFCiap.restore(prefix,dados?.__ciap2||[]);
   if(prefix==='pna'){idadeGest();calcIG('pna');avaliarProtocolosPna();atualizarTestesRapidosPna();}
   if(prefix==='pnc'){calcAge('pnc-nasc','pnc-idade');calcIG('pnc');checkPncQueixas();checkPncVitais();}

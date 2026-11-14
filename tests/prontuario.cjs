@@ -16,7 +16,7 @@ module.exports=async page=>{
         {id:4,paciente_cpf:cpf,unidade:'Outra UBS',soap:'Outra unidade'}],
       acoes_ubs:[{id:3,cpf,unidade:unit,tipo:'Dose aplicada',dia:'2026-10-08',descricao:'Vacina de teste',dose:'Primeira dose',lote:'X'}]
     };
-    _sb={from(table){let data=tables[table]||[];const api={select(){return api;},order(){return api;},eq(k,v){data=data.filter(r=>r[k]===v);return api;},in(k,vs){data=data.filter(r=>vs.includes(r[k]));return api;},or(){return api;},range(a,b){return Promise.resolve({data:data.slice(a,b+1)});},maybeSingle(){return Promise.resolve({data:data[0]});}};return api;}};
+    _sb={from(table){let data=tables[table]||[];const api={gte(){return api;},lt(){return api;},select(){return api;},order(){return api;},eq(k,v){data=data.filter(r=>r[k]===v);return api;},in(k,vs){data=data.filter(r=>vs.includes(r[k]));return api;},or(){return api;},range(a,b){return Promise.resolve({data:data.slice(a,b+1)});},maybeSingle(){return Promise.resolve({data:data[0]});}};return api;}};
     const user={id:CURRENT_AUTH_USER_ID,email:'teste@exemplo.invalid',user_metadata:{nome:'Profissional A'}};
     const from=_sb.from;_sb.from=function(table){
       if(table==='perfis')return {select(){return this;},eq(){return this;},maybeSingle(){return Promise.resolve({data:{nome:'Profissional A',unidade:unit,permissoes:{ver_historico:true}}});}};
@@ -32,17 +32,25 @@ module.exports=async page=>{
   await patient.first().waitFor();assert.equal(await patient.count(),2);
   await filter.selectOption('Profissional B');assert.equal(await patient.count(),1);
   await patient.click();
-  const chart=page.locator('#pac-modal');
+  const chart=page.locator('#pg-prontuario');
   await chart.getByText('Vacina de teste · Primeira dose').waitFor();
-  assert.deepEqual(await chart.locator('h4').allTextContents(),['Identificação','Consultas','Exames solicitados','Medicações prescritas','Vacinas']);
+  assert.deepEqual(await chart.locator('h2').allTextContents(),['Identificação','Consultas','Exames solicitados','Medicações prescritas','Vacinas']);
   const visits=chart.locator('section').nth(1);
-  assert.match(await visits.locator('summary').first().innerText(),/02\/11\/2026.*Profissional A/);
-  await visits.getByText(/01\/11\/2026.*Consulta Geral.*Profissional B/).click();
+  assert.match(await visits.locator('summary').first().innerText(),/02\/11\/2026[\s\S]*Profissional A/);
+  await visits.locator('summary').filter({hasText:'Profissional B'}).click();
   assert.match(await visits.innerText(),/relato fictício/);
   const all=await chart.textContent();for(const term of ['CNS fictício','Exame solicitado A','Resultado fictício A','Prescrição fictícia A','Lote X'])assert.ok(all.includes(term),term);
   for(const term of ['Somente em uso','Exame descartado','Outro paciente','Outra unidade'])assert.ok(!all.includes(term),term);
-  await page.keyboard.press('Escape');assert.equal(await chart.isVisible(),false);
+  await chart.getByRole('link',{name:'Vacinas'}).click();
+  for(const w of [1440,390]){
+    await page.setViewportSize({width:w,height:w===390?844:960});await page.evaluate(()=>window.scrollTo(0,0));
+    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+    if(process.env.ESF_CHART_PREVIEW)await page.screenshot({path:require('node:path').join(process.env.ESF_CHART_PREVIEW,'prontuario-'+w+'.png')});
+  }
+  await chart.getByRole('button',{name:'Voltar à agenda'}).click();assert.equal(await chart.isVisible(),false);
   assert.equal(await page.locator('.pg.on').getAttribute('id'),'pg-equipe');
+  assert.equal(await filter.inputValue(),'Profissional B');
+  await page.setViewportSize({width:1440,height:1000});
   await page.evaluate(()=>{go('consulta-geral');verificarAcesso({user:{id:CURRENT_AUTH_USER_ID}},'TOKEN_REFRESHED');_sb=null;});
   assert.equal(await page.locator('.pg.on').getAttribute('id'),'pg-consulta-geral');
   console.log('PASS Agenda da unidade, filtro por profissional, prontuário em ordem, SOAP, pedidos, prescrições e doses do paciente.');
