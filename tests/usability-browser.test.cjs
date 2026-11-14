@@ -14,8 +14,8 @@ async function main(){try{
  await check('Interface inicializa e todas as abas usam botões acessíveis',async()=>{
   assert.deepEqual(errors,[]);assert.equal(await page.locator('body.ux-compact').count(),1);assert.equal(await page.locator('.tabs .tab:not(button)').count(),0);assert.equal(await page.locator('button.tab[role=tab]').count(),69);
  });
- await check('25 páginas e 69 abas abrem sem perder o estado ativo',async()=>{
-  const ids=await page.locator('.pg').evaluateAll(nodes=>nodes.map(n=>n.id));assert.equal(ids.length,25);
+ await check('26 páginas, incluindo Agenda e equipe, abrem sem perder a aba ativa',async()=>{
+  const ids=await page.locator('.pg').evaluateAll(nodes=>nodes.map(n=>n.id));assert.equal(ids.length,26);assert.ok(ids.includes('pg-equipe'));
   for(const id of ids){await page.evaluate(id=>go(id.slice(3)),id);const tabs=page.locator('#'+id+' .tabs .tab');for(let i=0;i<await tabs.count();i++){await tabs.nth(i).evaluate(e=>e.click());assert.equal(await tabs.nth(i).getAttribute('aria-selected'),'true');}}
   assert.deepEqual(errors,[]);
  });

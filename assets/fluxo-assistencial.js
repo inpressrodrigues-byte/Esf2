@@ -15,6 +15,7 @@ const triagens=['pezinho','orelhinha','olhinho','coracao','lingua'];
 function historico(p){
  const box=id(p+'-historico-consulta');if(!box)return;box.replaceChildren();const records=registros(p);box.hidden=!records.length;
  window.SeguimentoAPS?.mostrar(p,records);
+ window.ContinuidadeAPS?.mostrar(p,records);
  if(p==='pu')for(const k of triagens){
    const hint=id('pu-anterior-'+k),a=records.find(a=>a.tipo==='Puericultura'&&(a.dados['pu-t-'+k]||a.dados['cm1m-t-'+k]));
    if(hint)hint.textContent=a?'Registrado em '+dateOf(a)+': '+(a.dados['pu-t-'+k]||a.dados['cm1m-t-'+k])+'. Preencha se houver atualização.':'';

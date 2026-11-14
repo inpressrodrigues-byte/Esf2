@@ -28,6 +28,39 @@ test.before(async()=>{
  await db.exec(sql);await db.exec(sql);
 });
 test.after(async()=>db.close());
+test('Equipe da UBS compartilha agenda, mantém histórico e protege vaga, versão, dose e território',async()=>{
+ const migration=fs.readFileSync(require('node:path').join(__dirname,'../supabase/migrations/202611130001_agenda_ubs.sql'),'utf8');
+ await db.exec(migration);
+ const colega='00000000-0000-4000-8000-000000000009';
+ await db.query('insert into profiles(id,unidade,perfil) values($1,$2,$3)',[colega,A,'enfermeiro']);
+ await db.query('insert into perfis values($1,$2,$3)',[colega,A,JSON.stringify({unidade_escopo:A,ver_historico:true})]);
+ ids.colega=colega;
+ await db.query("update perfis set permissoes=permissoes||'{\"ver_historico\":true}' where user_id in ($1,$2)",[ids.a,ids.b]);
+ const insert="insert into agenda_ubs(unidade,cpf,estado,profissional,horario,motivo) values($1,$2,'Agendado','Enfermeira','2026-11-10 12:00Z','Retorno fictício') returning id";
+ let id;
+ await as('a',async()=>{
+   id=(await db.query(insert,[A,'11111111111'])).rows[0].id;
+   await assert.rejects(db.query(insert,[A,'11111111111']),/unique/i);
+   await assert.rejects(db.query(insert,[B,'22222222222']),/row-level/);
+   await assert.rejects(db.query("insert into acoes_ubs(unidade,cpf,tipo,dia,descricao,dose) values($1,'11111111111','Dose aplicada','2026-01-02','Exemplo','1')",[A]),/check constraint/i);
+   await db.query("insert into acoes_ubs(unidade,cpf,tipo,dia,descricao,dose,lote,fabricante) values($1,'11111111111','Dose aplicada','2026-01-02','Exemplo','1','X','Y')",[A]);
+   await db.query("insert into acoes_ubs(unidade,tipo,dia,descricao,participantes,participantes_cpf) values($1,'Atividade coletiva','2026-01-02','Grupo',2,array['11111111111'])",[A]);
+   await assert.rejects(db.query("insert into acoes_ubs(unidade,tipo,dia,descricao,participantes,participantes_cpf) values($1,'Atividade coletiva','2026-01-02','Grupo',2,array['22222222222'])",[A]),/participantes/);
+   const imovel=(await db.query("insert into imoveis_ubs(unidade,microarea,endereco) values($1,'01','Teste local') returning id",[A])).rows[0].id;
+   await assert.rejects(db.query("update imoveis_ubs set ativo=false where id=$1",[imovel]),/motivo/);
+   await db.query("update imoveis_ubs set ativo=false,justificativa='Duplicidade' where id=$1 and versao=1",[imovel]);
+ });
+ await as('colega',async()=>{
+   for(const [i,est] of ['Aguardando atendimento','Em escuta','Compartilhado','Respondido','Concluído'].entries()){
+     assert.equal((await db.query("update agenda_ubs set estado=$1,devolutiva='Anotação fictícia' where id=$2 and versao=$3 returning versao",[est,id,i+1])).rows[0].versao,i+2);
+   }
+   assert.equal((await db.query('select * from agenda_ubs_historico where agenda_id=$1',[id])).rows.length,6);
+   assert.equal((await db.query("update agenda_ubs set estado='Cancelado' where id=$1 and versao=1 returning id",[id])).rows.length,0);
+ });
+ for(const who of ['b','blocked','none'])await as(who,async()=>{
+   for(const table of ['agenda_ubs','agenda_ubs_historico','acoes_ubs','imoveis_ubs'])assert.equal((await db.query('select * from '+table)).rows.length,0);
+ });
+});
 async function as(who,fn){await db.query("select set_config('request.jwt.claim.sub',$1,false)",[ids[who]||'']);await db.exec('set role '+(who==='anon'?'anon':'authenticated'));try{return await fn();}finally{await db.exec('reset role');}}
 test('UBS: leitura separada por unidade; sem UBS e bloqueado não leem; gestão vê pendentes',async()=>{
  for(const [who,expected]of [['a',['11111111111']],['b',['22222222222']],['none',[]],['blocked',[]],['admin',['11111111111','22222222222','33333333333']]])await as(who,async()=>assert.deepEqual((await db.query('select cpf from pacientes order by cpf')).rows.map(r=>r.cpf),expected));

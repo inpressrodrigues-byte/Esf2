@@ -922,6 +922,8 @@ body.sidebar-collapsed .dev-nav{display:none}
 <script defer src="assets/crescimento.js"></script>
 <script defer src="assets/fluxo-assistencial.js"></script>
 <script defer src="assets/seguimento.js"></script>
+<script defer src="assets/continuidade.js"></script>
+<script defer src="assets/equipe.js"></script>
 </head>
 <body>
 
@@ -947,6 +949,7 @@ body.sidebar-collapsed .dev-nav{display:none}
       <button class="nb" onclick="go('pni',this)">✦ PNI / Vacinação</button>
       <button class="nb" onclick="go('auditoria-clinica',this)">▣ Auditoria Clínica</button>
     <button class="nb" onclick="go('busca-ativa',this)">⌕ Busca Ativa</button>
+    <button class="nb" onclick="go('equipe',this)">Agenda e equipe</button>
     <button class="nb" onclick="go('indicadores',this)">▥ Indicadores</button>
     <button class="nb" onclick="go('territorio',this)">⌂ Território</button>
     <button class="nb" onclick="go('relatorios',this)">▧ Relatórios</button>
@@ -3881,8 +3884,13 @@ body.sidebar-collapsed .dev-nav{display:none}
 </div>
 
 <!-- ══ GESTÃO DA ESF ══ -->
+<div class="pg" id="pg-equipe">
+  <div class="sh"><div><div class="sh-t">Agenda e equipe</div><div class="sh-s">Agenda, fila, cuidado compartilhado e produção da UBS</div></div></div>
+  <div id="equipe-painel"></div>
+</div>
 <div class="pg" id="pg-busca-ativa">
   <div class="sh"><div class="sh-ic ic-r">⌕</div><div><div class="sh-t">Busca Ativa ESF</div><div class="sh-s">Alertas automáticos para acompanhamento longitudinal</div></div></div>
+  <details class="card"><summary>Listas de acompanhamento</summary><label class="f">População<select id="ba-populacao"><option>Problemas ativos</option><option>Exames a revisar</option><option>Rastreamento e saúde da mulher</option><option>Pessoa idosa</option></select></label><div id="ba-acompanhados"></div></details>
   <div class="card">
     <div class="gestao-filtros">
       <div class="f"><label for="ba-busca">Buscar paciente</label><input id="ba-busca" oninput="buscaGestaoDebounce(renderBuscaAtiva)" placeholder="Nome, CPF, CNS ou microárea"></div>
@@ -3922,6 +3930,7 @@ body.sidebar-collapsed .dev-nav{display:none}
       <div class="f"><label for="terr-filtro-grupo">Grupo</label><select id="terr-filtro-grupo" onchange="renderTerritorio()"><option value="">Todos</option><option value="visita">Precisa de visita</option><option value="vulneravel">Família vulnerável</option><option value="faltoso">Faltoso</option><option value="sem_acomp">Sem acompanhamento</option></select></div>
     </div>
     <div class="gestao-kpis" id="terr-kpis"></div>
+    <details class="support-section" id="terr-familias-resumo"></details>
     <div id="terr-resumo-microareas" style="margin-bottom:14px"></div>
     <div class="territorio-layout">
       <div class="gestao-table-wrap territorio-list" id="terr-lista"></div>
@@ -4523,7 +4532,7 @@ function go(id,btn){
   if(id!=='inicio'&&!moduloAtivo(id))return showToast('Este módulo está temporariamente desativado pelo administrador.');
   if(id==='historico'&&!exigirPermissao('ver_historico','Seu perfil não possui permissão para visualizar o histórico.'))return;
   if(id==='pacientes'&&!exigirPermissao('ver_historico','Seu perfil não possui permissão para visualizar o banco de pacientes.'))return;
-  if(['busca-ativa','indicadores','territorio','relatorios'].includes(id)&&!exigirPermissao('ver_historico','Seu perfil não possui permissão para visualizar dados de gestão assistencial.'))return;
+  if(['busca-ativa','indicadores','territorio','relatorios','equipe'].includes(id)&&!exigirPermissao('ver_historico','Seu perfil não possui permissão para visualizar dados de gestão assistencial.'))return;
   if(id==='editor'&&!exigirPermissao('editar_protocolos','Seu perfil não possui permissão para editar protocolos.'))return;
   if(id==='reportes'&&!exigirPermissao('reportar_erro','Seu perfil não possui permissão para enviar relatos.'))return;
   window.ESFUsability?.beforeNavigate();
@@ -4538,6 +4547,7 @@ function go(id,btn){
   if(id==='inicio')atualizarResumoDashboard();
   if(id==='reportes')setTimeout(carregarReportes,50);
   if(id==='busca-ativa')setTimeout(renderBuscaAtiva,50);
+  window.EquipeAPS?.navegar(id);
   if(id==='indicadores')setTimeout(renderIndicadores,50);
   if(id==='territorio')setTimeout(renderTerritorio,50);
   if(id==='relatorios')setTimeout(renderRelatorio,50);
@@ -8219,7 +8229,7 @@ document.addEventListener('change',e=>{if(e.target.matches?.('.dnpm-marco')||e.t
 document.addEventListener('input',e=>{if(e.target.id==='pu-nasc')avaliarDNPMAutomatico();});
 
 // ══ GESTÃO DA ESF, TERRITÓRIO, IVCF-20 E PLANO DE CUIDADOS ══
-const GESTAO_STATUS_KEY='esf_busca_ativa_status_v1';
+function chaveStatusBusca(){return 'esf_busca_ativa_status_v2:'+escopoDadosClinicos().chave;}
 const GESTAO_ACOES=['Agendar consulta','Visita domiciliar','Contato telefônico','ACS realizar busca','Encaminhar','Atualizar cadastro'];
 const gestEsc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const diasDesde=d=>d?Math.floor((Date.now()-new Date(d).getTime())/86400000):99999;
@@ -8237,7 +8247,7 @@ function dadoAtendimento(a,id){const v=a?.dados?.[id];return typeof v==='object'
 function temDadoAtendimento(a,fragmento){return Object.entries(a?.dados||{}).some(([k,v])=>k.includes(fragmento)&&String(typeof v==='object'?v.value||v.checked:v||'').trim()&&!['false','-','—'].includes(String(v)))}
 function atendimentoContem(a,termo){return [a?.soap,...Object.values(a?.dados||{}).map(v=>typeof v==='object'?v.value||'':v)].join(' ').toLowerCase().includes(String(termo).toLowerCase())}
 function alertasBuscaAtiva(){
-  const status=JSON.parse(localStorage.getItem(GESTAO_STATUS_KEY)||'{}'),out=[];
+  const status=JSON.parse(localStorage.getItem(chaveStatusBusca())||'{}'),out=[];
   const add=(p,linha,motivo,prioridade,acao,ref)=>out.push({id:[p.cpf,linha,motivo].join('|'),cpf:p.cpf,nome:p.nome||'Paciente sem nome',microarea:p.microarea||'',linha,motivo,prioridade,acao,ultimo:ref?.data||p.ultima?.data||'',status:status[[p.cpf,linha,motivo].join('|')]||'pendente'});
   dadosGestao().forEach(p=>{
     if(!p.microarea||!p.telefone)add(p,'Território','Cadastro territorial ou contato incompleto','baixa','Atualizar cadastro',p.ultima);
@@ -8272,7 +8282,7 @@ function filtrosGestao(){
   ['ba-microarea','ind-microarea','terr-filtro-microarea','rel-microarea'].forEach(id=>preencherSelectGestao(id,dados.map(p=>p.microarea)));
   preencherSelectGestao('terr-filtro-acs',dados.map(p=>p.acs));preencherSelectGestao('ind-profissional',ats.map(a=>a.profissional));
 }
-function marcarAlerta(id,status){const s=JSON.parse(localStorage.getItem(GESTAO_STATUS_KEY)||'{}');s[id]=status;localStorage.setItem(GESTAO_STATUS_KEY,JSON.stringify(s));renderBuscaAtiva()}
+function marcarAlerta(id,status){const k=chaveStatusBusca(),s=JSON.parse(localStorage.getItem(k)||'{}');s[id]=status;localStorage.setItem(k,JSON.stringify(s));renderBuscaAtiva()}
 function renderBuscaAtiva(){
   filtrosGestao();const busca=(document.getElementById('ba-busca')?.value||'').toLowerCase(),linha=val('ba-linha'),pri=val('ba-prioridade'),micro=val('ba-microarea'),status=val('ba-status');
   const lista=alertasBuscaAtiva().filter(a=>(!busca||[a.nome,a.cpf,a.microarea,a.motivo].join(' ').toLowerCase().includes(busca))&&(!linha||a.linha===linha)&&(!pri||a.prioridade===pri)&&(!micro||a.microarea===micro)&&(!status||a.status===status));
@@ -8299,7 +8309,7 @@ async function salvarCadastroTerritorial(){const cpf=normalizarCPF(val('terr-cpf
 function renderTerritorio(){
   filtrosGestao();const busca=(val('terr-busca')||'').toLowerCase(),micro=val('terr-filtro-microarea'),acs=val('terr-filtro-acs'),grupo=val('terr-filtro-grupo');
   const alerts=alertasBuscaAtiva(),ps=dadosGestao().filter(p=>{const txt=[p.nome,p.cpf,p.cns,p.microarea,p.acs,p.familia].join(' ').toLowerCase();const okG=!grupo||(grupo==='visita'&&String(p.visita_domiciliar).toLowerCase()==='sim')||(grupo==='vulneravel'&&/média|alta/i.test(p.vulnerabilidade||''))||(grupo==='faltoso'&&String(p.faltoso).toLowerCase()==='sim')||(grupo==='sem_acomp'&&!p.ultima);return(!busca||txt.includes(busca))&&(!micro||p.microarea===micro)&&(!acs||p.acs===acs)&&okG});
-  document.getElementById('terr-kpis').innerHTML=[['Pacientes',ps.length],['Precisam de visita',ps.filter(p=>String(p.visita_domiciliar).toLowerCase()==='sim').length],['Famílias vulneráveis',ps.filter(p=>/média|alta/i.test(p.vulnerabilidade||'')).length],['Alertas ativos',alerts.filter(a=>ps.some(p=>p.cpf===a.cpf)&&a.status!=='concluido').length]].map(x=>`<div class="gestao-kpi"><strong>${x[1]}</strong><span>${x[0]}</span></div>`).join('');
+  document.getElementById('terr-kpis').innerHTML=[['Pacientes',ps.length],['Precisam de visita',ps.filter(p=>String(p.visita_domiciliar).toLowerCase()==='sim').length],['Famílias identificadas com vulnerabilidade',ContinuidadeAPS.territorio(ps)],['Alertas ativos',alerts.filter(a=>ps.some(p=>p.cpf===a.cpf)&&a.status!=='concluido').length]].map(x=>`<div class="gestao-kpi"><strong>${x[1]}</strong><span>${x[0]}</span></div>`).join('');
   const areas={};ps.forEach(p=>{const a=p.microarea||'Sem microárea',r=areas[a]||(areas[a]={microarea:a,pacientes:0,gestantes:0,criancas:0,idosos:0,cronicos:0,visitas:0});r.pacientes++;if(p.consultas.some(x=>['Abertura PN','Consulta PN'].includes(x.tipo)&&diasDesde(x.data)<=300))r.gestantes++;if(p.idade!==null&&p.idade<10)r.criancas++;if(p.idade>=60)r.idosos++;if(p.cronicas)r.cronicos++;if(String(p.visita_domiciliar).toLowerCase()==='sim')r.visitas++});document.getElementById('terr-resumo-microareas').innerHTML=tabelaObjetos(Object.values(areas));
   document.getElementById('terr-lista').innerHTML=ps.length?ps.map(p=>`<div class="territorio-paciente" onclick="abrirCadastroTerritorial('${p.cpf}')"><strong>${gestEsc(p.nome||'Sem nome')}</strong><small>${gestEsc(p.microarea||'Sem microárea')} · ACS: ${gestEsc(p.acs||'não informado')} · ${p.ultima?'Último: '+new Date(p.ultima.data).toLocaleDateString('pt-BR'):'sem acompanhamento'}</small></div>`).join(''):'<div class="territorio-paciente">Nenhum paciente encontrado.</div>';
 }
@@ -12211,17 +12221,16 @@ async function gerarPacoteDiabetesGestacionalPN(){
   }
   window.alertasBuscaAtiva=function(){
     const base=(PRO.orig.alertasBuscaAtiva?.()||[]).map(a=>({...a,responsavel:a.responsavel||responsavelAlerta(a),dataLimite:a.dataLimite||prazoPrioridade(a.prioridade)}));
-    const existe=new Set(base.map(a=>a.id));
+    const existe=new Set(base.map(a=>a.id)),status=JSON.parse(localStorage.getItem(chaveStatusBusca())||'{}');
     const add=(p,linha,motivo,prioridade,acao,ref)=>{
       const id=[p.cpf,linha,motivo].join('|');if(existe.has(id))return;existe.add(id);
-      base.push({id,cpf:p.cpf,nome:p.nome||'Paciente sem nome',microarea:p.microarea||'',linha,motivo,prioridade,acao,ultimo:ref?.data||p.ultima?.data||'',status:'pendente',responsavel:responsavelAlerta({linha,motivo,acao}),dataLimite:prazoPrioridade(prioridade)});
+      base.push({id,cpf:p.cpf,nome:p.nome||'Paciente sem nome',microarea:p.microarea||'',linha,motivo,prioridade,acao,ultimo:ref?.data||p.ultima?.data||'',status:status[id]||'pendente',responsavel:responsavelAlerta({linha,motivo,acao}),dataLimite:prazoPrioridade(prioridade)});
     };
     try{
       dadosGestao().forEach(p=>{
         p.consultas.forEach(a=>{
-          const txt=norm([a.soap,...Object.values(a.dados||{}).map(v=>typeof v==='object'?v.value||'':v)].join(' '));
-          if(/sifilis|hiv|hepatite/.test(txt)&&/reagente|positivo/.test(txt)&&!/seguimento|tratamento|fluxo|notifica|sinan/.test(txt))add(p,'IST/SINAN','Teste reagente sem fluxo/seguimento registrado','alta','Agendar consulta e revisar fluxo IST/SINAN',a);
-          if(/sifilis|hiv|hepatite|dengue|violencia sexual|agravo notificavel/.test(txt)&&!/sinan|notifica/.test(txt))add(p,'SINAN','SINAN pendente ou não registrado','alta','Revisar notificação e ficha específica',a);
+          const testes=Object.entries(a.dados||{}).filter(([k,v])=>/^(?:ist-)?tr-p-(?:duo-)?(?:hiv2?|sif|hepb|hepc)-res$/.test(k)&&norm(v)==='reagente');
+          if(testes.length)add(p,'IST/SINAN','Revisar acompanhamento de teste reagente · '+String(a.data||'').slice(0,10),'alta','Conferir o laudo e registrar o seguimento',a);
         });
       });
     }catch(e){console.warn('Busca ativa extra falhou:',e)}

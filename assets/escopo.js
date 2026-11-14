@@ -5,6 +5,8 @@
  function atualizar(){
   const atual=escopoDadosClinicos().chave;
   if(anterior&&anterior!==atual){
+   window.EquipeAPS?.limpar();
+   for(const key of ['terr-familias-resumo','ba-acompanhados','ba-tbody','terr-kpis','ba-kpis'])document.getElementById(key)?.replaceChildren();
    for(const cfg of Object.values(MODULOS_ATENDIMENTO)){
     const page=document.getElementById('pg-'+cfg.page);window.ESFUsability?.beforeRestore(page);window.ESFCiap?.restore(cfg.prefix,[]);
     page?.querySelectorAll('.ux-draft-prompt').forEach(e=>e.remove());

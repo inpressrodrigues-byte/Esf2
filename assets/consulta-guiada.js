@@ -55,6 +55,7 @@
       ['dor','perdaliquido','sangra','mobilizacao'].some(k=>value(p,'corr-'+k)==='Sim');
     const pn=gestacao?QueixasGestacao.avaliar(obstetricos.join(' | '),{ig:ctx.ig,alarme}):null;
     const output=pn?.items.slice()||[],matches=R.match(text);
+    if(/\bdengue\b/.test(current))output.push({title:'Avaliação da suspeita de dengue',care:'Avaliar sinais de alarme, gravidade e condições especiais. Consultar o manejo do grupo identificado e registrar a conduta.',refs:[addRef('Classificar e consultar manejo · Ministério da Saúde','https://manejodengue.saude.gov.br/')]});
     for(const rule of matches){
       if(pn?.cobertas.has(rule.title))continue;
       if(rule.kit==='itu'){output.push(R.urinary({...ctx,urgent:ctx.urgent||redFlag||pn?.alarme}));continue;}

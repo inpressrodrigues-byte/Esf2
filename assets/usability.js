@@ -215,7 +215,7 @@
     nav.id = 'ux-navigation'; nav.setAttribute('aria-label','Módulos do sistema');
     const groups = [
       ['Atendimentos',['inicio','pn-abertura','pn-consulta','puericultura','preventivo','saude-mulher','idoso','saude-mental','consulta-geral','hiperdia','feridas','puerperio','ist','visita-domiciliar']],
-      ['Acompanhamento',['pacientes','historico','sinan','pni','busca-ativa']],
+      ['Acompanhamento',['equipe','pacientes','historico','sinan','pni','busca-ativa']],
       ['Gestão e apoio',['indicadores','territorio','relatorios','editor','auditoria-clinica','reportes']]
     ];
     const buttons = [...nav.querySelectorAll('.nb')];

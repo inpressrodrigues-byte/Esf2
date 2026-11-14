@@ -80,7 +80,7 @@
     if(Object.values(ids).some(id=>byId(id)?.value)&&!confirm('Substituir o SOAP atual pelos blocos revisados de cada CIAP?'))return;
     pularFinalizadorSoapAutomatico(p);
     for(const k of ['s','o','a','p']){const el=byId(ids[k]);el.value=items.map(i=>'CIAP-2 '+i.code+' — '+catalog.find(c=>c.code===i.code)?.display+'\n'+(i[k]||'Não registrado para este problema.')).join('\n\n');el.dispatchEvent(new Event('input',{bubbles:true}));}
-    window.ESFExames?.appendSoap(p);showToast('SOAP organizado por problema. Revise antes de salvar.');
+    window.ESFExames?.appendSoap(p);window.SeguimentoAPS?.sincronizarSoap(p);showToast('SOAP organizado por problema. Revise antes de salvar.');
   }
   function mount(){
     for(const cfg of Object.values(MODULOS_ATENDIMENTO)){
@@ -109,6 +109,7 @@
   }
   window.ESFCiap={capture,restore,restoreFromPage,suggest,suggestModule,aggregate,soapFor,mount,refreshSuggestions,description:code=>catalog.find(item=>item.code===code)?.display||''};
   async function init(){
+    window.ESFCiap.incluirCodigo=(p,code)=>{const c=catalog.find(item=>item.code===code);if(c)add(p,c);};
     try{const res=await fetch('assets/ciap2.json');if(!res.ok)throw Error('HTTP '+res.status);const data=await res.json();catalog=data.concept.filter(c=>/^[A-Z][0-9]{2}$/.test(c.code));}catch{catalogError='Catálogo CIAP-2 indisponível. Recarregue para tentar novamente.';}
     mount();owner=CURRENT_AUTH_USER_ID;
     const navigate=window.go;window.go=function(...args){if(owner!==CURRENT_AUTH_USER_ID){states.clear();for(const cfg of Object.values(MODULOS_ATENDIMENTO))restore(cfg.prefix,[]);owner=CURRENT_AUTH_USER_ID;}mount();const r=navigate.apply(this,args);if(args[0]==='indicadores')indicators();if(args[0]==='preventivo')refreshSuggestions('prev');return r;};

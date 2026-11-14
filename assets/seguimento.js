@@ -138,7 +138,14 @@
       box.append(details);
     }
   }
-  window.SeguimentoAPS = {mostrar, sincronizarSoap, removerBloco};
+  function pendentes(records,cpf,nasc){
+    const valid=records.filter(a=>MODULOS_ATENDIMENTO[a.tipo]&&a.dados&&normalizarCPF(a.cpf)===cpf
+      &&(!nasc||!a.dados[MODULOS_ATENDIMENTO[a.tipo].prefix+'-nasc']||a.dados[MODULOS_ATENDIMENTO[a.tipo].prefix+'-nasc']===nasc));
+    const orders=pedidos(valid);
+    for(const a of valid)for(const row of resultados(a.dados[MODULOS_ATENDIMENTO[a.tipo].prefix+'-resultados-vinculados'],cpf,nasc))orders.delete(keyOf(row));
+    return [...orders.values()].map(r=>r.nome+' · '+formatDate(r.dataPedido));
+  }
+  window.SeguimentoAPS = {mostrar, sincronizarSoap, removerBloco,pendentes};
   document.addEventListener('DOMContentLoaded', () => {
     for (const p of Object.values(QUICK_PAGE_PREFIX)) if (field(p,'historico-consulta')) FluxoAPS.historico(p);
     const generators = {gerarSoapAutomatoPna:'pna',gerarSoapAutomatoPnc:'pnc',gerarSoapAutomatoPu:'pu',
