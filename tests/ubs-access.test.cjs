@@ -92,6 +92,39 @@ test('Agenda individual valida vagas, sobreposição, reagendamento e triagem an
  await as('a',async()=>{const r=(await db.query("update agenda_ubs set estado='Em atendimento' where id=$1 returning triagem,triado_por",[id])).rows[0];assert.equal(r.triagem.pas,'120');assert.equal(r.triado_por,ids.colega);});
  await as('b',async()=>assert.equal((await db.query('select * from agenda_horarios')).rows.length,0));
 });
+test('Monitor exibe somente chamadas recentes da UBS e fecha após a revogação; cancelamento libera a vaga',async()=>{
+ await db.exec(fs.readFileSync(require('node:path').join(__dirname,'../supabase/migrations/202611140003_chamador.sql'),'utf8'));
+ await db.exec("update pacientes set dados=jsonb_set(dados,'{nome}',to_jsonb('Pessoa Fictícia'::text)) where cpf='11111111111'");
+ const call="select agenda_chamar($1,$2,'Sala 2',$3,$4) id";
+ const agenda=(await db.query("select id,versao from agenda_ubs where estado='Em atendimento'")).rows[0];
+ let token,other;
+ await as('a',async()=>{
+   token=(await db.query('select agenda_painel_configurar($1,false) chave',[A])).rows[0].chave;
+   await assert.rejects(db.query('select agenda_painel_configurar($1,false)',[B]),/privilege/i);
+   await assert.rejects(db.query(call,[agenda.id,'Triagem',ids.a,agenda.versao]),/Etapa/);
+   await db.query(call,[agenda.id,'Atendimento',ids.a,agenda.versao]);
+   await db.query(call,[agenda.id,'Atendimento',ids.a,agenda.versao]);
+   await assert.rejects(db.query(call,[agenda.id,'Atendimento',ids.none,agenda.versao]),/Aguarde/);
+   const row=(await db.query("insert into agenda_ubs(unidade,cpf,profissional,motivo,estado) values($1,'11111111111','Nome A','teste','Aguardando atendimento') returning id,versao",[A])).rows[0];
+   await db.query("update agenda_ubs set profissional='Profissional B',estado='Em escuta' where id=$1",[row.id]);
+   await db.query("select agenda_chamar($1,'Triagem','Sala 2',$2,$3,'agenda')",[row.id,ids.colega,row.versao+1]);
+   const slot=(await db.query("select id,inicio from agenda_horarios order by inicio limit 1")).rows[0];
+   const book="insert into agenda_ubs(unidade,cpf,profissional,motivo,estado,horario,horario_id) values($1,'11111111111','Nome A','teste','Agendado',$2,$3) returning id";
+   const ag=(await db.query(book,[A,slot.inicio,slot.id])).rows[0];
+   await db.query("update agenda_ubs set estado='Cancelado' where id=$1",[ag.id]);await db.query(book,[A,slot.inicio,slot.id]);
+ });
+ await as('b',async()=>{other=(await db.query('select agenda_painel_configurar($1,false) chave',[B])).rows[0].chave;await assert.rejects(db.query(call,[agenda.id,'Atendimento',ids.b,agenda.versao]),/indisponível/);});
+ const read=async t=>(await db.query('select agenda_painel_ler($1) painel',[t])).rows[0].painel;
+ await as('anon',async()=>{
+   assert.equal((await read(other)).chamadas.length,0);
+   const calls=(await read(token)).chamadas;assert.equal(calls.length,2);assert.equal(calls[0].paciente,'Pessoa Fictícia');assert.equal(calls[0].profissional,'Profissional B');
+   assert.deepEqual(Object.keys(calls[0]).sort(),['etapa','hora','id','paciente','profissional','sala']);
+   await assert.rejects(db.query('select * from prumo_painel.chamadas'),/permission denied/);
+   await assert.rejects(db.query(call,[agenda.id,'Atendimento',ids.a,agenda.versao]),/permission denied/);
+ });
+ await as('a',()=>db.query('select agenda_painel_configurar($1,true)',[A]));
+ await as('anon',()=>assert.rejects(read(token),/privilege/i));
+});
 test('UBS: leitura separada por unidade; sem UBS e bloqueado não leem; gestão vê pendentes',async()=>{
  for(const [who,expected]of [['a',['11111111111']],['b',['22222222222']],['none',[]],['blocked',[]],['admin',['11111111111','22222222222','33333333333']]])await as(who,async()=>assert.deepEqual((await db.query('select cpf from pacientes order by cpf')).rows.map(r=>r.cpf),expected));
  await as('anon',()=>assert.rejects(db.query('select * from pacientes'),/permission denied/));

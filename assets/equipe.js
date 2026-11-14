@@ -11,7 +11,12 @@
     'Em observação':['Em atendimento','Compartilhado','Concluído'],
     'Compartilhado':['Respondido','Cancelado'],'Respondido':['Em atendimento','Concluído']
   };
-  const id=key=>document.getElementById('eq-'+key);
+  function fase(estado){
+    if(['Aguardando vaga','Agendado'].includes(estado))return 'Agendados';
+    if(['Aguardando atendimento','Em escuta'].includes(estado))return 'Triagem';
+    if(['Cancelado','Concluído','Faltou'].includes(estado))return 'Encerrados';
+    return 'Atendimento';
+  }
   let generation=0,timer,sequence=0,retomar;
   function node(tag,text){const n=document.createElement(tag);if(text)n.textContent=text;return n;}
   function btn(text,action){const b=node('button',text);b.type='button';b.className='btn btn-s';b.onclick=action;return b;}
@@ -21,7 +26,7 @@
     else if(type!=='textarea')c.type=type;
     if(key)c.id='eq-'+key;l.append(c);parent.append(l);return c;
   }
-  function today(){return new Date().toLocaleDateString('sv-SE');}
+  function today(){return new Date().toLocaleDateString('sv-SE',{timeZone:'America/Sao_Paulo'});}
   function limpar(){retomar=null;generation++;sequence++;clearInterval(timer);host()?.replaceChildren();}
   const active=(g,scope)=>g===generation&&document.getElementById('pg-equipe')?.classList.contains('on')
     && temPermissao('ver_historico')&&escopoDadosClinicos().chave===scope;
@@ -33,17 +38,20 @@
     limpar();if(page!=='equipe'||!temPermissao('ver_historico'))return;
     const s=escopoDadosClinicos(),g=generation,root=host();
     if(!s.permitido||!_sb||window.MODO_OFFLINE){root.append(node('p','Entre com uma conta conectada à UBS para consultar a agenda compartilhada.'));return;}
-    const toolbar=node('div');toolbar.className='card';
+    const toolbar=node('div');toolbar.className='card agenda-filtros';
     const unidades=s.municipal?(window.ESFUnidadesToledo?.unidades||[]).map(u=>u.nome):[s.unidade];
     const unit=field(toolbar,'UBS','', 'unidade',unidades);
     if(s.unidade&&unidades.includes(s.unidade))unit.value=s.unidade;
     const mode=field(toolbar,'Exibir','','visao',['Agenda e fila','Aguardando vaga','Cuidado compartilhado','Vacinação','Retornos de vacina','Atividades coletivas','Imóveis','Produção']);
     const day=field(toolbar,'Dia','date','dia');day.value=today();
+    const dates=node('div');dates.className='agenda-datas';
+    const shift=delta=>{if(!delta)day.value=today();else{const date=new Date((day.value||today())+'T12:00:00Z');date.setUTCDate(date.getUTCDate()+delta);day.value=date.toISOString().slice(0,10);}refresh();};
+    dates.append(btn('Dia anterior',()=>shift(-1)),btn('Hoje',()=>shift(0)),btn('Próximo dia',()=>shift(1)));day.parentElement.after(dates);
     const professional=field(toolbar,'Profissional da agenda','','profissional',['Todos os profissionais']);
     const search=field(toolbar,'Buscar por nome, CPF, responsável ou descrição','search','busca');
     const state=node('p');state.setAttribute('role','status');
     const entry=node('details'),list=node('div');entry.className='card';list.className='card';root.append(toolbar,entry,state,list);
-    let rows=[],vagasDia=[],patients={},viewKey='',writeLock=false;
+    let rows=[],vagasDia=[],patients={},viewKey='',writeLock=false,segment='Todos';
     const current=()=>active(g,s.chave);
     const filterKey=()=>JSON.stringify([unit.value,mode.value,day.value]);
     function patientName(cpf,row){return row?.pacientes?.nome||patients[cpf]?.nome||cpf;}
@@ -110,8 +118,8 @@
       };
     }
     function transitions(row,line){
-      const options=flows[row.estado]?.filter(o=>row.estado!=='Triagem concluída'||o!=='Em atendimento');if(!options?.length)return;
-      const details=node('details');details.append(node('summary',row.estado==='Agendado'?'Reagendar ou registrar chegada':row.estado==='Em escuta'?'Registrar triagem':'Atualizar ou passar o caso'));line.append(details);
+      const options=flows[row.estado]?.filter(o=>!(row.estado==='Triagem concluída'&&o==='Em atendimento')&&!(row.estado==='Agendado'&&['Cancelado','Aguardando atendimento'].includes(o)));if(!options?.length)return;
+      const details=node('details');details.append(node('summary',row.estado==='Agendado'?'Reagendar ou registrar falta':row.estado==='Em escuta'?'Registrar triagem':'Atualizar ou passar o caso'));line.append(details);
       const form=node('form');details.append(form);
       const next=field(form,'Próxima situação','','',options),prof=field(form,'Passar para / responsável','text');
       prof.required=true;prof.value=row.profissional;prof.maxLength=160;
@@ -128,8 +136,17 @@
     }
     function draw(){
       list.replaceChildren();const q=search.value.trim().toLocaleLowerCase('pt-BR');
-      const filtered=rows.filter(r=>professional.hidden||!professional.value||r.profissional===professional.value).filter(r=>[r.cpf,patientName(r.cpf,r),r.descricao,r.profissional,r.motivo,r.estado,r.microarea,r.endereco,r.complemento].join(' ').toLocaleLowerCase('pt-BR').includes(q));
-      if(mode.value==='Agenda e fila'&&!search.value.trim()){
+      let filtered=rows.filter(r=>professional.hidden||!professional.value||r.profissional===professional.value).filter(r=>[r.cpf,patientName(r.cpf,r),r.descricao,r.profissional,r.motivo,r.estado,r.microarea,r.endereco,r.complemento].join(' ').toLocaleLowerCase('pt-BR').includes(q));
+      if(mode.value==='Agenda e fila'){
+        const strip=node('nav');strip.className='agenda-segmentos';strip.setAttribute('aria-label','Etapas da agenda');
+        for(const label of ['Todos','Agendados','Triagem','Atendimento','Encerrados']){
+          const total=label==='Todos'?filtered.length:filtered.filter(r=>fase(r.estado)===label).length;
+          const tab=btn(label+' ('+total+')',()=>{segment=label;draw();list.querySelector('[aria-pressed="true"]')?.focus();});
+          tab.setAttribute('aria-pressed',String(segment===label));strip.append(tab);
+        }
+        list.append(strip);if(segment!=='Todos')filtered=filtered.filter(r=>fase(r.estado)===segment);
+      }
+      if(mode.value==='Agenda e fila'&&['Todos','Agendados'].includes(segment)&&!search.value.trim()){
         const livres=vagasDia.filter(x=>Date.parse(x.inicio)>Date.now()&&(!professional.value||x.profissional===professional.value)&&!x.agenda_ubs?.some(a=>!['Cancelado','Faltou'].includes(a.estado)));
         if(livres.length){const free=node('details');free.append(node('summary','Horários livres ('+livres.length+')'));
           for(const prof of new Set(livres.map(x=>x.profissional)))free.append(node('p',prof+' · '+livres.filter(x=>x.profissional===prof).map(x=>AgendaClinica.clock(x.inicio)).join(', ')));list.append(free);}
@@ -149,8 +166,10 @@
         }else if(row.estado){
           const patient=btn(patientName(row.cpf,row),()=>abrirPaciente(row.cpf,unit.value));
           patient.className='agenda-paciente';patient.title='Abrir prontuário';
-          const title=node('strong');title.append(patient,document.createTextNode(' · '+row.estado));
-          card.append(title,node('p',[row.horario?new Date(row.horario).toLocaleString('pt-BR'):'',row.profissional,row.motivo,row.devolutiva].filter(Boolean).join(' · ')));
+          card.className='agenda-linha';const title=node('div');title.className='agenda-resumo';
+          const time=node('time',row.horario?AgendaClinica.clock(row.horario):'Encaixe'),badge=node('span',row.estado);badge.className='agenda-estado';badge.dataset.fase=fase(row.estado);
+          title.append(time,patient,badge);
+          card.append(title,node('p',[row.horario&&mode.value!=='Agenda e fila'?new Date(row.horario).toLocaleString('pt-BR'):'',row.profissional,row.motivo,row.devolutiva].filter(Boolean).join(' · ')));
           const history=node('details');history.append(node('summary','Histórico da passagem de caso'));
           history.ontoggle=async()=>{if(!history.open||history.childElementCount>1)return;
             const {data,error}=await _sb.from('agenda_ubs_historico').select('estado,responsavel,anotacao,registrado_em').eq('agenda_id',row.id).order('versao');
@@ -163,6 +182,13 @@
             const quick=btn(row.estado==='Agendado'?'Registrar chegada':'Iniciar triagem',()=>escrever(quick,()=>_sb.from('agenda_ubs').update({estado:next}).eq('id',row.id).eq('versao',row.versao).select('id').maybeSingle()));
             card.append(quick);
           }
+          if(row.estado==='Agendado'){
+            const cancel=btn('Cancelar agendamento',()=>{
+              if(!confirm('Cancelar o agendamento de '+patientName(row.cpf,row)+' com '+row.profissional+' em '+new Date(row.horario).toLocaleString('pt-BR')+' e liberar o horário?'))return;
+              escrever(cancel,()=>_sb.from('agenda_ubs').update({estado:'Cancelado'}).eq('id',row.id).eq('versao',row.versao).select('id').maybeSingle());
+            });cancel.classList.add('agenda-cancelar');card.append(cancel);
+          }
+          ChamadorAPS.caller(row,unit.value,card);
           if(row.triagem)card.append(node('p','Triagem · '+new Date(row.triado_em).toLocaleString('pt-BR')+' — '+AgendaClinica.summary(row)));
           if(['Triagem concluída','Em atendimento'].includes(row.estado)){
             const type=field(card,'Tipo de consulta','','',Object.keys(MODULOS_ATENDIMENTO).filter(t=>moduloAtivo(MODULOS_ATENDIMENTO[t].page)));
@@ -180,7 +206,7 @@
           for(const cpf of row.participantes_cpf)members.append(node('p',patientName(cpf)));card.append(members);}
         list.append(card);
       }
-      if(!filtered.length&&!list.childElementCount)list.append(node('p','Nenhum registro neste recorte.'));
+      if(!filtered.length&&!list.querySelector('details,article')&&(mode.value==='Agenda e fila'||!list.childElementCount))list.append(node('p','Nenhum registro neste recorte.'));
     }
     async function loadPages(build){
       const result=[];
@@ -192,7 +218,7 @@
       if(reset){rows=[];vagasDia=[];list.replaceChildren();state.textContent='Carregando…';}
       if(!current()||!d||!u)return;
       try{
-        const start=new Date(d+'T00:00:00'),finish=new Date(start);finish.setDate(finish.getDate()+1);
+        const start=new Date(d+'T00:00:00-03:00'),finish=new Date(+start+86400000);
         const queue=()=>_sb.from('agenda_ubs').select('*,pacientes(nome:dados->>nome)').eq('unidade',u);
         const tasks=()=>_sb.from('acoes_ubs').select('*').eq('unidade',u).eq('dia',d);
         const wait=m==='Aguardando vaga',share=m==='Cuidado compartilhado',prod=m==='Produção';
@@ -230,8 +256,9 @@
         draw();state.textContent='Atualizado às '+new Date().toLocaleTimeString('pt-BR')+'.';
       }catch{if(current()&&ticket===sequence){if(viewKey!==key)list.replaceChildren();state.textContent='Não foi possível atualizar. Confira a conexão e tente novamente.';}}
     }
-    function switchView(){professional.hidden=professional.parentElement.hidden=mode.value!=='Agenda e fila';fillForm();day.parentElement.hidden=['Aguardando vaga','Cuidado compartilhado','Imóveis'].includes(mode.value);refresh();}
-    unit.onchange=()=>{professional.value='';switchView();};mode.onchange=switchView;professional.onchange=draw;day.onchange=()=>refresh();search.oninput=draw;
+    function switchView(){professional.hidden=professional.parentElement.hidden=mode.value!=='Agenda e fila';fillForm();day.parentElement.hidden=['Aguardando vaga','Cuidado compartilhado','Imóveis'].includes(mode.value);dates.hidden=day.parentElement.hidden;refresh();}
+    unit.onchange=()=>{professional.value='';segment='Todos';switchView();};mode.onchange=switchView;professional.onchange=draw;day.onchange=()=>refresh();search.oninput=draw;
+    ChamadorAPS.panel(toolbar,unit,current);
     AgendaClinica.availability(toolbar,unit,day,current,()=>{refresh();fillForm();});
     toolbar.append(btn('Atualizar lista',()=>refresh()));switchView();
     retomar={scope:s.chave,atualizar:()=>refresh(false)};

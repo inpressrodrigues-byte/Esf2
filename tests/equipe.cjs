@@ -25,14 +25,21 @@ module.exports=async page=>{
   assert.match(result.antes,/Alergia fictícia/);assert.match(result.antes,/K86/);assert.equal(JSON.parse(result.resolvido)[0].estado,'Resolvido');
   assert.equal(result.limpo,true);assert.equal(result.grupos,2);assert.equal(result.istNeg,0);
   await page.evaluate(()=>{
-    window.dadosTesteEquipe=[];let pending=null;
+    CURRENT_USER_PROFILE.nome='Profissional de teste';window.dadosTesteEquipe=[];let pending=null;
     const slots=[1,2].map(i=>({id:'slot-'+i,inicio:new Date(Date.now()+i*3600000).toISOString(),profissional:'Enfermeiro fictício',agenda_ubs:[]}));
-    _sb={from(table){
+    window.callsFixture=[];window.panelFixtureKey=crypto.randomUUID();
+    _sb={async rpc(name,args){
+      if(name==='agenda_painel_configurar')return {data:window.panelFixtureKey};
+      if(name!=='agenda_chamar')throw Error('RPC inesperado');
+      const row=window.dadosTesteEquipe[0];if(row.id!==args.atendimento||args.versao!==row.versao)throw Error('Chamada desatualizada');
+      window.callsFixture=[{id:args.pedido,paciente:'Paciente fictício',profissional:args.responsavel==='agenda'?row.profissional:CURRENT_USER_PROFILE.nome,sala:args.destino,etapa:args.etapa,hora:new Date().toISOString()}];
+      return {data:args.pedido};
+    },from(table){
       const api={gte(){return api;},lt(){return api;},select(){return api;},eq(){return api;},in(){return api;},lte(){return api;},or(){return api;},order(){return api;},
         range(){return Promise.resolve({data:table==='agenda_ubs'?structuredClone(window.dadosTesteEquipe):table==='agenda_horarios'?slots:[],error:null});},
         insert(data){pending={...data,versao:1,criado_em:new Date().toISOString()};return api;},
         update(delta){pending={...window.dadosTesteEquipe[0],...delta,versao:window.dadosTesteEquipe[0].versao+1,...(delta.triagem?{triado_em:new Date().toISOString()}:{})};return api;},
-        maybeSingle(){window.dadosTesteEquipe=[pending];return Promise.resolve({data:{id:pending.id},error:null});}};
+        maybeSingle(){window.dadosTesteEquipe=[pending];return Promise.resolve({data:{...pending},error:null});}};
       return api;}};
     go('equipe');
   });
@@ -44,18 +51,51 @@ module.exports=async page=>{
   await root.getByLabel('Motivo ou questão para a equipe').fill('Retorno simulado');
   await root.getByRole('button',{name:'Salvar',exact:true}).click();
   await root.getByText(/Enfermeiro fictício · Retorno simulado/).waitFor();
-  await root.getByText('Reagendar ou registrar chegada',{exact:true}).click();
+  await root.getByText('Reagendar ou registrar falta',{exact:true}).click();
   const update=root.locator('article').filter({hasText:'Retorno simulado'});
   await update.getByLabel('Horário disponível').selectOption('slot-2');
   await update.getByRole('button',{name:'Confirmar mudança'}).click();
   await page.waitForFunction(()=>window.dadosTesteEquipe[0].horario_id==='slot-2');
+  await root.getByRole('button',{name:'Cancelar agendamento'}).click();
+  await root.getByText('Cancelado',{exact:true}).filter({visible:true}).first().waitFor();
+  assert.equal(await root.getByText('Chamar para triagem',{exact:true}).count(),0);
+  await root.getByText('Nova entrada',{exact:true}).click();
+  await root.getByLabel('CPF do paciente cadastrado').fill('00000000023');
+  await root.getByLabel('Entrada',{exact:true}).selectOption('Agendado');
+  await root.getByLabel('Horário disponível').selectOption('slot-2');
+  await root.getByLabel('Motivo ou questão para a equipe').fill('Retorno simulado');
+  await root.getByRole('button',{name:'Salvar',exact:true}).click();
   await root.getByRole('button',{name:'Registrar chegada'}).click();
+  await root.getByText('Painel da sala de espera',{exact:true}).click();await root.getByRole('button',{name:'Preparar tela de chamadas'}).click();
+  const href=await root.getByRole('link',{name:'Abrir painel'}).getAttribute('href');
+  const tv=await page.context().browser().newContext({serviceWorkers:'block'}),monitor=await tv.newPage(),base=new URL(page.url()).origin;
+  await monitor.route('**/*',async route=>{
+    const req=route.request();
+    if(req.url().endsWith('/rpc/agenda_painel_ler')&&req.method()==='POST'){
+      const valid=await page.evaluate(k=>k===window.panelFixtureKey,req.postDataJSON().chave);
+      return route.fulfill({status:valid?200:403,contentType:'application/json',body:JSON.stringify({unidade:'UBS de teste',chamadas:await page.evaluate(()=>window.callsFixture)})});
+    }
+    return req.method()==='GET'&&new URL(req.url()).origin===base?route.continue():route.abort();
+  });
+  await monitor.goto(href);await monitor.getByText('Aguardando chamada').waitFor();
+  await root.getByText('Chamar para triagem',{exact:true}).click();
+  await root.getByLabel('Quem vai atender').selectOption('agenda');
+  await root.getByLabel('Sala ou consultório').fill('Triagem 1');await root.getByRole('button',{name:'Enviar chamada'}).click();
+  await monitor.getByText('Triagem 1',{exact:true}).waitFor();await monitor.getByText('Profissional · Enfermeiro fictício',{exact:true}).waitFor();await monitor.getByText('Paciente fictício',{exact:true}).waitFor();
+  assert.doesNotMatch(await monitor.locator('body').innerText(),/00000000023|Retorno simulado/);
   await root.getByRole('button',{name:'Iniciar triagem'}).click();
-  await root.getByText(/00000000023 · Em escuta/).waitFor();
+  await root.getByText('Em escuta',{exact:true}).waitFor();
   await root.getByText('Registrar triagem',{exact:true}).click();
   await root.getByLabel('PA sistólica (mmHg)').fill('120');await root.getByLabel('PA diastólica (mmHg)').fill('80');
   await root.getByRole('button',{name:'Confirmar mudança'}).click();
+  await root.getByText('Chamar para atendimento',{exact:true}).click();
+  await root.getByLabel('Sala ou consultório').fill('Consultório 3');await root.getByRole('button',{name:'Enviar chamada'}).click();
+  await monitor.getByText('Consultório 3',{exact:true}).waitFor();await monitor.getByText('Profissional · Profissional de teste',{exact:true}).waitFor();
   await root.getByRole('button',{name:'Iniciar atendimento'}).click();
+  await page.getByRole('button',{name:'Chamar paciente',exact:true}).click();
+  await page.locator('#ger-triagem-resumo').getByLabel('Sala ou consultório').fill('Consultório 4');
+  await page.locator('#ger-triagem-resumo').getByRole('button',{name:'Enviar chamada'}).click();
+  await monitor.getByText('Consultório 4',{exact:true}).waitFor();await tv.close();
   await page.locator('#pg-consulta-geral.on #ger-triagem-resumo').waitFor();
   assert.match(await page.locator('#ger-triagem-resumo').textContent(),/120 mmHg.*80 mmHg/);
   assert.equal(await page.locator('#ger-cpf').inputValue(),'000.000.000-23');

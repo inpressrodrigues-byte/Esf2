@@ -98,6 +98,18 @@
     const scope=escopoDadosClinicos();
     out.hidden=!data||data.cpf!==normalizarCPF(document.getElementById(p+'-cpf')?.value)||!scope.permitido||!scope.municipal&&scope.unidade!==data.unidade;
     out.textContent=out.hidden?'':'Triagem · '+new Date(data.em).toLocaleString('pt-BR')+' — '+summary({triagem:data.medidas});
+    if(!out.hidden&&data.id&&_sb){
+      const call=el('button','Chamar paciente');call.type='button';call.className='btn btn-s';
+      call.onclick=async()=>{
+        call.disabled=true;const scope=escopoDadosClinicos().chave;
+        try{
+          const r=await _sb.from('agenda_ubs').select('id,estado,versao,unidade,profissional').eq('id',data.id).eq('cpf',data.cpf).eq('unidade',data.unidade).maybeSingle();
+          if(!call.isConnected||scope!==escopoDadosClinicos().chave)return;
+          if(r.error||!r.data||r.data.estado!=='Em atendimento'){showToast('A chamada está disponível durante o atendimento na fila.');return;}
+          call.remove();ChamadorAPS.caller(r.data,data.unidade,out);out.lastElementChild.open=true;
+        }catch{if(call.isConnected)showToast('Não foi possível consultar a fila.');}finally{call.disabled=false;}
+      };out.append(call);
+    }
   }
   document.addEventListener('DOMContentLoaded',()=>{
     for(const cfg of Object.values(MODULOS_ATENDIMENTO)){
