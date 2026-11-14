@@ -109,5 +109,6 @@ const root=path.resolve(__dirname,'..'),server=http.createServer((req,res)=>{con
  await require('./seguimento.cjs')(page);
  await require('./equipe.cjs')(page);
  await require('./avaliacoes.cjs')(page);
+ await require('./prontuario.cjs')(page);
  assert.deepEqual(errors,[]);console.log('PASS Layout responsivo sem rolagem horizontal e sem erros de JavaScript');
  }finally{await browser?.close();server.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

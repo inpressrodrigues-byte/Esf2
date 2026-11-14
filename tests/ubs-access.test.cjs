@@ -11,7 +11,7 @@ test.before(async()=>{
  create table profiles(id uuid primary key,full_name text,nome text,cargo text,conselho text,updated_at timestamptz,unidade text,role text default 'user',perfil text,ativo boolean default true,blocked boolean default false,permissoes jsonb default '{}');
  create table unidades_saude_toledo(nome text primary key,ativa boolean default true);
  create table pacientes(cpf text primary key,dados jsonb default '{}',updated_by uuid);
- create table atendimentos(id serial primary key,paciente_cpf text,unidade text,user_id uuid,soap text);
+ create table atendimentos(id serial primary key,paciente_cpf text,unidade text,user_id uuid,soap text,data text);
  create function usuario_tem_permissao(chave text) returns boolean language sql stable security definer set search_path='' as $$select coalesce((select(permissoes->>chave)::boolean from public.perfis where user_id=auth.uid()),false)$$;
  grant select on perfis to authenticated;grant usage on all sequences in schema public to authenticated;
  alter table perfis enable row level security;create policy perfil_own on perfis for select to authenticated using(user_id=auth.uid());
@@ -50,7 +50,11 @@ test('Equipe da UBS compartilha agenda, mantém histórico e protege vaga, vers�
    await assert.rejects(db.query("update imoveis_ubs set ativo=false where id=$1",[imovel]),/motivo/);
    await db.query("update imoveis_ubs set ativo=false,justificativa='Duplicidade' where id=$1 and versao=1",[imovel]);
  });
+ await db.exec(fs.readFileSync(require('node:path').join(__dirname,'../supabase/migrations/202611140001_prontuario_ubs.sql'),'utf8'));
  await as('colega',async()=>{
+   assert.deepEqual((await db.query('select paciente_cpf from atendimentos')).rows.map(r=>r.paciente_cpf),['11111111111']);
+   assert.equal((await db.query("update atendimentos set soap='alterado' returning id")).rows.length,0);
+   assert.equal((await db.query('delete from atendimentos returning id')).rows.length,0);
    for(const [i,est] of ['Aguardando atendimento','Em escuta','Compartilhado','Respondido','Concluído'].entries()){
      assert.equal((await db.query("update agenda_ubs set estado=$1,devolutiva='Anotação fictícia' where id=$2 and versao=$3 returning versao",[est,id,i+1])).rows[0].versao,i+2);
    }

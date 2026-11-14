@@ -27,20 +27,19 @@
    await baixarPacientesNuvem();if(escopo!==escopoDadosClinicos().chave)return;abrirPaciente(cpf);renderPacientes();showToast('Vínculo de UBS atualizado.');
   }catch{showToast('Não foi possível alterar a UBS. Confira a permissão e sincronize o cadastro.');}
  }
- window.ESFEscopo={atualizar,vincular};
- document.addEventListener('DOMContentLoaded',()=>{
-  anterior=escopoDadosClinicos().chave;
-  const abrir=window.abrirPaciente;
-  window.abrirPaciente=function(cpf){
-   abrir(cpf);const p=carregarPacientes()[cpf],out=document.getElementById('pac-modal-conteudo');if(!p||!out)return;
+ function mostrarVinculo(cpf,p,out){
+   if(!escopoDadosClinicos().municipal)return;
    const box=document.createElement('div');box.className='alert alert-i';
    const label=document.createElement('label');label.textContent='UBS do cadastro: '+(p.unidade||'Não vinculada — acesso restrito à gestão municipal');box.append(label);
-   if(escopoDadosClinicos().municipal){
+   {
     const select=document.createElement('select');select.id='pac-vinculo-ubs';select.setAttribute('aria-label','UBS do cadastro');select.innerHTML=ESFUnidades.options(p.unidade||'');
     const button=document.createElement('button');button.type='button';button.className='btn btn-s';button.textContent='Salvar vínculo de UBS';button.onclick=()=>vincular(cpf);box.append(select,button);
    }
-   out.prepend(box);
-  };
+   out.append(box);
+ }
+ window.ESFEscopo={atualizar,vincular,mostrarVinculo};
+ document.addEventListener('DOMContentLoaded',()=>{
+  anterior=escopoDadosClinicos().chave;
   const go=window.go;window.go=function(...args){atualizar();return go.apply(this,args);};
  });
 })();

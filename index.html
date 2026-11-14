@@ -927,6 +927,7 @@ body.sidebar-collapsed .dev-nav{display:none}
 <script defer src="assets/continuidade.js"></script>
 <script defer src="assets/avaliacoes-aps.js"></script>
 <script defer src="assets/equipe.js"></script>
+<script defer src="assets/prontuario.js"></script>
 </head>
 <body>
 
@@ -4036,7 +4037,7 @@ body.sidebar-collapsed .dev-nav{display:none}
   </div>
 </div>
 
-<div class="edit-modal" id="pac-modal" onclick="if(event.target===this)fecharPaciente()">
+<div class="edit-modal" id="pac-modal" role="dialog" aria-modal="true" aria-labelledby="pac-modal-titulo" onclick="if(event.target===this)fecharPaciente()">
   <div class="edit-panel" style="max-width:760px">
     <h3 id="pac-modal-titulo">Paciente</h3>
     <div id="pac-modal-conteudo"></div>
@@ -7962,6 +7963,7 @@ async function buscarPacientePorCPF(input){
   input.value=formatarCPF(cpf);
   const prefix=input.id.split('-')[0], locais=carregarPacientes(),escopo=escopoDadosClinicos().chave;
   if(input.dataset.cpfCarregado&&input.dataset.cpfCarregado!==cpf){
+    const prescricao=document.getElementById(prefix+'-prescricoes-registradas');if(prescricao)prescricao.value='';
     for(const [chave,id] of Object.entries(CAMPOS_PACIENTE[prefix]||{})){
       const el=document.getElementById(id);
       if(el&&chave!=='cpf')atribuirValorCadastro(el,'');
@@ -8044,16 +8046,16 @@ function renderPacientes(){
   el.innerHTML=pacientes.map(p=>{const cs=consultasDoPaciente(p.cpf,p.nome,consultas),ult=cs[0];return`<div class="pac-card" onclick="abrirPaciente('${p.cpf}')"><div class="pac-name">${escTR(p.nome||'Paciente sem nome')}</div><div class="pac-meta">CPF: ${escTR(formatarCPF(p.cpf))}${p.cns?`<br>CNS: ${escTR(p.cns)}`:''}${p.telefone?`<br>Contato: ${escTR(p.telefone)}`:''}<br>Endereço: ${escTR(enderecoPaciente(p))}</div><div class="pac-last">${ult?`Última consulta: <strong>${escTR(ult.tipo)}</strong> · ${new Date(ult.data).toLocaleDateString('pt-BR')}`:'Sem consulta relacionada'}</div></div>`}).join('');
 }
 let PACIENTE_MODAL_CPF='';
-function abrirPaciente(cpf){
-  const d=carregarPacientes()[cpf];if(!d)return;const cs=consultasDoPaciente(cpf,d.nome),ult=cs[0];
-  registrarAuditoria('Cadastro de paciente acessado',`CPF final ${String(cpf).slice(-4)}`);
-  PACIENTE_MODAL_CPF=cpf;
-  document.getElementById('pac-modal-titulo').textContent=d.nome||'Paciente';
-  const item=(l,v)=>v?`<div class="pac-detail-item"><b>${l}</b>${escTR(v)}</div>`:'';
-  document.getElementById('pac-modal-conteudo').innerHTML=`<div class="pac-detail-grid">${item('CPF',formatarCPF(cpf))}${item('CNS',d.cns)}${item('Nascimento',d.nasc?formatarDataBR(d.nasc):'')}${item('Prontuário',d.prontuario)}${item('Telefone',d.telefone)}${item('Endereço',enderecoPaciente(d))}${item('Microárea',d.microarea)}${item('ACS responsável',d.acs)}${item('Família',d.familia)}${item('Vulnerabilidade',d.vulnerabilidade)}${item('Necessita visita',d.visita_domiciliar)}${item('Estado civil',d.estado_civil)}${item('Naturalidade',d.naturalidade)}${item('Religião',d.religiao)}${item('Raça/cor',d.raca)}${item('Escolaridade',d.escolaridade)}${item('Ocupação',d.ocupacao)}${item('Responsável',d.responsavel)}${item('Nome da mãe',d.nome_mae)}${item('Parceiro(a)',d.parceiro_nome)}${item('Nascimento do parceiro',d.parceiro_nasc?formatarDataBR(d.parceiro_nasc):'')}${item('Prontuário do parceiro',d.parceiro_prontuario)}${item('Última consulta',ult?`${ult.tipo} em ${new Date(ult.data).toLocaleString('pt-BR')}`:'Sem consulta')}</div><div class="ct"><span class="dot db"></span>Consultas relacionadas</div><div class="pac-consultas">${cs.length?cs.map(a=>`<div class="pac-consulta"><strong>${escTR(a.tipo)}</strong> · ${new Date(a.data).toLocaleString('pt-BR')}<button class="hist-btn hist-btn-edit" style="float:right" onclick="fecharPaciente();reabrirAtendimento('${a.id}')">Reabrir</button><div style="color:var(--tx3);margin-top:3px">${escTR(a.profissional||'')}</div></div>`).join(''):'<div class="pac-consulta">Nenhuma consulta relacionada.</div>'}</div>`;
-  document.getElementById('pac-modal').classList.add('open');
+function abrirPaciente(cpf,unidade){
+  window.ProntuarioAPS.abrir(cpf,unidade);
 }
-function fecharPaciente(){document.getElementById('pac-modal').classList.remove('open');PACIENTE_MODAL_CPF=''}
+function fecharPaciente(){
+  document.getElementById('pac-modal').classList.remove('open');
+  document.getElementById('pac-modal-conteudo').replaceChildren();
+  document.getElementById('pac-modal-titulo').textContent='Prontuário';
+  PACIENTE_MODAL_CPF='';
+  window.ProntuarioAPS?.devolverFoco();
+}
 const PACIENTE_CAMPOS_EDICAO=[
   ['nome','Nome completo','text'],['cpf','CPF','text'],['cns','CNS','text'],['nasc','Data de nascimento','date'],
   ['prontuario','Prontuário / registro local','text'],['telefone','Telefone / WhatsApp','text'],['cep','CEP','text'],['logradouro','Logradouro','text'],
@@ -8972,13 +8974,14 @@ function criarAtendimento(tipo) {
   window.SeguimentoAPS?.sincronizarSoap(prefix);
   const soap = coletarSOAP(cfg.soap);
   if (!soap) { showToast('Gere o SOAP antes de salvar. Toque em GERAR EVOLUÇÃO primeiro.'); return null; }
+  const prescricao=document.getElementById(prefix+'-prescricoes-registradas')?.value.trim();
   const conselho = u.conselho ? ` (${u.conselho})` : '';
   return {
     id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
     tipo,
     nome,
     cpf,
-    soap,
+    soap:prescricao?soap+'\n\nMedicações prescritas nesta consulta: '+prescricao:soap,
     dados:coletarDadosModulo(prefix),
     data: new Date().toISOString(),
     profissional: `${u.nome}${conselho} · ${u.cargo}`,
@@ -9633,7 +9636,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const { data: { session } } = await comLimite(_sb.auth.getSession(),9000,'O serviço de login não respondeu. A rede da unidade pode estar bloqueando o Supabase.');
     verificarAcesso(session);
     if(status)status.textContent='Acesse sua conta.';
-    _sb.auth.onAuthStateChange((event, session) => verificarAcesso(session));
+    _sb.auth.onAuthStateChange((event, session) => { setTimeout(()=>verificarAcesso(session,event),0); });
   }catch(e){
     // Sessão não respondeu: tenta modo offline com sessão em cache antes de bloquear.
     if(entrarModoOffline()){
@@ -9751,6 +9754,7 @@ function entrarModoOffline(){
   const chip=document.getElementById('user-chip-label');if(chip)chip.innerText=nome?nome.split(' ')[0]:'Minha Conta';
   try{registrarAuditoria('Acesso offline','Sessão em cache — sem rede')}catch(e){}
   mostrarBannerOffline();
+  abrirPaginaInicialDaSessao();
   return true;
 }
 
@@ -9768,7 +9772,11 @@ function mostrarBannerOffline(){
   document.body.appendChild(b);
 }
 
-function verificarAcesso(session) {
+function abrirPaginaInicialDaSessao(){
+  const pagina=temPermissao('ver_historico')&&moduloAtivo('equipe')?'equipe':'inicio';
+  go(pagina,document.querySelector(`.nb[onclick*="'${pagina}'"]`));
+}
+function verificarAcesso(session,event) {
   const authScreen = document.getElementById('auth-screen');
   if (!session) {
     if(CURRENT_AUTH_USER_ID)registrarAuditoria('Logout','Sessão encerrada');
@@ -9779,13 +9787,20 @@ function verificarAcesso(session) {
     if(window.trialInterval){clearInterval(window.trialInterval);window.trialInterval=null;}
     authScreen.classList.add('visible');
   } else {
-    authScreen.classList.remove('visible');
     const user = session.user;
+    const novaSessao=CURRENT_AUTH_USER_ID!==user.id||window.MODO_OFFLINE;
+    if(!novaSessao&&event!=='USER_UPDATED')return;
+    if(novaSessao)authScreen.classList.add('visible');
+    window.MODO_OFFLINE=false;
     const meta = user.user_metadata || {};
     CURRENT_AUTH_USER_ID=user.id;
     CURRENT_USER_PROFILE={nome:meta.nome||user.email||'',cargo:meta.cargo||'',conselho:meta.conselho||'',unidade:''};
     window.ESFUnidades?.iniciarSessao();
-    carregarPermissoesUsuario(user);
+    carregarPermissoesUsuario(user).then(()=>{
+      if(CURRENT_AUTH_USER_ID!==user.id)return;
+      if(novaSessao)abrirPaginaInicialDaSessao();
+      authScreen.classList.remove('visible');
+    });
     localStorage.setItem(chaveUsuarioAtual(),JSON.stringify(CURRENT_USER_PROFILE));
     registrarAuditoria('Login','Acesso autenticado');
     iniciarSessaoSegura();

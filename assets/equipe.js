@@ -35,13 +35,14 @@
     if(s.unidade&&unidades.includes(s.unidade))unit.value=s.unidade;
     const mode=field(toolbar,'Exibir','','visao',['Agenda e fila','Aguardando vaga','Cuidado compartilhado','Vacinação','Retornos de vacina','Atividades coletivas','Imóveis','Produção']);
     const day=field(toolbar,'Dia','date','dia');day.value=today();
+    const professional=field(toolbar,'Profissional da agenda','','profissional',['Todos os profissionais']);
     const search=field(toolbar,'Buscar por nome, CPF, responsável ou descrição','search','busca');
     const state=node('p');state.setAttribute('role','status');
     const entry=node('details'),list=node('div');entry.className='card';list.className='card';root.append(toolbar,entry,state,list);
     let rows=[],patients={},viewKey='',writeLock=false;
     const current=()=>active(g,s.chave);
     const filterKey=()=>JSON.stringify([unit.value,mode.value,day.value]);
-    function patientName(cpf){return patients[cpf]?.nome||cpf;}
+    function patientName(cpf,row){return row?.pacientes?.nome||patients[cpf]?.nome||cpf;}
     async function escrever(button,fn,onOk) {
       if(!current()||writeLock)return;
       writeLock=true;button.disabled=true;const key=filterKey();
@@ -120,7 +121,7 @@
     }
     function draw(){
       list.replaceChildren();const q=search.value.trim().toLocaleLowerCase('pt-BR');
-      const filtered=rows.filter(r=>[r.cpf,patientName(r.cpf),r.descricao,r.profissional,r.motivo,r.estado,r.microarea,r.endereco,r.complemento].join(' ').toLocaleLowerCase('pt-BR').includes(q));
+      const filtered=rows.filter(r=>professional.hidden||!professional.value||r.profissional===professional.value).filter(r=>[r.cpf,patientName(r.cpf,r),r.descricao,r.profissional,r.motivo,r.estado,r.microarea,r.endereco,r.complemento].join(' ').toLocaleLowerCase('pt-BR').includes(q));
       if(mode.value==='Produção'){
         const counts=new Map();for(const r of filtered){const tipo=r.tipo||r.estado;counts.set(tipo,(counts.get(tipo)||0)+1);}
         for(const [tipo,total] of counts)list.append(node('p',tipo+' · '+total+' registro(s)'));
@@ -134,7 +135,10 @@
             escrever(save,()=>_sb.from('imoveis_ubs').update({ativo:!row.ativo,justificativa:motivo.value.trim()}).eq('id',row.id).eq('versao',row.versao).select('id').maybeSingle());
           });details.append(save);
         }else if(row.estado){
-          card.append(node('strong',patientName(row.cpf)+' · '+row.estado),node('p',[row.horario?new Date(row.horario).toLocaleString('pt-BR'):'',row.profissional,row.motivo,row.devolutiva].filter(Boolean).join(' · ')));
+          const patient=btn(patientName(row.cpf,row),()=>abrirPaciente(row.cpf,unit.value));
+          patient.className='agenda-paciente';patient.title='Abrir prontuário';
+          const title=node('strong');title.append(patient,document.createTextNode(' · '+row.estado));
+          card.append(title,node('p',[row.horario?new Date(row.horario).toLocaleString('pt-BR'):'',row.profissional,row.motivo,row.devolutiva].filter(Boolean).join(' · ')));
           const history=node('details');history.append(node('summary','Histórico da passagem de caso'));
           history.ontoggle=async()=>{if(!history.open||history.childElementCount>1)return;
             const {data,error}=await _sb.from('agenda_ubs_historico').select('estado,responsavel,anotacao,registrado_em').eq('agenda_id',row.id).order('versao');
@@ -162,7 +166,7 @@
       if(!current()||!d||!u)return;
       try{
         const start=new Date(d+'T00:00:00'),finish=new Date(start);finish.setDate(finish.getDate()+1);
-        const queue=()=>_sb.from('agenda_ubs').select('*').eq('unidade',u);
+        const queue=()=>_sb.from('agenda_ubs').select('*,pacientes(nome:dados->>nome)').eq('unidade',u);
         const tasks=()=>_sb.from('acoes_ubs').select('*').eq('unidade',u).eq('dia',d);
         const wait=m==='Aguardando vaga',share=m==='Cuidado compartilhado',prod=m==='Produção';
         let data;
@@ -188,11 +192,17 @@
         }
         if(!current()||ticket!==sequence||key!==filterKey())return;
         patients=carregarPacientes();data.sort((a,b)=>(a.horario||a.criado_em).localeCompare(b.horario||b.criado_em));
-        rows=data;viewKey=key;draw();state.textContent='Atualizado às '+new Date().toLocaleTimeString('pt-BR')+'.';
+        rows=data;viewKey=key;
+        if(!professional.hidden){
+          const selected=professional.value,names=[...new Set(rows.map(r=>r.profissional).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+          professional.replaceChildren(new Option('Todos os profissionais',''),...names.map(name=>new Option(name,name)));
+          professional.value=names.includes(selected)?selected:'';
+        }
+        draw();state.textContent='Atualizado às '+new Date().toLocaleTimeString('pt-BR')+'.';
       }catch{if(current()&&ticket===sequence){if(viewKey!==key)list.replaceChildren();state.textContent='Não foi possível atualizar. Confira a conexão e tente novamente.';}}
     }
-    function switchView(){fillForm();day.parentElement.hidden=['Aguardando vaga','Cuidado compartilhado','Imóveis'].includes(mode.value);refresh();}
-    unit.onchange=mode.onchange=switchView;day.onchange=()=>refresh();search.oninput=draw;
+    function switchView(){professional.hidden=professional.parentElement.hidden=mode.value!=='Agenda e fila';fillForm();day.parentElement.hidden=['Aguardando vaga','Cuidado compartilhado','Imóveis'].includes(mode.value);refresh();}
+    unit.onchange=()=>{professional.value='';switchView();};mode.onchange=switchView;professional.onchange=draw;day.onchange=()=>refresh();search.oninput=draw;
     toolbar.append(btn('Atualizar lista',()=>refresh()));switchView();
     timer=setInterval(()=>{if(current()&&!document.hidden&&!entry.open&&!list.querySelector('details[open]')&&!writeLock)refresh(false);},20000);
   }

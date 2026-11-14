@@ -9,7 +9,7 @@ Enfermeiros acessam os pacientes da própria UBS. A gestão municipal mantém a 
 3. Cadastros sem vínculo ficam visíveis somente à gestão municipal até serem atribuídos a uma UBS.
 4. Profissionais sem UBS definida precisam solicitar a atribuição antes de salvar atendimentos.
 
-A regra dos atendimentos continua distinguindo os papéis: enfermeiro consulta seus próprios registros dentro da UBS; gestor da UBS consulta registros da unidade; gestão municipal consulta todos.
+Ao entrar, a equipe vê a agenda da própria UBS. O nome do paciente abre o prontuário com as consultas de todos os profissionais da unidade. O histórico pessoal continua disponível para reabrir os próprios registros. A gestão municipal pode selecionar outra UBS.
 
 Trocar de conta ou UBS limpa os dados exibidos no formulário. Rascunhos e dados locais são separados por conta e escopo. Registros locais antigos sem vínculo demonstrável não são importados automaticamente; eventual recuperação deve ser revisada pela administração.
 

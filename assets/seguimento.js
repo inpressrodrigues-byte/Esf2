@@ -145,7 +145,7 @@
     for(const a of valid)for(const row of resultados(a.dados[MODULOS_ATENDIMENTO[a.tipo].prefix+'-resultados-vinculados'],cpf,nasc))orders.delete(keyOf(row));
     return [...orders.values()].map(r=>r.nome+' · '+formatDate(r.dataPedido));
   }
-  window.SeguimentoAPS = {mostrar, sincronizarSoap, removerBloco,pendentes};
+  window.SeguimentoAPS = {mostrar, sincronizarSoap, removerBloco,pendentes,pedidos,resultados,keyOf};
   document.addEventListener('DOMContentLoaded', () => {
     for (const p of Object.values(QUICK_PAGE_PREFIX)) if (field(p,'historico-consulta')) FluxoAPS.historico(p);
     const generators = {gerarSoapAutomatoPna:'pna',gerarSoapAutomatoPnc:'pnc',gerarSoapAutomatoPu:'pu',

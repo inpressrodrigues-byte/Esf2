@@ -228,3 +228,10 @@ body.ux-prumo[data-surface=light]{color-scheme:light}
 @media(max-width:420px){.ux-prumo .g2,.ux-prumo .g3,.ux-prumo .g4,.ux-prumo .module-form-grid{grid-template-columns:1fr}.ux-prumo .clinical-options{display:grid;grid-template-columns:minmax(0,1fr)}.ux-prumo .clinical-chip{width:100%}.ux-prumo .sh>div:has(.sh-t){min-width:140px}.ux-prumo .ux-favorite-toggle{margin-left:0}.ux-prumo .ux-risk-review-heading{align-items:flex-start}}
 @media(pointer:coarse){.ux-prumo .btn,.ux-prumo .quick-action-btn,.ux-prumo summary,.ux-prumo .ux-link,.ux-prumo .ux-favorite-toggle,.ux-prumo .nb{min-height:44px}.ux-prumo .f input,.ux-prumo .f select,.ux-prumo .f textarea{font-size:16px;min-height:44px}}
 @media print{#ux-home-background,.ux-prumo .ux-favorite-toggle,.ux-prumo .ux-patient-icon{display:none!important}.ux-prumo .wrap{padding:0}.ux-prumo .ux-documents{border:0}}
+
+.agenda-paciente{background:none;border:0;padding:.35rem .15rem;color:var(--green);font:inherit;text-decoration:underline;text-underline-offset:.16em;cursor:pointer}
+.prontuario-secao{margin:1rem 0;padding-top:.7rem;border-top:1px solid var(--bd);overflow-wrap:anywhere}
+.prontuario-secao h4{font-size:1rem;margin:0 0 .45rem}
+.prontuario-secao summary{cursor:pointer;padding:.4rem 0}
+.prontuario-secao p,.prontuario-secao article strong{white-space:pre-wrap}
+.prontuario-secao p{margin:.4rem 0}
