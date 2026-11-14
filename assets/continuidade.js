@@ -97,17 +97,21 @@
     }
     return {grupos,pendentes};
   }
-  function territorio(ps) {
+  function territorio(ps,todos=ps) {
     const {grupos,pendentes}=gruposFamilia(ps);
+    const completos=gruposFamilia(todos).grupos,dia=new Date().toLocaleDateString('sv-SE');
+    let total=0;
     const vulneravel=p=>/^(média|media|alta)$/i.test(p.vulnerabilidade||'');
     const out=id('terr-familias-resumo');out.replaceChildren(el('summary','Famílias e moradores · '+grupos.size));
-    for(const moradores of grupos.values()){
-      const d=el('details'),p=moradores[0];d.append(el('summary',p.familia+' · '+p.microarea+' · '+moradores.length+' morador(es)'));
+    for(const key of grupos.keys()){
+      const moradores=completos.get(key),r=EstratificacaoAPS.escala(moradores,dia);
+      const d=el('details'),p=moradores[0];d.append(el('summary',p.familia+' · '+p.microarea+' · '+moradores.length+' morador(es) · '+(r.completa?'Vulnerabilidade '+r.classe.toLowerCase()+' ('+r.pontos+' pontos)':'Escala incompleta')));
+      if(r.completa?r.pontos>=7:moradores.some(vulneravel))total++;
       for(const m of moradores)d.append(acao(m.nome||'Abrir cadastro',()=>abrirCadastroTerritorial(m.cpf)));
       out.append(d);
     }
     if(pendentes.length)out.append(el('p',pendentes.length+' cadastro(s) sem identificação completa da família, microárea ou UBS.'));
-    return [...grupos.values()].filter(g=>g.some(vulneravel)).length;
+    return total;
   }
   function acompanhar(){
     const out=id('ba-acompanhados');if(!out)return;
@@ -140,8 +144,6 @@
       const previous=JSON.parse(box._identity)[1];
       if(previous&&previous!==normalizarCPF(e.target.value)&&window.ESFCiap?.capture(p).length)ESFCiap.restore(p,[]);
     },true);
-    const risco=id('hip-risco-cv');
-    if(risco){const link=el('a','Calcular risco em 10 anos na HEARTS (OPAS)');link.href='https://www.paho.org/pt/hearts-nas-americas/calculadora-risco-cardiovascular';link.target='_blank';link.rel='noopener noreferrer';risco.after(link);}
     const filter=id('ba-populacao');filter.onchange=acompanhar;
     const panel=filter.closest('details');panel.ontoggle=()=>{if(panel.open)acompanhar();else id('ba-acompanhados').replaceChildren();};
     for(const key of ['ba-microarea','ba-busca'])id(key).addEventListener(key==='ba-busca'?'input':'change',()=>{if(panel.open)acompanhar();});

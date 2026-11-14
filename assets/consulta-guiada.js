@@ -36,6 +36,23 @@
     return content.join('\n');
   }
   function addRef(title,url){return {title,url};}
+  const dengueCampos=[
+    ['grave','Choque, hemorragia grave ou disfunção grave de órgão'],
+    ['alarme','Sinal de alarme (dor abdominal intensa contínua, vômitos persistentes, acúmulo de líquido, hipotensão postural, lipotimia, hepatomegalia, sangramento de mucosa, letargia, irritabilidade ou hematócrito em ascensão)'],
+    ['especial','Sangramento cutâneo, prova do laço positiva, condição especial, comorbidade ou risco social']
+  ];
+  function dengue(p,ctx){
+    const ler=k=>value(p,'dengue-'+k),grave=ler('grave'),alarme=ler('alarme'),especial=ler('especial');
+    const grupo=grave==='Sim'?'D':grave!=='Não'?'':alarme==='Sim'?'C':alarme!=='Não'?'':especial==='Sim'||ctx.gestante==='Sim'?'B':especial==='Não'?'A':'';
+    const item={dengue:true,grupo,title:'Dengue'+(grupo?' · Grupo '+grupo:''),refs:[addRef('Manejo por grupo · Ministério da Saúde','https://sisaps.saude.gov.br/sistemas/esusaps/docs/manual/PEC/PEC_13_sdc/')]};
+    if(!grupo){item.care='Avalie gravidade, sinais de alarme e condições especiais para classificar. Se houver instabilidade, acione urgência imediatamente.';return item;}
+    if(grupo==='D'||grupo==='C'){item.priority=grupo==='D'?'Emergência · iniciar estabilização e acionar remoção imediata.':'Urgência · iniciar manejo de sinais de alarme e encaminhar para atendimento hospitalar.';
+      item.care='Monitorar perfusão e sinais vitais, obter acesso venoso e iniciar reposição conforme protocolo de urgência. A coleta de exames não deve atrasar a assistência.';return item;}
+    item.care=grupo==='B'?'Manter em observação, iniciar hidratação e reavaliar com o hematócrito. Após liberação, reavaliar diariamente até 48 horas depois da queda da febre.':'Iniciar hidratação oral. Reavaliar quando a febre baixar ou no quinto dia de sintomas se a febre persistir.';
+    item.medication='Sais de reidratação oral. Para dor ou febre, avaliar paracetamol ou dipirona conforme idade, contraindicações e protocolo aplicável. Evitar AAS e anti-inflamatórios.';
+    item.exams=(grupo==='B'?'Solicitar hemograma completo. ':'Hemograma a critério clínico. ')+'Para investigação etiológica, NS1 ou RT-PCR até o 5º dia e sorologia a partir do 6º dia, conforme fluxo local.';
+    item.note='Notificar a suspeita conforme o fluxo de vigilância. Orientar retorno imediato diante de sinais de alarme.';return item;
+  }
   function activeDecisions(p,text,ctx){
     const current=R.positive(text).join(' | ');
     const priority=value(p,'prioridade');
@@ -55,7 +72,7 @@
       ['dor','perdaliquido','sangra','mobilizacao'].some(k=>value(p,'corr-'+k)==='Sim');
     const pn=gestacao?QueixasGestacao.avaliar(obstetricos.join(' | '),{ig:ctx.ig,alarme}):null;
     const output=pn?.items.slice()||[],matches=R.match(text);
-    if(/\bdengue\b/.test(current))output.push({title:'Avaliação da suspeita de dengue',care:'Avaliar sinais de alarme, gravidade e condições especiais. Consultar o manejo do grupo identificado e registrar a conduta.',refs:[addRef('Classificar e consultar manejo · Ministério da Saúde','https://manejodengue.saude.gov.br/')]});
+    if(/\bdengue\b/.test(current)||/\bsuspeita (?:de )?dengue\b/.test(declarados)&&!/nega|descart|sem suspeita/.test(declarados))output.push(dengue(p,ctx));
     for(const rule of matches){
       if(pn?.cobertas.has(rule.title))continue;
       if(rule.kit==='itu'){output.push(R.urinary({...ctx,urgent:ctx.urgent||redFlag||pn?.alarme}));continue;}
@@ -183,6 +200,16 @@
     for(const [index,item] of items.entries()){
       const section=tag('article','care-item');
       section.append(tag('h3','',item.title));
+      if(item.dengue){
+        const grid=tag('div','g3');
+        for(const [key,label] of dengueCampos){
+          const wrap=tag('label','f',label),select=tag('select');
+          for(const opt of ['','Sim','Não'])select.add(new Option(opt||'Não avaliado',opt));
+          const saved=byId(p+'-dengue-'+key);select.value=saved.value;
+          select.onchange=()=>{saved.value=select.value;saved.dispatchEvent(new Event('input',{bubbles:true}));model.stamp='';display(p);};
+          wrap.append(select);grid.append(wrap);
+        }section.append(grid);
+      }
       if(item.priority)section.append(tag('p','care-priority',item.priority));
       line(section,'Medicação prevista no protocolo',item.medication);
       line(section,'Conduta',item.care);line(section,'Tratamento / manejo',item.treatment);line(section,'Exames e avaliação',item.exams);
@@ -261,6 +288,8 @@
       const home=page.querySelector('.ux-stage-label')||page.querySelector('.tabs');if(!home)continue;
       const box=tag('aside','consultation-protocol');box.id=p+'-protocolo-atual';box.setAttribute('aria-label','Orientação do protocolo');box.setAttribute('aria-live','polite');box.hidden=true;home.after(box);
       const old=tag('div');old.hidden=true;
+      for(const [key] of dengueCampos){const field=tag('input','aps-new');field.type='hidden';field.id=p+'-dengue-'+key;old.append(field);}
+      byId(p+'-cpf')?.addEventListener('input',()=>{for(const [key] of dengueCampos)byId(p+'-dengue-'+key).value='';});
       for(const k of ['motivo','completo']){const input=tag('input');input.id=p+'-guide-'+k;input.type=k==='completo'?'checkbox':'text';old.append(input);}old.className='consultation-guide legacy-guide';page.append(old);
       pages.set(p,{page,box,home,stamp:'',timer:0});clean(page,p);if(assessment[p])mountPicker(p,pages.get(p));
       const change=e=>{
