@@ -9,3 +9,10 @@
 @media(max-width:600px){#equipe-painel .agenda-filtros{padding:12px}.agenda-segmentos{gap:5px}.agenda-segmentos button{padding:8px;font-size:13px}.tv-ubs footer{justify-content:flex-start}}
 
 .agenda-datas{display:flex;gap:4px;align-items:center}.agenda-datas button{font-size:13px}#equipe-painel .agenda-filtros .panel-tools{padding:0}
+.tv-ubs main{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(19rem,1fr);align-items:center;gap:2vw}
+#anteriores{padding:1em;border-radius:1em;background:white}#anteriores ul{display:grid;grid-template-columns:1fr}
+#anteriores li{display:grid;grid-template-columns:1fr auto;align-items:end;column-gap:.6em;overflow-wrap:anywhere}
+#anteriores li strong{grid-column:1/-1}#anteriores time{font-size:1em}
+#ajustes-voz{position:relative}#ajustes-voz summary{cursor:pointer}#ajustes-voz[open]{padding:.6em;background:white;border-radius:.6em}
+#ajustes-voz select{max-width:100%;font:inherit}#ajustes-voz label{display:block;margin:.5em 0}
+@media(max-width:800px){.tv-ubs main{grid-template-columns:minmax(0,1fr);align-content:center;gap:1rem}}

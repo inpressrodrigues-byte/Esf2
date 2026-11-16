@@ -51,7 +51,7 @@
     const search=field(toolbar,'Buscar por nome, CPF, responsável ou descrição','search','busca');
     const state=node('p');state.setAttribute('role','status');
     const entry=node('details'),list=node('div');entry.className='card';list.className='card';root.append(toolbar,entry,state,list);
-    let rows=[],vagasDia=[],patients={},viewKey='',writeLock=false,segment='Todos';
+    let rows=[],vagasDia=[],patients={},viewKey='',writeLock=false,segment='Em aberto';
     const current=()=>active(g,s.chave);
     const filterKey=()=>JSON.stringify([unit.value,mode.value,day.value]);
     function patientName(cpf,row){return row?.pacientes?.nome||patients[cpf]?.nome||cpf;}
@@ -118,7 +118,7 @@
       };
     }
     function transitions(row,line){
-      const options=flows[row.estado]?.filter(o=>!(row.estado==='Triagem concluída'&&o==='Em atendimento')&&!(row.estado==='Agendado'&&['Cancelado','Aguardando atendimento'].includes(o)));if(!options?.length)return;
+      const options=flows[row.estado]?.filter(o=>o!=='Cancelado'&&!(row.estado==='Triagem concluída'&&o==='Em atendimento')&&!(row.estado==='Agendado'&&o==='Aguardando atendimento'));if(!options?.length)return;
       const details=node('details');details.append(node('summary',row.estado==='Agendado'?'Reagendar ou registrar falta':row.estado==='Em escuta'?'Registrar triagem':'Atualizar ou passar o caso'));line.append(details);
       const form=node('form');details.append(form);
       const next=field(form,'Próxima situação','','',options),prof=field(form,'Passar para / responsável','text');
@@ -139,14 +139,15 @@
       let filtered=rows.filter(r=>professional.hidden||!professional.value||r.profissional===professional.value).filter(r=>[r.cpf,patientName(r.cpf,r),r.descricao,r.profissional,r.motivo,r.estado,r.microarea,r.endereco,r.complemento].join(' ').toLocaleLowerCase('pt-BR').includes(q));
       if(mode.value==='Agenda e fila'){
         const strip=node('nav');strip.className='agenda-segmentos';strip.setAttribute('aria-label','Etapas da agenda');
-        for(const label of ['Todos','Agendados','Triagem','Atendimento','Encerrados']){
-          const total=label==='Todos'?filtered.length:filtered.filter(r=>fase(r.estado)===label).length;
+        const matches=(r,label)=>label==='Em aberto'?fase(r.estado)!=='Encerrados':fase(r.estado)===label;
+        for(const label of ['Em aberto','Agendados','Triagem','Atendimento','Encerrados']){
+          const total=filtered.filter(r=>matches(r,label)).length;
           const tab=btn(label+' ('+total+')',()=>{segment=label;draw();list.querySelector('[aria-pressed="true"]')?.focus();});
           tab.setAttribute('aria-pressed',String(segment===label));strip.append(tab);
         }
-        list.append(strip);if(segment!=='Todos')filtered=filtered.filter(r=>fase(r.estado)===segment);
+        list.append(strip);filtered=filtered.filter(r=>matches(r,segment));
       }
-      if(mode.value==='Agenda e fila'&&['Todos','Agendados'].includes(segment)&&!search.value.trim()){
+      if(mode.value==='Agenda e fila'&&['Em aberto','Agendados'].includes(segment)&&!search.value.trim()){
         const livres=vagasDia.filter(x=>Date.parse(x.inicio)>Date.now()&&(!professional.value||x.profissional===professional.value)&&!x.agenda_ubs?.some(a=>!['Cancelado','Faltou'].includes(a.estado)));
         if(livres.length){const free=node('details');free.append(node('summary','Horários livres ('+livres.length+')'));
           for(const prof of new Set(livres.map(x=>x.profissional)))free.append(node('p',prof+' · '+livres.filter(x=>x.profissional===prof).map(x=>AgendaClinica.clock(x.inicio)).join(', ')));list.append(free);}
@@ -182,11 +183,12 @@
             const quick=btn(row.estado==='Agendado'?'Registrar chegada':'Iniciar triagem',()=>escrever(quick,()=>_sb.from('agenda_ubs').update({estado:next}).eq('id',row.id).eq('versao',row.versao).select('id').maybeSingle()));
             card.append(quick);
           }
-          if(row.estado==='Agendado'){
-            const cancel=btn('Cancelar agendamento',()=>{
-              if(!confirm('Cancelar o agendamento de '+patientName(row.cpf,row)+' com '+row.profissional+' em '+new Date(row.horario).toLocaleString('pt-BR')+' e liberar o horário?'))return;
-              escrever(cancel,()=>_sb.from('agenda_ubs').update({estado:'Cancelado'}).eq('id',row.id).eq('versao',row.versao).select('id').maybeSingle());
-            });cancel.classList.add('agenda-cancelar');card.append(cancel);
+          if(fase(row.estado)!=='Encerrados'){
+            const removal=node('details'),toggle=node('summary','Remover da agenda');
+            toggle.className='agenda-cancelar';
+            const cancel=btn('Confirmar remoção',()=>escrever(cancel,()=>_sb.from('agenda_ubs').update({estado:'Cancelado'}).eq('id',row.id).eq('versao',row.versao).select('id').maybeSingle()));
+            const keep=btn('Manter na agenda',()=>{removal.open=false;toggle.focus();});
+            removal.append(toggle,node('p','Remover '+patientName(row.cpf,row)+' desta agenda? A passagem ficará registrada como cancelada.'),cancel,keep);card.append(removal);
           }
           ChamadorAPS.caller(row,unit.value,card);
           if(row.triagem)card.append(node('p','Triagem · '+new Date(row.triado_em).toLocaleString('pt-BR')+' — '+AgendaClinica.summary(row)));
@@ -257,7 +259,7 @@
       }catch{if(current()&&ticket===sequence){if(viewKey!==key)list.replaceChildren();state.textContent='Não foi possível atualizar. Confira a conexão e tente novamente.';}}
     }
     function switchView(){professional.hidden=professional.parentElement.hidden=mode.value!=='Agenda e fila';fillForm();day.parentElement.hidden=['Aguardando vaga','Cuidado compartilhado','Imóveis'].includes(mode.value);dates.hidden=day.parentElement.hidden;refresh();}
-    unit.onchange=()=>{professional.value='';segment='Todos';switchView();};mode.onchange=switchView;professional.onchange=draw;day.onchange=()=>refresh();search.oninput=draw;
+    unit.onchange=()=>{professional.value='';segment='Em aberto';switchView();};mode.onchange=switchView;professional.onchange=draw;day.onchange=()=>refresh();search.oninput=draw;
     ChamadorAPS.panel(toolbar,unit,current);
     AgendaClinica.availability(toolbar,unit,day,current,()=>{refresh();fillForm();});
     toolbar.append(btn('Atualizar lista',()=>refresh()));switchView();

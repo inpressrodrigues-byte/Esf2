@@ -96,6 +96,9 @@ test('Agenda individual valida vagas, sobreposição, reagendamento e triagem an
 test('Monitor exibe somente chamadas recentes da UBS e fecha após a revogação; cancelamento libera a vaga',async()=>{
  await db.exec(fs.readFileSync(require('node:path').join(__dirname,'../supabase/migrations/202611140003_chamador.sql'),'utf8'));
  await db.exec(fs.readFileSync(require('node:path').join(__dirname,'../supabase/migrations/202611160001_chamador_nome.sql'),'utf8'));
+ await db.exec("alter table public.perfis add column cargo text");
+ await db.query("update perfis set cargo='Enfermeira' where user_id=$1",[ids.a]);
+ await db.exec(fs.readFileSync(require('node:path').join(__dirname,'../supabase/migrations/202611160002_painel_historico_agenda.sql'),'utf8'));
  await db.exec("update pacientes set dados=jsonb_set(dados,'{nome}',to_jsonb('Pessoa Fictícia'::text)) where cpf='11111111111'");
  const call="select agenda_chamar($1,$2,'Sala 2',$3,$4) id";
  const agenda=(await db.query("select id,versao from agenda_ubs where estado='Em atendimento'")).rows[0];
@@ -120,7 +123,11 @@ test('Monitor exibe somente chamadas recentes da UBS e fecha após a revogação
  await as('anon',async()=>{
    assert.equal((await read(other)).chamadas.length,0);
    const calls=(await read(token)).chamadas;assert.equal(calls.length,2);assert.equal(calls[0].paciente,'Pessoa Fictícia');assert.equal(calls[0].profissional,'Profissional B');
-   assert.deepEqual(Object.keys(calls[0]).sort(),['etapa','hora','id','paciente','profissional','sala']);
+   assert.deepEqual(Object.keys(calls[0]).sort(),['cargo','etapa','hora','id','paciente','profissional','sala']);
+   assert.equal(calls[0].cargo,null);assert.equal(calls[1].cargo,'Enfermeira');
+   const hist=(await read(token)).historico;assert.equal(hist.length,2);
+   assert.equal(hist[0].quemChamou,'Nome A');assert.equal(hist[0].etapa,'Triagem');
+   assert.deepEqual((await read(other)).historico,[]);
    await assert.rejects(db.query('select * from prumo_painel.chamadas'),/permission denied/);
    await assert.rejects(db.query(call,[agenda.id,'Atendimento',ids.a,agenda.versao]),/permission denied/);
  });
@@ -133,6 +140,8 @@ test('Monitor exibe somente chamadas recentes da UBS e fecha após a revogação
    await db.exec("reset request.jwt.claims");
  });
  await as('anon',async()=>assert.equal((await read(token)).chamadas[0].profissional,'Nome de teste do login'));
+ await as('a',async()=>{await db.query("update agenda_ubs set estado='Cancelado' where id=$1",[agenda.id]);});
+ await as('anon',async()=>{assert.equal((await read(token)).historico.length,1);assert.equal((await read(token)).chamadas.length,1);});
  await as('a',()=>db.query('select agenda_painel_configurar($1,true)',[A]));
  await as('anon',()=>assert.rejects(read(token),/privilege/i));
 });

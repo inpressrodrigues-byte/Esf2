@@ -56,9 +56,12 @@ module.exports=async page=>{
   await update.getByLabel('Horário disponível').selectOption('slot-2');
   await update.getByRole('button',{name:'Confirmar mudança'}).click();
   await page.waitForFunction(()=>window.dadosTesteEquipe[0].horario_id==='slot-2');
-  await root.getByRole('button',{name:'Cancelar agendamento'}).click();
+  await root.getByText('Remover da agenda',{exact:true}).click();
+  await root.getByRole('button',{name:'Confirmar remoção'}).click();
+  await root.getByRole('button',{name:'Encerrados (1)'}).click();
   await root.getByText('Cancelado',{exact:true}).filter({visible:true}).first().waitFor();
   assert.equal(await root.getByText('Chamar para triagem',{exact:true}).count(),0);
+  await root.getByRole('button',{name:'Em aberto (0)'}).click();
   await root.getByText('Nova entrada',{exact:true}).click();
   await root.getByLabel('CPF do paciente cadastrado').fill('00000000023');
   await root.getByLabel('Entrada',{exact:true}).selectOption('Agendado');
@@ -69,19 +72,28 @@ module.exports=async page=>{
   await root.getByText('Painel da sala de espera',{exact:true}).click();await root.getByRole('button',{name:'Preparar tela de chamadas'}).click();
   const href=await root.getByRole('link',{name:'Abrir painel'}).getAttribute('href');
   const tv=await page.context().browser().newContext({serviceWorkers:'block'}),monitor=await tv.newPage(),base=new URL(page.url()).origin;
+  await monitor.addInitScript(()=>{
+    window.ditos=[];
+    Object.defineProperty(window,'speechSynthesis',{value:{getVoices:()=>[{voiceURI:'teste',name:'Português natural',localService:true,lang:'pt-BR'}],speak:m=>ditos.push(m.text),cancel(){},addEventListener(){}}});
+    window.SpeechSynthesisUtterance=class{constructor(text){this.text=text;}};
+  });
   await monitor.route('**/*',async route=>{
     const req=route.request();
     if(req.url().endsWith('/rpc/agenda_painel_ler')&&req.method()==='POST'){
       const valid=await page.evaluate(k=>k===window.panelFixtureKey,req.postDataJSON().chave);
-      return route.fulfill({status:valid?200:403,contentType:'application/json',body:JSON.stringify({unidade:'UBS de teste',chamadas:await page.evaluate(()=>window.callsFixture)})});
+      const calls=await page.evaluate(()=>window.callsFixture);
+      return route.fulfill({status:valid?200:403,contentType:'application/json',body:JSON.stringify({unidade:'UBS de teste',chamadas:calls.map(c=>({...c,cargo:'Enfermeira'})),historico:calls.map(c=>({...c,quemChamou:'Recepção de teste'}))})});
     }
     return req.method()==='GET'&&new URL(req.url()).origin===base?route.continue():route.abort();
   });
   await monitor.goto(href);await monitor.getByText('Aguardando chamada').waitFor();
+  await monitor.getByRole('button',{name:'Ativar voz'}).click();
   await root.getByText('Chamar para triagem',{exact:true}).click();
   await root.getByLabel('Quem vai atender').selectOption('agenda');
   await root.getByLabel('Sala ou consultório').fill('Triagem 1');await root.getByRole('button',{name:'Enviar chamada'}).click();
-  await monitor.getByText('Triagem 1',{exact:true}).waitFor();await monitor.getByText('Profissional · Enfermeiro fictício',{exact:true}).waitFor();await monitor.getByText('Paciente fictício',{exact:true}).waitFor();
+  await monitor.getByText('Triagem 1',{exact:true}).waitFor();await monitor.getByText('Profissional · Enfermeiro fictício',{exact:true}).waitFor();await monitor.getByRole('heading',{name:'Paciente fictício'}).waitFor();
+  await monitor.locator('#anteriores').getByText('Triagem · Recepção de teste').waitFor();
+  assert.match(await monitor.locator('#anteriores time').textContent(),/^\d\d:\d\d$/);
   assert.doesNotMatch(await monitor.locator('body').innerText(),/00000000023|Retorno simulado/);
   await root.getByRole('button',{name:'Iniciar triagem'}).click();
   await root.getByText('Em escuta',{exact:true}).waitFor();
@@ -91,6 +103,7 @@ module.exports=async page=>{
   await root.getByText('Chamar para atendimento',{exact:true}).click();
   await root.getByLabel('Sala ou consultório').fill('Consultório 3');await root.getByRole('button',{name:'Enviar chamada'}).click();
   await monitor.getByText('Consultório 3',{exact:true}).waitFor();await monitor.getByText('Profissional · Profissional de teste',{exact:true}).waitFor();
+  assert.ok(await monitor.evaluate(()=>ditos.includes('Chamando Paciente fictício. Favor comparecer ao consultório 3, com a enfermeira Profissional de teste.')));
   await root.getByRole('button',{name:'Iniciar atendimento'}).click();
   await page.getByRole('button',{name:'Chamar paciente',exact:true}).click();
   await page.locator('#ger-triagem-resumo').getByLabel('Sala ou consultório').fill('Consultório 4');

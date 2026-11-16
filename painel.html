@@ -9,6 +9,8 @@
 <body class="tv-ubs">
 <header><div><span class="tv-brand">PRUMO APS</span><h1 id="unidade">Painel de chamadas</h1></div><time id="relogio"></time></header>
 <main><div id="chamada" aria-live="polite"><p id="etapa">Sala de espera</p><h2 id="paciente">Conectando ao painel…</h2><p id="destino"></p><p id="profissional"></p></div>
-<section id="anteriores" hidden><h3>Chamadas recentes</h3><ul></ul></section></main>
-<footer><span id="situacao" role="status"></span><button id="voz" type="button" aria-pressed="false">Ativar voz</button><button id="cheia" type="button">Tela cheia</button></footer>
+<aside id="anteriores" aria-labelledby="recentes-titulo"><h3 id="recentes-titulo">Últimas chamadas</h3><p id="sem-historico">Nenhuma chamada recente.</p><ul></ul></aside></main>
+<footer><span id="situacao" role="status"></span><button id="voz" type="button" aria-pressed="false">Ativar voz</button>
+<details id="ajustes-voz"><summary>Ajustar voz</summary><label>Voz em português <select id="locutor"></select></label><button id="ouvir" type="button">Testar voz</button><p id="aviso-voz" role="status"></p></details>
+<button id="cheia" type="button">Tela cheia</button></footer>
 </body></html>
