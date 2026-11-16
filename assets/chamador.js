@@ -8,6 +8,17 @@
     return '';
   }
   function roomKey(unit,step){return JSON.stringify(['prumo-sala',CURRENT_AUTH_USER_ID,unit,step]);}
+  function callError(error){
+    const messages={
+      'Profissional sem nome cadastrado':'Preencha seu nome no perfil ou selecione o profissional da agenda.',
+      'Confira a sala ou o consultório':'Informe uma sala ou consultório com até 60 caracteres.',
+      'Paciente indisponível nesta unidade':'O cadastro do paciente está indisponível nesta UBS. Atualize a agenda.',
+      'Etapa da fila alterada':'A fila mudou. Atualize a agenda e confira a etapa do paciente.',
+      'Aguarde antes de repetir a chamada':'Aguarde alguns segundos para repetir.'
+    };
+    if(error?.code==='42501')return 'Seu usuário não tem acesso a esta chamada na UBS.';
+    return messages[error?.message]||'Não foi possível confirmar o envio. Confira a conexão e tente novamente.';
+  }
   function caller(row,unit,onScreen){
     const step=stage(row);if(!step)return;
     const details=el('details'),title=el('summary','Chamar para '+step.toLowerCase()),form=el('form'),label=el('label','Sala ou consultório'),room=el('input'),submit=el('button','Enviar chamada'),feedback=el('p');
@@ -31,7 +42,7 @@
         if(!details.isConnected||escopoDadosClinicos().chave!==scope)return;
         sessionStorage.setItem(roomKey(unit,step),destination);
         title.textContent='Chamar novamente para '+step.toLowerCase();submit.textContent='Repetir chamada';feedback.textContent='Chamada enviada ao painel da UBS.';
-      }catch(e){if(details.isConnected&&escopoDadosClinicos().chave===scope)feedback.textContent=e?.message?.includes('Aguarde')?'Aguarde alguns segundos para repetir.':'Chamada não confirmada. Confira a conexão, a etapa da fila e o nome do profissional no perfil.';}
+      }catch(e){if(details.isConnected&&escopoDadosClinicos().chave===scope)feedback.textContent=callError(e);}
       finally{submit.disabled=false;}
     };
   }

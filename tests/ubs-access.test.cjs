@@ -6,6 +6,7 @@ const A='ESFSB Cosmos',B='EAP Centro de Saúde de Toledo';let db;
 test.before(async()=>{
  db=await PGlite.create();await db.exec(`create role anon;create role authenticated;create schema auth;
  create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
+ create function auth.jwt() returns jsonb language sql stable as $$select nullif(current_setting('request.jwt.claims',true),'')::jsonb$$;
  grant usage on schema auth to authenticated,anon;
  create table perfis(user_id uuid primary key,unidade text,permissoes jsonb);
  create table profiles(id uuid primary key,full_name text,nome text,cargo text,conselho text,updated_at timestamptz,unidade text,role text default 'user',perfil text,ativo boolean default true,blocked boolean default false,permissoes jsonb default '{}');
@@ -94,6 +95,7 @@ test('Agenda individual valida vagas, sobreposição, reagendamento e triagem an
 });
 test('Monitor exibe somente chamadas recentes da UBS e fecha após a revogação; cancelamento libera a vaga',async()=>{
  await db.exec(fs.readFileSync(require('node:path').join(__dirname,'../supabase/migrations/202611140003_chamador.sql'),'utf8'));
+ await db.exec(fs.readFileSync(require('node:path').join(__dirname,'../supabase/migrations/202611160001_chamador_nome.sql'),'utf8'));
  await db.exec("update pacientes set dados=jsonb_set(dados,'{nome}',to_jsonb('Pessoa Fictícia'::text)) where cpf='11111111111'");
  const call="select agenda_chamar($1,$2,'Sala 2',$3,$4) id";
  const agenda=(await db.query("select id,versao from agenda_ubs where estado='Em atendimento'")).rows[0];
@@ -122,6 +124,15 @@ test('Monitor exibe somente chamadas recentes da UBS e fecha após a revogação
    await assert.rejects(db.query('select * from prumo_painel.chamadas'),/permission denied/);
    await assert.rejects(db.query(call,[agenda.id,'Atendimento',ids.a,agenda.versao]),/permission denied/);
  });
+ await db.query("update perfis set nome=' ' where user_id=$1",[ids.a]);
+ await db.query("delete from prumo_painel.chamadas where agenda=$1",[agenda.id]);
+ await as('a',async()=>{
+   await assert.rejects(db.query(call,[agenda.id,'Atendimento',ids.a,agenda.versao]),/sem nome cadastrado/);
+   await db.query("select set_config('request.jwt.claims',$1,false)",[JSON.stringify({user_metadata:{nome:'Nome de teste do login'}})]);
+   await db.query(call,[agenda.id,'Atendimento',ids.a,agenda.versao]);
+   await db.exec("reset request.jwt.claims");
+ });
+ await as('anon',async()=>assert.equal((await read(token)).chamadas[0].profissional,'Nome de teste do login'));
  await as('a',()=>db.query('select agenda_painel_configurar($1,true)',[A]));
  await as('anon',()=>assert.rejects(read(token),/privilege/i));
 });
