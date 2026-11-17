@@ -38,3 +38,18 @@ test('Unidades: unidade inexistente e conta inexistente não provocam alteraçõ
 });
 test('Unidades: perfil ausente é criado sem conceder administração',async()=>{await as(admin,()=>update(missing,'EAP Boa Vista'));const p=(await db.query('select unidade,permissoes from perfis where user_id=$1',[missing])).rows[0];assert.equal(p.unidade,'EAP Boa Vista');assert.equal(p.permissoes.ver_admin,undefined);});
 test('Unidades: cliente não pode adulterar o catálogo',async()=>{await as(admin,()=>assert.rejects(db.query("update unidades_saude_toledo set nome='Adulterado' where codigo='9002995'"),e=>e.code==='42501'));});
+test('Consultórios: somente admin cadastra e vincula, repetição reutiliza local e falha reverte cadastro',async()=>{
+ await db.exec("create schema esf_access; grant usage on schema esf_access to authenticated; create function esf_access.contexto() returns jsonb language sql as $$select '{}'::jsonb$$");
+ await db.exec(fs.readFileSync(path.join(__dirname,'../supabase/migrations/202611170001_consultorios_particulares.sql'),'utf8'));
+ const create=(id,name)=>db.query('select admin_cadastrar_consultorio($1,$2) as local',[id,name]);
+ for(const id of [user,''])await as(id,()=>assert.rejects(create(user,'Consultório fictício'),e=>e.code==='42501'));
+ await as(admin,async()=>{
+   const first=(await create(user,' Consultório   fictício ')).rows[0].local;
+   assert.equal(first.nome,'Consultório fictício');assert.equal(first.grupo,'Consultórios particulares');
+   assert.equal((await create(user,'consultório fictício')).rows[0].local.codigo,first.codigo);
+   assert.equal((await db.query('select unidade from perfis where user_id=$1',[user])).rows[0].unidade,first.nome);
+   for(const name of ['', 'ab', 'ESFSB Cosmos', 'a'.repeat(161)])await assert.rejects(create(user,name),e=>e.code==='22023');
+   await assert.rejects(create('00000000-0000-4000-8000-000000000099','Consultório revertido'),e=>e.code==='P0002');
+   assert.equal((await db.query("select count(*)::int n from unidades_saude_toledo where nome='Consultório revertido'")).rows[0].n,0);
+ });
+});

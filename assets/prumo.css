@@ -185,6 +185,7 @@ body.ux-home{isolation:isolate}
 .ux-prumo .admin-bar,.ux-prumo .admin-card{background:var(--sf);color:var(--tx)}
 .ux-prumo .admin-tabs{flex-wrap:wrap;gap:7px}
 .admin-account-fields{display:grid;grid-template-columns:1fr;gap:8px;margin-top:12px;min-width:220px;max-width:350px}
+.admin-local-extra{max-width:350px;margin-top:12px}.admin-local-extra summary{cursor:pointer;color:var(--green);font-weight:600}.admin-local-extra label{display:grid;gap:5px;margin:10px 0;font-size:12px}.admin-local-extra input{width:100%;box-sizing:border-box;padding:8px;border:1px solid var(--bd);border-radius:6px;background:var(--sf);color:var(--tx);font:inherit}.admin-local-extra p{font-size:12px}
 .admin-account-fields label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--tx2)}
 .admin-account-fields select,.admin-account-fields input{width:100%;min-width:0;min-height:36px;font:inherit;padding:7px 8px;border:1px solid var(--bd);border-radius:6px;background:var(--sf);color:var(--tx)}
 .ux-prumo #u-unidade{width:100%;min-width:0;font-size:14px;min-height:40px}

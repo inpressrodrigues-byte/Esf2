@@ -9599,7 +9599,7 @@ document.querySelectorAll('[onclick*="go("]').forEach(btn => {
     <div class="admin-section" id="admin-sec-usuarios">
       <div class="admin-card">
         <div class="admin-card-title">Permissões por usuário</div>
-        <div class="alert alert-i">Defina a unidade de saúde e os recursos de cada profissional. Somente administradores podem alterar a unidade. A outra conta recebe a atualização no próximo acesso.</div>
+        <div class="alert alert-i">Defina a unidade de saúde ou o consultório particular de cada profissional. Use “Adicionar consultório particular” para cadastrar um novo local. A conta recebe o vínculo no próximo acesso.</div>
         <table class="admin-table">
           <thead><tr><th>Profissional e escopo</th><th>Histórico</th><th>Modo TESTE</th><th>IA SOAP</th><th>Documentos/PDF</th><th>Protocolos</th><th>Gerenciar relatos</th><th>Admin</th></tr></thead>
           <tbody id="admin-users-tbody"><tr><td colspan="8" style="text-align:center;color:var(--tx2);padding:20px">Carregando permissões...</td></tr></tbody>
@@ -9807,7 +9807,8 @@ function verificarAcesso(session,event) {
     CURRENT_AUTH_USER_ID=user.id;
     CURRENT_USER_PROFILE={nome:meta.nome||user.email||'',cargo:meta.cargo||'',conselho:meta.conselho||'',unidade:''};
     window.ESFUnidades?.iniciarSessao();
-    carregarPermissoesUsuario(user).then(()=>{
+    carregarPermissoesUsuario(user).then(async()=>{
+      await window.ESFUnidades?.carregarCatalogo();
       if(CURRENT_AUTH_USER_ID!==user.id)return;
       if(novaSessao)abrirPaginaInicialDaSessao();
       authScreen.classList.remove('visible');
@@ -10161,7 +10162,11 @@ function abrirProntuarioAdmin(pacienteEnc, soapEnc) {
 const PERMISSAO_LABELS={ver_historico:'Histórico',usar_modo_teste:'Modo TESTE',usar_ia_soap:'IA SOAP',gerar_documentos:'Documentos/PDF',editar_protocolos:'Protocolos',reportar_erro:'Reportar',ver_reportes:'Gerenciar relatos',ver_admin:'Admin'};
 async function adminCarregarPermissoes(){
   const tbody=document.getElementById('admin-users-tbody');if(!tbody||!_sb)return;
+  const actor=CURRENT_AUTH_USER_ID;
+  await window.ESFUnidades?.carregarCatalogo();
+  if(actor!==CURRENT_AUTH_USER_ID)return;
   const {data,error}=await _sb.from('perfis').select('user_id,nome,email,cargo,unidade,permissoes').order('nome');
+  if(actor!==CURRENT_AUTH_USER_ID)return;
   if(error){tbody.innerHTML='<tr><td colspan="8">Execute o arquivo SUPABASE-BACKEND-SEGURO.sql para habilitar permissões.</td></tr>';return;}
   tbody.innerHTML=(data||[]).map(p=>{
     const perms={...PERMISSOES_PADRAO,...(p.permissoes||{})};
@@ -10170,7 +10175,7 @@ async function adminCarregarPermissoes(){
     const nivel=perms.nivel_acesso||'enfermeiro',municipio=escTR(perms.municipio_escopo||'Toledo');
     const escopo=`<div class="admin-account-fields"><label>Perfil de acesso<select onchange="adminAlterarPermissao('${p.user_id}','nivel_acesso',this.value)"><option value="enfermeiro" ${nivel==='enfermeiro'?'selected':''}>Enfermeiro</option><option value="gerente_esf" ${nivel==='gerente_esf'?'selected':''}>Gerente ESF/APS</option><option value="gerente_municipal" ${nivel==='gerente_municipal'?'selected':''}>Gerente municipal</option></select></label><label>Unidade de saúde<select data-unit-user="${escTR(p.user_id)}" data-current="${escTR(p.unidade||'')}" aria-label="Unidade de ${nome}" onchange="ESFUnidades.alterar('${p.user_id}',this.value,this)">${window.ESFUnidades?.options(p.unidade||'')||''}</select></label><label>Município<input value="${municipio}" onchange="adminAlterarPermissao('${p.user_id}','municipio_escopo',this.value)"></label></div>`;
     const check=chave=>`<td style="text-align:center"><input type="checkbox" ${perms[chave]?'checked':''} onchange="adminAlterarPermissao('${p.user_id}','${chave}',this.checked)"></td>`;
-    return `<tr><td><strong>${nome}</strong><div style="font-size:11px;color:var(--tx2)">${detalhe}</div>${escopo}</td>${check('ver_historico')}${check('usar_modo_teste')}${check('usar_ia_soap')}${check('gerar_documentos')}${check('editar_protocolos')}${check('ver_reportes')}${check('ver_admin')}</tr>`;
+    return `<tr><td><strong>${nome}</strong><div style="font-size:11px;color:var(--tx2)">${detalhe}</div>${escopo}${window.ESFUnidades?.cadastroHtml(p.user_id)||''}</td>${check('ver_historico')}${check('usar_modo_teste')}${check('usar_ia_soap')}${check('gerar_documentos')}${check('editar_protocolos')}${check('ver_reportes')}${check('ver_admin')}</tr>`;
   }).join('')||'<tr><td colspan="8">Nenhum perfil encontrado.</td></tr>';
 }
 async function adminAlterarPermissao(userId,chave,valor){

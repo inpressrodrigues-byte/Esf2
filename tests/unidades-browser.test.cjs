@@ -23,6 +23,32 @@ const server=http.createServer((req,res)=>{const file=path.resolve(root,'.'+(req
   await page.waitForFunction(()=>calls.some(c=>c.args.p_user_id==='synthetic-other'));
   assert.equal(await page.evaluate(()=>calls.at(-1).args.p_unidade),'EAP Boa Vista');assert.equal(await page.evaluate(()=>CURRENT_USER_PROFILE.unidade),'ESFSB Cosmos');await page.evaluate(()=>fecharAdmin());
  });
+ await check('Consultório particular: cadastro, vínculo, releitura do catálogo e falha de servidor',async()=>{
+  await page.evaluate(async()=>{
+    window.office={codigo:'particular-ficticio',nome:'Consultório fictício',grupo:'Consultórios particulares'};
+    const oldFrom=_sb.from,oldRpc=_sb.rpc;
+    window.offices=[];
+    _sb.from=table=>table==='unidades_saude_toledo'?{select(){return this;},eq(){return this;},order(){return this;},range:async()=>({data:[...ESFUnidadesToledo.unidades.filter(x=>x.grupo!=='Consultórios particulares'),...offices]})}:oldFrom(table);
+    _sb.rpc=async(name,args)=>{if(name==='admin_cadastrar_consultorio'){calls.push({name,args});offices=[office];return {data:office};}return oldRpc(name,args);};
+    document.getElementById('admin-screen').classList.add('visible');adminTab(null,'usuarios');await adminCarregarPermissoes();
+  });
+  const box=page.locator('.admin-local-extra');
+  await box.getByText('Adicionar consultório particular',{exact:true}).click();
+  await box.getByLabel('Nome do consultório').fill('Consultório fictício');
+  await box.getByRole('button',{name:'Cadastrar e vincular'}).click();
+  await box.getByText('Consultório cadastrado e vinculado ao profissional.').waitFor();
+  assert.equal(await page.locator('[data-unit-user="synthetic-other"]').inputValue(),'Consultório fictício');
+  assert.equal(await page.evaluate(()=>calls.at(-1).args.p_user_id),'synthetic-other');
+  assert.equal(await page.evaluate(()=>CURRENT_USER_PROFILE.unidade),'ESFSB Cosmos');
+  await page.evaluate(async()=>{ESFUnidades.iniciarSessao();await ESFUnidades.carregarCatalogo();});
+  assert.equal(await page.locator('[data-unit-user="synthetic-other"]').inputValue(),'Consultório fictício');
+  await page.evaluate(()=>{_sb.rpc=async()=>({error:{code:'42501'}});});
+  await box.getByLabel('Nome do consultório').fill('Outro consultório');
+  await box.getByRole('button',{name:'Cadastrar e vincular'}).click();
+  await box.getByText('Somente o administrador pode cadastrar consultórios.').waitFor();
+  assert.equal(await page.locator('[data-unit-user="synthetic-other"]').inputValue(),'Consultório fictício');
+  await page.evaluate(()=>{ESFUnidades.receberPerfil(CURRENT_AUTH_USER_ID,'ESFSB Cosmos');fecharAdmin();});
+ });
  await check('Unidades: usuário comum fica bloqueado mesmo forçando chamada JavaScript',async()=>{
   const state=await page.evaluate(async()=>{PERMISSOES_ATUAIS.ver_admin=false;ESFUnidades.refresh();const before=calls.length;const ok=await ESFUnidades.alterar(CURRENT_AUTH_USER_ID,'EAP Boa Vista');salvarUsuario();return{ok,before,after:calls.length,unit:CURRENT_USER_PROFILE.unidade};});
   assert.equal(await page.locator('#u-unidade').isDisabled(),true);assert.equal(await page.locator('#u-salvar-unidade').isVisible(),false);assert.equal(state.ok,false);assert.equal(state.before,state.after);assert.equal(state.unit,'ESFSB Cosmos');

@@ -179,3 +179,22 @@ test('UBS: gestão vincula e transfere; unidade anterior perde acesso; conta blo
  await db.query("update perfis set permissoes=permissoes||'{\"ver_admin\":true}' where user_id=$1",[ids.blocked]);
  await as('blocked',async()=>assert.equal((await db.query('select cpf from pacientes')).rows.length,0));
 });
+test('Consultório particular mantém pacientes e agenda restritos ao local e à administração',async()=>{
+ await db.exec("alter table unidades_saude_toledo add column codigo text,add column grupo text default 'Rede pública',add column fonte text; grant select on unidades_saude_toledo to authenticated;");
+ await db.exec(fs.readFileSync(require('node:path').join(__dirname,'../supabase/migrations/202611170001_consultorios_particulares.sql'),'utf8'));
+ const office='Consultório particular de teste';
+ await db.query("insert into unidades_saude_toledo(nome,grupo) values($1,'Consultórios particulares')",[office]);
+ await db.query("update perfis set unidade=$1,permissoes=jsonb_set(permissoes,'{unidade_escopo}',to_jsonb($1::text)) where user_id=$2",[office,ids.a]);
+ await db.query("update profiles set unidade=$1 where id=$2",[office,ids.a]);
+ await as('a',async()=>{
+   await db.query('insert into pacientes(cpf,updated_by) values($1,$2)',['77777777777',ids.a]);
+   await db.query("insert into agenda_ubs(unidade,cpf,profissional,motivo,estado) values($1,'77777777777','Profissional fictício','Retorno','Aguardando atendimento')",[office]);
+   assert.deepEqual((await db.query('select cpf from pacientes')).rows.map(r=>r.cpf),['77777777777']);
+ });
+ await db.query("update perfis set permissoes=permissoes||'{\"nivel_acesso\":\"gerente_municipal\"}' where user_id=$1",[ids.b]);
+ for(const who of ['b','colega','blocked'])await as(who,async()=>{
+   assert.equal((await db.query("select cpf from pacientes where cpf='77777777777'")).rows.length,0);
+   assert.equal((await db.query('select id from agenda_ubs where unidade=$1',[office])).rows.length,0);
+ });
+ await as('admin',async()=>assert.equal((await db.query("select cpf from pacientes where cpf='77777777777'")).rows.length,1));
+});

@@ -2,9 +2,61 @@
 (function(){
   'use strict';
   let resolvedOwner='';
+  const original=(window.ESFUnidadesToledo?.unidades||[]).slice();
   const items=()=>window.ESFUnidadesToledo?.unidades||[];
   const byId=id=>document.getElementById(id);
   const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function updateCatalog(units){
+    window.ESFUnidadesToledo.unidades=units;
+    const own=byId('u-unidade');if(own)delete own.dataset.current;
+    document.querySelectorAll('[data-unit-user]').forEach(control=>{control.innerHTML=options(control.dataset.current||'');});
+    refresh();
+  }
+  async function loadCatalog(){
+    if(!_sb||!CURRENT_AUTH_USER_ID||window.MODO_OFFLINE)return false;
+    const actor=CURRENT_AUTH_USER_ID,units=[];
+    try{
+      for(let offset=0;;offset+=500){
+        const {data,error}=await comLimite(_sb.from('unidades_saude_toledo').select('codigo,nome,grupo').eq('ativa',true).order('nome').range(offset,offset+499),8000);
+        if(actor!==CURRENT_AUTH_USER_ID)return false;
+        if(error||!Array.isArray(data))throw error||Error('Catálogo indisponível');
+        units.push(...data);if(data.length<500)break;
+      }
+      updateCatalog(units);return true;
+    }catch{return false;}
+  }
+  function registration(userId){
+    return '<details class="admin-local-extra" data-user="'+escape(userId)+'"><summary>Adicionar consultório particular</summary>'+
+      '<label>Nome do consultório<input type="text" minlength="3" maxlength="160" placeholder="Ex.: Consultório Santa Clara"></label>'+
+      '<button type="button" class="btn btn-s" onclick="ESFUnidades.cadastrarConsultorio(this)">Cadastrar e vincular</button><p role="status"></p></details>';
+  }
+  async function createOffice(button){
+    const box=button.closest('[data-user]'),input=box.querySelector('input'),status=box.querySelector('[role="status"]');
+    if(button.disabled)return;
+    if(!CURRENT_AUTH_USER_ID||!temPermissao('ver_admin')||!_sb||window.MODO_OFFLINE){status.textContent='Entre como administrador conectado para cadastrar o consultório.';return;}
+    const name=input.value.trim().replace(/\s+/g,' ');
+    if(name.length<3||!input.reportValidity()){status.textContent='Informe o nome do consultório.';input.focus();return;}
+    const actor=CURRENT_AUTH_USER_ID,userId=box.dataset.user;
+    button.disabled=true;status.textContent='Cadastrando…';
+    try{
+      const {data,error}=await comLimite(_sb.rpc('admin_cadastrar_consultorio',{p_user_id:userId,p_nome:name}),12000);
+      if(actor!==CURRENT_AUTH_USER_ID)return;
+      if(error)throw error;
+      if(!data?.nome||!data?.codigo||data.grupo!=='Consultórios particulares')throw Error('Resposta inválida');
+      updateCatalog([...items().filter(u=>u.codigo!==data.codigo),data]);
+      const control=box.parentElement.querySelector('[data-unit-user]');
+      if(control){control.value=data.nome;control.dataset.current=data.nome;}
+      if(userId===actor)receiveAssignment(data.nome);
+      status.textContent='Consultório cadastrado e vinculado ao profissional.';input.value='';
+    }catch(error){
+      if(actor===CURRENT_AUTH_USER_ID)status.textContent=error?.code==='22023'?error.message:
+        error?.code==='42501'?'Somente o administrador pode cadastrar consultórios.':'Não foi possível confirmar. Tente novamente com o mesmo nome.';
+    }finally{button.disabled=false;}
+  }
+  function receiveAssignment(unit){
+    PERMISSOES_ATUAIS={...PERMISSOES_ATUAIS,unidade_escopo:unit};receive(CURRENT_AUTH_USER_ID,unit);
+    try{const cache=JSON.parse(localStorage.getItem('esf_sessao_cache')||'null');if(cache?.uid===CURRENT_AUTH_USER_ID){cache.profile=CURRENT_USER_PROFILE;cache.permissoes=PERMISSOES_ATUAIS;localStorage.setItem('esf_sessao_cache',JSON.stringify(cache));}}catch(_){}
+  }
   function options(current=''){
     const groups=new Map();
     for(const u of items()){if(!groups.has(u.grupo))groups.set(u.grupo,[]);groups.get(u.grupo).push(u);}
@@ -32,7 +84,7 @@
   async function change(userId,unit,control){
     if(!CURRENT_AUTH_USER_ID||!temPermissao('ver_admin')){showToast('Somente o administrador pode alterar a unidade.');return false;}
     if(!_sb||window.MODO_OFFLINE){showToast('Conecte-se para alterar a unidade.');return false;}
-    if(unit&&!items().some(u=>u.nome===unit)){showToast('Escolha uma unidade da lista de Toledo.');return false;}
+    if(unit&&!items().some(u=>u.nome===unit)){showToast('Escolha um local cadastrado na lista.');return false;}
     const actor=CURRENT_AUTH_USER_ID,previous=control?.dataset.current??CURRENT_USER_PROFILE?.unidade??'';
     if(control)control.disabled=true;
     try{
@@ -41,8 +93,7 @@
       if(error)throw error;
       if(data!==unit)throw new Error('O servidor não confirmou a unidade.');
       if(userId===CURRENT_AUTH_USER_ID){
-        PERMISSOES_ATUAIS={...PERMISSOES_ATUAIS,unidade_escopo:unit};receive(userId,unit);
-        try{const cache=JSON.parse(localStorage.getItem('esf_sessao_cache')||'null');if(cache?.uid===actor){cache.profile=CURRENT_USER_PROFILE;cache.permissoes=PERMISSOES_ATUAIS;localStorage.setItem('esf_sessao_cache',JSON.stringify(cache));}}catch(_){}
+        receiveAssignment(unit);
       }
       if(control)control.dataset.current=unit;
       showToast('Unidade atualizada.');return true;
@@ -56,6 +107,6 @@
     const select=byId('u-unidade'),button=byId('u-salvar-unidade');button.disabled=true;
     try{if(await change(CURRENT_AUTH_USER_ID,select.value,select))byId('user-modal').classList.remove('open');}finally{refresh();}
   }
-  window.ESFUnidades={options,refresh,receberPerfil:receive,alterar:change,salvarMinhaUnidade:saveMine,iniciarSessao:()=>{resolvedOwner='';refresh();}};
+  window.ESFUnidades={options,refresh,carregarCatalogo:loadCatalog,cadastroHtml:registration,cadastrarConsultorio:createOffice,receberPerfil:receive,alterar:change,salvarMinhaUnidade:saveMine,iniciarSessao:()=>{resolvedOwner='';updateCatalog(original.slice());}};
   document.addEventListener('DOMContentLoaded',refresh);
 })();
